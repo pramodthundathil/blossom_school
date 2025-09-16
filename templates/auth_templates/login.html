@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blossom British Nursery - Login</title>
+    <link rel="shortcut icon" href="{% static 'img/BB_LOGO_V2.png' %}" type="image/x-icon">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #214888;
+            --secondary-pink: #D54395;
+            --accent-purple: #8B5FBF;
+            --light-purple: #F3EBFF;
+            --soft-yellow: #FFD700;
+            --coral: #FF6B6B;
+            --light-bg: #F8F6FF;
+            --white: #FFFFFF;
+            --text-dark: #453F4E;
+            --text-light: #6B7280;
+            --success: #10B981;
+            --error: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--light-bg) 0%, #E8DFFF 50%, var(--light-purple) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px 0;
+        }
+
+        /* Decorative Background Elements */
+        .decoration {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .decoration.circle-1 {
+            top: 10%;
+            left: 5%;
+            width: 60px;
+            height: 60px;
+            background: var(--soft-yellow);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .decoration.circle-2 {
+            top: 20%;
+            right: 10%;
+            width: 40px;
+            height: 40px;
+            background: var(--coral);
+            border-radius: 50%;
+            animation: float 4s ease-in-out infinite reverse;
+        }
+
+        .decoration.triangle {
+            bottom: 20%;
+            left: 8%;
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 45px solid var(--secondary-pink);
+            animation: bounce 3s ease-in-out infinite;
+        }
+
+        .decoration.star {
+            top: 15%;
+            right: 25%;
+            color: var(--soft-yellow);
+            font-size: 24px;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+
+        .decoration.butterfly {
+            bottom: 30%;
+            right: 15%;
+            color: var(--secondary-pink);
+            font-size: 32px;
+            animation: flutter 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.2); }
+        }
+
+        @keyframes flutter {
+            0%, 100% { transform: rotate(0deg) translateY(0px); }
+            25% { transform: rotate(-5deg) translateY(-10px); }
+            75% { transform: rotate(5deg) translateY(-5px); }
+        }
+
+        /* Main Login Container */
+        .login-container {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 550px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Left Panel - Illustration */
+        .login-left {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+            color: var(--white);
+            text-align: center;
+        }
+
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .nursery-logo {
+            /* width: 80px; */
+            /* height: 80px; */
+            background: var(--white);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .nursery-logo i {
+            font-size: 32px;
+            color: var(--secondary-pink);
+        }
+
+        .welcome-text {
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-text h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .welcome-text p {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.5;
+            max-width: 280px;
+        }
+
+        .illustration {
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            width: 200px;
+            height: 200px;
+            opacity: 0.2;
+            z-index: 1;
+        }
+
+        .illustration i {
+            font-size: 200px;
+            color: var(--white);
+        }
+
+        /* Right Panel - Login Form */
+        .login-right {
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h2 {
+            color: var(--text-dark);
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .login-header p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 4px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-dark);
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 45px 12px 40px;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-icon {
+            position: absolute;
+            left: 14px;
+            top: 56%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .form-input:focus ~ .form-icon {
+            color: var(--primary-blue);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 56%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-blue);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -8px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #E5E7EB;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .custom-checkbox input {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .custom-checkbox input:checked + .checkmark {
+            background: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .custom-checkbox input:checked + .checkmark::after {
+            opacity: 1;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .checkmark::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--white);
+            font-size: 10px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .forgot-password {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: var(--accent-purple);
+        }
+
+        .login-button {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+            color: var(--white);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .login-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(33, 72, 136, 0.3);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .login-button span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #E5E7EB;
+            z-index: 1;
+        }
+
+        .divider span {
+            background: var(--white);
+            padding: 0 16px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-button {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            background: var(--white);
+            color: var(--text-dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .social-button:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-button.google:hover {
+            border-color: #EA4335;
+        }
+
+        .social-button.microsoft:hover {
+            border-color: #00A4EF;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .footer-links p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .footer-links a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-purple);
+        }
+
+        /* Error/Success Messages */
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .message.error {
+            background: #FEE2E2;
+            color: var(--error);
+            border: 1px solid #FECACA;
+        }
+
+        .message.success {
+            background: #D1FAE5;
+            color: var(--success);
+            border: 1px solid #A7F3D0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+                margin: 20px;
+            }
+
+            .login-left {
+                padding: 30px 20px;
+                min-height: 200px;
+            }
+
+            .login-right {
+                padding: 40px 30px;
+            }
+
+            .welcome-text h1 {
+                font-size: 24px;
+            }
+
+            .login-header h2 {
+                font-size: 24px;
+            }
+
+            .decoration {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 10px;
+                border-radius: 16px;
+            }
+
+            .login-right {
+                padding: 30px 20px;
+            }
+
+            .form-input {
+                padding: 14px 45px 14px 45px;
+            }
+
+            .social-login {
+                flex-direction: column;
+            }
+        }
+
+        /* Developer Footer */
+        .developer-footer {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 16px 0;
+            text-align: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            width: 100%;
+            max-width: 900px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .developer-footer p {
+            color: var(--text-light);
+            font-size: 11px;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .developer-footer span {
+            color: var(--primary-blue);
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 40px 0 60px 0;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Decorations -->
+    <div class="decoration circle-1"></div>
+    <div class="decoration circle-2"></div>
+    <div class="decoration triangle"></div>
+    <div class="decoration star"><i class="fas fa-star"></i></div>
+    <div class="decoration butterfly"><i class="fas fa-butterfly"></i></div>
+
+    <!-- Main Login Container -->
+    <div class="login-container">
+        <!-- Left Panel -->
+        <div class="login-left">
+            <div class="nursery-logo">
+                <img src="{% static 'img/BB_LOGO_V1.png' %}" style="max-width: 100px;" alt="">
+            </div>
+            <div class="welcome-text">
+                
+                <h1>Welcome to<br>Blossom British ERP</h1>
+                <p>Managing your nursery with care, creativity, and excellence every single day.</p>
+            </div>
+            <div class="illustration">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="login-right">
+            <div class="login-header">
+                <h2>Sign In</h2>
+                <p>Access your nursery management dashboard</p>
+            </div>
+
+            <!-- Error/Success Message (Hidden by default) -->
+            <div id="message" class="message" style="display: none;"></div>
+
+            <form class="login-form"  method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" required>
+                    <i class="form-icon fas fa-user"></i>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required>
+                    <i class="form-icon fas fa-lock"></i>
+                    <i class="password-toggle fas fa-eye" onclick="togglePassword()"></i>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <div class="custom-checkbox">
+                            <input type="checkbox" id="remember">
+                            <div class="checkmark"></div>
+                        </div>
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="login-button">
+                    <span id="buttonText">Sign In</span>
+                </button>
+            </form>
+
+            <!-- <div class="divider">
+                <span>Or continue with</span>
+            </div> -->
+
+            <!-- <div class="social-login">
+                <a href="#" class="social-button google">
+                    <i class="fab fa-google"></i>
+                    Google
+                </a>
+                <a href="#" class="social-button microsoft">
+                    <i class="fab fa-microsoft"></i>
+                    Microsoft
+                </a>
+            </div> -->
+
+            <div class="footer-links">
+                <p>Need help? <a href="#">Contact Support</a></p>
+                <!-- <p style="margin-top: 8px;">Don't have an account? <a href="#">Request Access</a></p> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Developer Footer -->
+    <footer class="developer-footer">
+        <p>Developed by <span>ByteBoot</span> • All Rights Reserved Blossom British School</p>
+    </footer>
+
+    <script>
+        // Password Toggle Functionality
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.password-toggle');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Form Submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const button = document.querySelector('.login-button');
+            const buttonText = document.getElementById('buttonText');
+            const messageDiv = document.getElementById('message');
+            
+            // Show loading state
+            button.disabled = true;
+            buttonText.innerHTML = '<span class="loading"></span>';
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Demo credentials
+                if (email === 'admin@blossombritish.com' && password === 'admin123') {
+                    showMessage('Login successful! Redirecting to dashboard...', 'success');
+                    setTimeout(() => {
+                        // Redirect to dashboard (replace with actual dashboard URL)
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } else {
+                    showMessage('Invalid email or password. Please try again.', 'error');
+                    button.disabled = false;
+                    buttonText.textContent = 'Sign In';
+                }
+            }, 2000);
+        });
+
+        // Show Message Function
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Social Login Handlers
+        document.querySelectorAll('.social-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const provider = this.classList.contains('google') ? 'Google' : 'Microsoft';
+                showMessage(`${provider} login coming soon!`, 'success');
+            });
+        });
+
+        // Forgot Password Handler
+        document.querySelector('.forgot-password').addEventListener('click', function(e) {
+            e.preventDefault();
+            showMessage('Password reset link will be sent to your email.', 'success');
+        });
+
+        // Input Focus Effects
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+
+        // Demo Info (Remove in production)
+        console.log('Demo Login Credentials:');
+        console.log('Email: admin@blossombritish.com');
+        console.log('Password: admin123');
+    </script>
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% if messages %}
+<script>
+  // Custom CSS for Blossom British themed alerts
+  const blossomTheme = `
+    .swal2-popup {
+      background: linear-gradient(135deg, #F8F6FF 0%, #E8DFFF 50%, #F3EBFF 100%) !important;
+      border-radius: 20px !important;
+      border: 3px solid transparent !important;
+      background-clip: padding-box !important;
+      box-shadow: 0 15px 35px rgba(33, 72, 136, 0.15), 0 5px 15px rgba(0, 0, 0, 0.08) !important;
+      font-family: 'Poppins', sans-serif !important;
+      position: relative !important;
+      overflow: hidden !important;
+    }
+    
+    .swal2-popup::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #214888, #D54395, #8B5FBF, #4ECDC4);
+      border-radius: 22px;
+      z-index: -1;
+      animation: borderRotate 3s linear infinite;
+    }
+    
+    @keyframes borderRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .swal2-title {
+      color: #214888 !important;
+      font-weight: 600 !important;
+      font-size: 20px !important;
+      margin-bottom: 15px !important;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .swal2-icon {
+      border: none !important;
+      margin: 20px auto 15px !important;
+      position: relative !important;
+    }
+    
+    .swal2-icon::before {
+      content: '✨';
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      font-size: 16px;
+      animation: sparkle 2s ease-in-out infinite;
+    }
+    
+    .swal2-icon.swal2-success {
+      background: linear-gradient(135deg, #4ECDC4, #FFD700) !important;
+      color: white !important;
+    }
+    
+    .swal2-icon.swal2-error {
+      background: linear-gradient(135deg, #FF6B6B, #D54395) !important;
+      color: white !important;
+    }
+    
+    .swal2-icon.swal2-warning {
+      background: linear-gradient(135deg, #FFD700, #FF6B6B) !important;
+      color: white !important;
+    }
+    
+    .swal2-icon.swal2-info {
+      background: linear-gradient(135deg, #214888, #8B5FBF) !important;
+      color: white !important;
+    }
+    
+    .swal2-confirm {
+      background: linear-gradient(135deg, #214888 0%, #D54395 100%) !important;
+      border: none !important;
+      border-radius: 25px !important;
+      padding: 12px 30px !important;
+      font-weight: 600 !important;
+      font-size: 14px !important;
+      color: white !important;
+      box-shadow: 0 5px 15px rgba(33, 72, 136, 0.3) !important;
+      transition: all 0.3s ease !important;
+    }
+    
+    .swal2-confirm:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 25px rgba(33, 72, 136, 0.4) !important;
+    }
+    
+    .swal2-container {
+      backdrop-filter: blur(10px) !important;
+      background: rgba(248, 246, 255, 0.3) !important;
+    }
+    
+    @keyframes sparkle {
+      0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+      50% { opacity: 0.7; transform: scale(1.2) rotate(180deg); }
+    }
+    
+    .floating-butterflies {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    
+    .butterfly-float {
+      position: absolute;
+      color: #D54395;
+      font-size: 16px;
+      opacity: 0.6;
+      animation: butterflyFloat 4s ease-in-out infinite;
+    }
+    
+    .butterfly-float:nth-child(1) {
+      top: 20%;
+      left: 10%;
+      animation-delay: 0s;
+      color: #FFD700;
+    }
+    
+    .butterfly-float:nth-child(2) {
+      top: 70%;
+      right: 15%;
+      animation-delay: -2s;
+      color: #4ECDC4;
+    }
+    
+    @keyframes butterflyFloat {
+      0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+      25% { transform: translateY(-10px) translateX(5px) rotate(5deg); }
+      50% { transform: translateY(-5px) translateX(-8px) rotate(-3deg); }
+      75% { transform: translateY(-15px) translateX(3px) rotate(7deg); }
+    }
+  `;
+  
+  // Inject custom styles
+  const style = document.createElement('style');
+  style.textContent = blossomTheme;
+  document.head.appendChild(style);
+  
+ "{% for message in messages %}"
+    // Add floating butterflies to the alert
+    const butterflyHTML = `
+      <div class="floating-butterflies">
+        <div class="butterfly-float">🦋</div>
+        <div class="butterfly-float">🦋</div>
+      </div>
+    `;
+    
+    Swal.fire({
+      icon: "{% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}",
+      title: "{{ message|escapejs }}",
+      html: butterflyHTML,
+      showConfirmButton: true,
+      confirmButtonText: '✨ Got it!',
+      timer: 2000,
+      timerProgressBar: true,
+      allowEscapeKey: true,
+      allowOutsideClick: true,
+      showClass: {
+        popup: 'animate__animated animate__bounceIn animate__faster'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp animate__faster'
+      },
+      customClass: {
+        popup: 'blossom-alert',
+        title: 'blossom-title',
+        confirmButton: 'blossom-button'
+      }
+    });
+  "{% endfor %}"
+</script>
+{% endif %}
+</body>
+</html>
