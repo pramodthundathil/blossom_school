@@ -1,0 +1,1564 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- Fixed Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<!-- Profile Content -->
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-header-bg">
+            <div class="header-pattern"></div>
+        </div>
+        <div class="profile-avatar-section">
+            <div class="avatar-wrapper">
+                <div class="avatar-container">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="Profile Picture" class="profile-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    {% else %}
+                        <img src="{% static 'img/userplaceholder.png' %}" alt="Profile Picture" class="profile-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    {% endif %}
+                    <div class="avatar-fallback" style="{% if user.avatar %}display: none;{% else %}display: flex;{% endif %}">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+                <form id="avatarForm" enctype="multipart/form-data" style="display: none;">
+                    {% csrf_token %}
+                    <input type="file" id="avatar-input" name="avatar" accept="image/*">
+                </form>
+                <button class="avatar-edit-btn" onclick="document.getElementById('avatar-input').click()">
+                    <i class="fas fa-camera"></i>
+                </button>
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
+                <p class="profile-username">@{{ user.username }}</p>
+                <div class="profile-role">
+                    <span class="role-badge role-{{ user.role }}">
+                        {% if user.role == 'admin' %}
+                            <i class="fas fa-crown"></i>
+                        {% elif user.role == 'account' %}
+                            <i class="fas fa-calculator"></i>
+                        {% else %}
+                            <i class="fas fa-user"></i>
+                        {% endif %}
+                        {{ user.role|title }}
+                    </span>
+                </div>
+                <p class="profile-joined">
+                    <i class="fas fa-calendar-alt"></i>
+                    Joined {{ user.date_joined|date:"F Y" }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Content Grid -->
+    <div class="profile-content-grid">
+        <!-- Profile Information Card -->
+        <div class="profile-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-user-edit"></i>
+                    Profile Information
+                </h3>
+                <button class="edit-profile-btn" onclick="toggleEditMode()" id="editBtn">
+                    <i class="fas fa-edit"></i>
+                    <span>Edit</span>
+                </button>
+            </div>
+            <div class="card-content">
+                <form class="profile-form" method="POST" action="{% url 'update_profile' %}" id="profileForm">
+                    {% csrf_token %}
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-user"></i>
+                                First Name
+                            </label>
+                            <input type="text" name="first_name" value="{{ user.first_name }}" class="form-input" readonly id="firstName">
+                            <div class="input-border"></div>
+                            <div class="field-error" id="firstName-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-user"></i>
+                                Last Name
+                            </label>
+                            <input type="text" name="last_name" value="{{ user.last_name }}" class="form-input" readonly id="lastName">
+                            <div class="input-border"></div>
+                            <div class="field-error" id="lastName-error"></div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-envelope"></i>
+                                Email Address
+                            </label>
+                            <input type="email" name="email" value="{{ user.email }}" class="form-input" readonly id="email">
+                            <div class="input-border"></div>
+                            <div class="field-error" id="email-error"></div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-at"></i>
+                                Username
+                            </label>
+                            <input type="text" name="username" value="{{ user.username }}" class="form-input" readonly id="username">
+                            <div class="input-border"></div>
+                            <div class="field-error" id="username-error"></div>
+                        </div>
+                    </div>
+                    <div class="form-actions" id="profileActions" style="display: none;">
+                        <button type="button" class="btn-secondary" onclick="cancelEdit()">
+                            <i class="fas fa-times"></i>
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Password Change Card -->
+        <div class="profile-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-lock"></i>
+                    Change Password
+                </h3>
+                <div class="security-indicator">
+                    <span class="security-status good">
+                        <i class="fas fa-shield-alt"></i>
+                        Secure
+                    </span>
+                </div>
+            </div>
+            <div class="card-content">
+                <form class="password-form" method="POST" action="{% url 'change_password' %}" id="passwordForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-lock"></i>
+                            Current Password
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password" name="old_password" class="form-input password-input" placeholder="Enter current password" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="input-border"></div>
+                        <div class="field-error" id="oldPassword-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-key"></i>
+                            New Password
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password" name="new_password1" class="form-input password-input" placeholder="Enter new password" required id="newPassword">
+                            <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="input-border"></div>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-bar">
+                                <div class="strength-fill"></div>
+                            </div>
+                            <span class="strength-text">Password strength</span>
+                        </div>
+                        <div class="field-error" id="newPassword1-error"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-check-circle"></i>
+                            Confirm Password
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password" name="new_password2" class="form-input password-input" placeholder="Confirm new password" required id="confirmPassword">
+                            <button type="button" class="password-toggle" onclick="togglePassword(this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="input-border"></div>
+                        <div class="password-match" id="passwordMatch"></div>
+                        <div class="field-error" id="newPassword2-error"></div>
+                    </div>
+                    <div class="password-requirements">
+                        <h4>Password Requirements:</h4>
+                        <ul class="requirements-list">
+                            <li id="req-length"><i class="fas fa-times"></i> At least 8 characters</li>
+                            <li id="req-upper"><i class="fas fa-times"></i> One uppercase letter</li>
+                            <li id="req-lower"><i class="fas fa-times"></i> One lowercase letter</li>
+                            <li id="req-number"><i class="fas fa-times"></i> One number</li>
+                            <li id="req-special"><i class="fas fa-times"></i> One special character</li>
+                        </ul>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary full-width">
+                            <i class="fas fa-shield-alt"></i>
+                            Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Account Activity Card -->
+        <div class="profile-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-history"></i>
+                    Recent Activity
+                </h3>
+            </div>
+            <div class="card-content">
+                <div class="activity-timeline">
+                    <div class="activity-item">
+                        <div class="activity-icon login">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-title">Last Login</p>
+                            <p class="activity-time">{{ user.last_login|timesince }} ago</p>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon update">
+                            <i class="fas fa-user-edit"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-title">Profile Created</p>
+                            <p class="activity-time">{{ user.date_joined|timesince }} ago</p>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon security">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-title">Account Active</p>
+                            <p class="activity-time">Status: {% if user.is_active %}Active{% else %}Inactive{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+
+/* Profile Container */
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Profile Header */
+.profile-header {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.profile-header-bg {
+    height: 160px;
+    background: linear-gradient(135deg, var(--e-global-color-primary) 0%, var(--e-global-color-secondary) 100%);
+    border-radius: var(--border-radius-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.header-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                      radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+}
+
+.profile-avatar-section {
+    position: absolute;
+    bottom: -40px;
+    left: 2rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+}
+
+.avatar-wrapper {
+    position: relative;
+}
+
+.avatar-container {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid white;
+    overflow: hidden;
+    box-shadow: var(--shadow-medium);
+    background: white;
+    position: relative;
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-fallback {
+    width: 100%;
+    height: 100%;
+    background: var(--e-global-color-eecedb7);
+    color: var(--e-global-color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.avatar-edit-btn {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    width: 32px;
+    height: 32px;
+    background: var(--e-global-color-secondary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.avatar-edit-btn:hover {
+    transform: scale(1.1);
+    background: #c1396b;
+}
+
+.profile-info {
+    padding-bottom: 1rem;
+    color: white;
+}
+
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.profile-username {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+.profile-role {
+    margin-bottom: 0.5rem;
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.role-badge.role-admin {
+    background: rgba(255, 215, 0, 0.2);
+    color: #FFD700;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.role-badge.role-account {
+    background: rgba(76, 236, 196, 0.2);
+    color: #4ECDC4;
+    border: 1px solid rgba(76, 236, 196, 0.3);
+}
+
+.role-badge.role-user {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.profile-joined {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Enhanced Responsive Profile Content Grid */
+.profile-content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-top: 3rem;
+}
+
+.profile-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    min-width: 0;
+}
+
+.profile-card:hover {
+    box-shadow: var(--shadow-medium);
+}
+
+.card-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--e-global-color-5d90ead);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--e-global-color-fe7363b);
+    flex-wrap: wrap;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--e-global-color-text);
+    margin: 0;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
+.edit-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    background: var(--e-global-color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.edit-profile-btn:hover {
+    background: #1a3a70;
+    transform: translateY(-1px);
+}
+
+.security-indicator {
+    display: flex;
+    align-items: center;
+}
+
+.security-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.security-status.good {
+    background: rgba(67, 165, 116, 0.1);
+    color: var(--e-global-color-4e9ef99);
+}
+
+.card-content {
+    padding: 1.25rem;
+    min-width: 0;
+}
+
+/* Enhanced Responsive Form Styles */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    position: relative;
+    min-width: 0;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--e-global-color-text);
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--e-global-color-5d90ead);
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    color: var(--e-global-color-text);
+    background: white;
+    transition: all 0.3s ease;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--e-global-color-primary);
+    box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+}
+
+.form-input[readonly] {
+    background: var(--e-global-color-5d90ead);
+    cursor: not-allowed;
+}
+
+.form-input.editing {
+    border-color: var(--e-global-color-secondary);
+    background: rgba(213, 67, 149, 0.05);
+}
+
+.input-border {
+    height: 2px;
+    background: linear-gradient(90deg, var(--e-global-color-primary), var(--e-global-color-secondary));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    margin-top: -2px;
+    border-radius: 1px;
+}
+
+.form-input:focus + .input-border {
+    transform: scaleX(1);
+}
+
+.field-error {
+    color: var(--e-global-color-7d1e931);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+.field-error.show {
+    display: block;
+}
+
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--e-global-color-text);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.password-toggle:hover {
+    opacity: 1;
+}
+
+/* Password Strength */
+.password-strength {
+    margin-top: 0.5rem;
+}
+
+.strength-bar {
+    height: 4px;
+    background: var(--e-global-color-5d90ead);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.strength-text {
+    font-size: 0.75rem;
+    color: var(--e-global-color-text);
+    opacity: 0.7;
+}
+
+.password-match {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.password-requirements {
+    background: var(--e-global-color-fe7363b);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+}
+
+.password-requirements h4 {
+    font-size: 0.8rem;
+    color: var(--e-global-color-text);
+    margin-bottom: 0.75rem;
+}
+
+.requirements-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.requirements-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--e-global-color-text);
+}
+
+.requirements-list li i {
+    width: 12px;
+    color: var(--e-global-color-7d1e931);
+}
+
+.requirements-list li.valid i {
+    color: var(--e-global-color-4e9ef99);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.btn-primary {
+    background: var(--e-global-color-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1a3a70;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--e-global-color-5d90ead);
+    color: var(--e-global-color-text);
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.full-width {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Activity Timeline */
+.activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--e-global-color-fe7363b);
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+    background: var(--e-global-color-eecedb7);
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.activity-icon.login {
+    background: var(--e-global-color-4e9ef99);
+}
+
+.activity-icon.update {
+    background: var(--e-global-color-primary);
+}
+
+.activity-icon.security {
+    background: var(--e-global-color-secondary);
+}
+
+.activity-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 600;
+    color: var(--e-global-color-text);
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: var(--e-global-color-text);
+    opacity: 0.7;
+    margin: 0;
+}
+
+/* Enhanced Mobile-First Responsive Design */
+@media (max-width: 1024px) {
+    .profile-content-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .requirements-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 0 0.75rem;
+    }
+    
+    .breadcrumb-wrapper {
+        padding: 0.375rem 0.5rem;
+        margin: 0 0.25rem;
+    }
+    
+    .breadcrumb-item span {
+        display: none;
+    }
+    
+    .profile-header-bg {
+        height: 120px;
+        margin: 0 0.25rem;
+    }
+    
+    .profile-avatar-section {
+        position: static;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1rem;
+        background: white;
+        margin: -25px 0.5rem 0;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-light);
+        gap: 1rem;
+        left: auto;
+    }
+    
+    .avatar-container {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .profile-info {
+        color: var(--e-global-color-text);
+        text-align: center;
+    }
+    
+    .profile-name {
+        font-size: 1.25rem;
+        text-shadow: none;
+    }
+    
+    .profile-content-grid {
+        margin-top: 1rem;
+    }
+    
+    .card-header {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .card-title {
+        justify-content: center;
+    }
+    
+    .edit-profile-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .card-content {
+        padding: 1rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .activity-item {
+        padding: 0.75rem;
+    }
+    
+    .activity-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-container {
+        padding: 0 0.5rem;
+    }
+    
+    .breadcrumb-wrapper {
+        margin: 0;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+    
+    .profile-header-bg {
+        margin: 0;
+    }
+    
+    .profile-avatar-section {
+        margin: -20px 0.25rem 0;
+        padding: 0.75rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+    
+    .form-input {
+        font-size: 0.85rem;
+        padding: 0.625rem 0.75rem;
+    }
+    
+    .btn-primary, .btn-secondary {
+        padding: 0.625rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .activity-content {
+        overflow-wrap: break-word;
+    }
+    
+    .activity-title, .activity-time {
+        font-size: 0.8rem;
+    }
+    
+    .password-requirements {
+        padding: 0.75rem;
+    }
+    
+    .requirements-list {
+        gap: 0.375rem;
+    }
+}
+
+/* Loading States */
+.btn-loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.profile-card:nth-child(2) { animation-delay: 0.1s; }
+.profile-card:nth-child(3) { animation-delay: 0.2s; }
+
+/* Success/Error States */
+.form-success {
+    border-color: var(--e-global-color-4e9ef99) !important;
+    background-color: rgba(67, 165, 116, 0.05) !important;
+}
+
+.form-error {
+    border-color: var(--e-global-color-7d1e931) !important;
+    background-color: rgba(255, 149, 135, 0.05) !important;
+}
+</style>
+
+<script>
+// Profile editing functionality
+let isEditMode = false;
+const originalValues = {};
+
+function toggleEditMode() {
+    isEditMode = !isEditMode;
+    const inputs = ['firstName', 'lastName', 'email', 'username'];
+    const actions = document.getElementById('profileActions');
+    const editBtn = document.getElementById('editBtn');
+    
+    if (isEditMode) {
+        // Store original values
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            originalValues[id] = input.value;
+            input.readOnly = false;
+            input.classList.add('editing');
+        });
+        
+        actions.style.display = 'flex';
+        editBtn.innerHTML = '<i class="fas fa-times"></i><span>Cancel</span>';
+        editBtn.style.background = 'var(--e-global-color-7d1e931)';
+        
+        // Focus first input
+        document.getElementById('firstName').focus();
+    } else {
+        // Reset to readonly mode
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            input.readOnly = true;
+            input.classList.remove('editing', 'form-success', 'form-error');
+            // Clear any error messages
+            const errorDiv = document.getElementById(id + '-error');
+            if (errorDiv) {
+                errorDiv.textContent = '';
+                errorDiv.classList.remove('show');
+            }
+        });
+        
+        actions.style.display = 'none';
+        editBtn.innerHTML = '<i class="fas fa-edit"></i><span>Edit</span>';
+        editBtn.style.background = 'var(--e-global-color-primary)';
+    }
+}
+
+function cancelEdit() {
+    // Restore original values
+    Object.keys(originalValues).forEach(id => {
+        const input = document.getElementById(id);
+        input.value = originalValues[id];
+    });
+    toggleEditMode();
+}
+
+// Password visibility toggle
+function togglePassword(button) {
+    const input = button.parentElement.querySelector('.password-input');
+    const icon = button.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// Password strength checker
+function checkPasswordStrength(password) {
+    let strength = 0;
+    const requirements = {
+        length: password.length >= 8,
+        upper: /[A-Z]/.test(password),
+        lower: /[a-z]/.test(password),
+        number: /\d/.test(password),
+        special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+    };
+    
+    // Update requirement indicators
+    Object.keys(requirements).forEach(key => {
+        const element = document.getElementById(`req-${key}`);
+        if (element) {
+            const icon = element.querySelector('i');
+            if (requirements[key]) {
+                element.classList.add('valid');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-check');
+                strength++;
+            } else {
+                element.classList.remove('valid');
+                icon.classList.remove('fa-check');
+                icon.classList.add('fa-times');
+            }
+        }
+    });
+    
+    // Update strength bar
+    const strengthFill = document.querySelector('.strength-fill');
+    const strengthText = document.querySelector('.strength-text');
+    const percentage = (strength / 5) * 100;
+    
+    strengthFill.style.width = percentage + '%';
+    
+    let color, text;
+    if (strength <= 1) {
+        color = '#FF6B6B';
+        text = 'Very Weak';
+    } else if (strength <= 2) {
+        color = '#FF9587';
+        text = 'Weak';
+    } else if (strength <= 3) {
+        color = '#FFD700';
+        text = 'Fair';
+    } else if (strength <= 4) {
+        color = '#4ECDC4';
+        text = 'Good';
+    } else {
+        color = '#43A574';
+        text = 'Strong';
+    }
+    
+    strengthFill.style.background = color;
+    strengthText.textContent = `Password strength: ${text}`;
+    strengthText.style.color = color;
+    
+    return strength;
+}
+
+// Password confirmation checker
+function checkPasswordMatch() {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const matchIndicator = document.getElementById('passwordMatch');
+    
+    if (confirmPassword.length === 0) {
+        matchIndicator.innerHTML = '';
+        return;
+    }
+    
+    if (newPassword === confirmPassword) {
+        matchIndicator.innerHTML = '<i class="fas fa-check" style="color: var(--e-global-color-4e9ef99);"></i> Passwords match';
+        matchIndicator.style.color = 'var(--e-global-color-4e9ef99)';
+    } else {
+        matchIndicator.innerHTML = '<i class="fas fa-times" style="color: var(--e-global-color-7d1e931);"></i> Passwords do not match';
+        matchIndicator.style.color = 'var(--e-global-color-7d1e931)';
+    }
+}
+
+// Show field errors
+function showFieldError(fieldId, message) {
+    const errorDiv = document.getElementById(fieldId + '-error');
+    const input = document.getElementById(fieldId);
+    
+    if (errorDiv && input) {
+        errorDiv.textContent = message;
+        errorDiv.classList.add('show');
+        input.classList.add('form-error');
+    }
+}
+
+// Clear field errors
+function clearFieldErrors() {
+    const errorDivs = document.querySelectorAll('.field-error');
+    const inputs = document.querySelectorAll('.form-input');
+    
+    errorDivs.forEach(div => {
+        div.textContent = '';
+        div.classList.remove('show');
+    });
+    
+    inputs.forEach(input => {
+        input.classList.remove('form-error', 'form-success');
+    });
+}
+
+// Fixed avatar upload function
+function handleAvatarUpload(file) {
+    if (!file) return;
+    
+    // Validate file
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+        showNotification('Please select a valid image file (JPEG, PNG, or GIF)', 'error');
+        return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification('File size must be less than 5MB', 'error');
+        return;
+    }
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('avatar', file);
+    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+    // Show loading state
+    const avatarBtn = document.querySelector('.avatar-edit-btn');
+    const originalHTML = avatarBtn.innerHTML;
+    avatarBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    avatarBtn.disabled = true;
+    
+    // Upload via AJAX
+    fetch('{% url "upload_avatar" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update avatar image
+            const avatar = document.querySelector('.profile-avatar');
+            const fallback = document.querySelector('.avatar-fallback');
+            
+            if (data.avatar_url) {
+                avatar.src = data.avatar_url + '?t=' + new Date().getTime(); // Cache bust
+            } else {
+                avatar.src = URL.createObjectURL(file);
+            }
+            avatar.style.display = 'block';
+            fallback.style.display = 'none';
+            
+            showNotification(data.message || 'Avatar updated successfully!', 'success');
+        } else {
+            showNotification(data.message || 'Error updating avatar', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error uploading avatar', 'error');
+    })
+    .finally(() => {
+        // Reset button
+        avatarBtn.innerHTML = originalHTML;
+        avatarBtn.disabled = false;
+    });
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Password strength checking
+    const newPasswordInput = document.getElementById('newPassword');
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+            checkPasswordMatch();
+        });
+    }
+    
+    // Password confirmation checking
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+    }
+    
+    // Avatar upload handling
+    const avatarInput = document.getElementById('avatar-input');
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleAvatarUpload(file);
+            }
+        });
+    }
+    
+    // Profile form submission
+    const profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            clearFieldErrors();
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.classList.add('btn-loading');
+            
+            // Create form data
+            const formData = new FormData(this);
+            
+            // Submit via AJAX
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mark fields as success
+                    ['firstName', 'lastName', 'email', 'username'].forEach(id => {
+                        const input = document.getElementById(id);
+                        if (input) input.classList.add('form-success');
+                    });
+                    
+                    showNotification(data.message || 'Profile updated successfully!', 'success');
+                    
+                    // Exit edit mode after delay
+                    setTimeout(() => {
+                        toggleEditMode();
+                    }, 1500);
+                } else {
+                    // Show field errors
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => {
+                            const fieldId = field === 'first_name' ? 'firstName' : 
+                                          field === 'last_name' ? 'lastName' : field;
+                            const errors = data.errors[field];
+                            if (errors && errors.length > 0) {
+                                showFieldError(fieldId, errors[0]);
+                            }
+                        });
+                    }
+                    
+                    showNotification(data.message || 'Error updating profile', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error updating profile', 'error');
+            })
+            .finally(() => {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.classList.remove('btn-loading');
+            });
+        });
+    }
+    
+    // Password form submission
+    const passwordForm = document.getElementById('passwordForm');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            clearFieldErrors();
+            
+            // Validate passwords match
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showFieldError('newPassword2', 'Passwords do not match');
+                showNotification('Passwords do not match!', 'error');
+                return;
+            }
+            
+            // Check password strength
+            const strength = checkPasswordStrength(newPassword);
+            if (strength < 3) {
+                showNotification('Password is too weak. Please choose a stronger password.', 'warning');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+            submitBtn.classList.add('btn-loading');
+            
+            // Create form data
+            const formData = new FormData(this);
+            
+            // Submit via AJAX
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message || 'Password updated successfully!', 'success');
+                    
+                    // Clear form
+                    this.reset();
+                    document.getElementById('passwordMatch').innerHTML = '';
+                    document.querySelector('.strength-fill').style.width = '0%';
+                    document.querySelector('.strength-text').textContent = 'Password strength';
+                    
+                    // Reset requirement indicators
+                    document.querySelectorAll('.requirements-list li').forEach(li => {
+                        li.classList.remove('valid');
+                        const icon = li.querySelector('i');
+                        icon.classList.remove('fa-check');
+                        icon.classList.add('fa-times');
+                    });
+                } else {
+                    // Show field errors
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => {
+                            const fieldId = field === 'old_password' ? 'oldPassword' :
+                                          field === 'new_password1' ? 'newPassword1' :
+                                          field === 'new_password2' ? 'newPassword2' : field;
+                            const errors = data.errors[field];
+                            if (errors && errors.length > 0) {
+                                showFieldError(fieldId, errors[0]);
+                            }
+                        });
+                    }
+                    
+                    showNotification(data.message || 'Error changing password', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error changing password', 'error');
+            })
+            .finally(() => {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.classList.remove('btn-loading');
+            });
+        });
+    }
+});
+
+// Enhanced Notification system
+function showNotification(message, type = 'info') {
+    // Remove any existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+            <span>${message}</span>
+        </div>
+        <button class="notification-close" onclick="closeNotification(this)">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // Add styles if not already added
+    if (!document.querySelector('#notification-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'notification-styles';
+        styles.textContent = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                border-radius: var(--border-radius);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+                padding: 1rem 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+                z-index: 10000;
+                min-width: 300px;
+                max-width: 400px;
+                transform: translateX(100%);
+                animation: slideIn 0.3s ease-out forwards;
+            }
+            
+            .notification-success { border-left: 4px solid var(--e-global-color-4e9ef99); }
+            .notification-error { border-left: 4px solid var(--e-global-color-7d1e931); }
+            .notification-warning { border-left: 4px solid var(--e-global-color-3a7e2f2); }
+            .notification-info { border-left: 4px solid var(--e-global-color-primary); }
+            
+            .notification-content {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                flex: 1;
+            }
+            
+            .notification-content i {
+                font-size: 1.25rem;
+            }
+            
+            .notification-success i { color: var(--e-global-color-4e9ef99); }
+            .notification-error i { color: var(--e-global-color-7d1e931); }
+            .notification-warning i { color: var(--e-global-color-3a7e2f2); }
+            .notification-info i { color: var(--e-global-color-primary); }
+            
+            .notification-close {
+                background: none;
+                border: none;
+                color: var(--e-global-color-text);
+                cursor: pointer;
+                opacity: 0.7;
+                padding: 0.25rem;
+                border-radius: 50%;
+                transition: all 0.3s ease;
+            }
+            
+            .notification-close:hover {
+                background: var(--e-global-color-5d90ead);
+                opacity: 1;
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateX(100%); }
+                to { transform: translateX(0); }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); }
+                to { transform: translateX(100%); }
+            }
+            
+            @media (max-width: 480px) {
+                .notification {
+                    top: 10px;
+                    right: 10px;
+                    left: 10px;
+                    max-width: none;
+                    min-width: auto;
+                }
+            }
+        `;
+        document.head.appendChild(styles);
+    }
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            closeNotification(notification.querySelector('.notification-close'));
+        }
+    }, 5000);
+}
+
+function closeNotification(button) {
+    const notification = button.closest('.notification');
+    notification.style.animation = 'slideOut 0.3s ease-out forwards';
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 300);
+}
+</script>
+
+{% endblock %}

@@ -31,6 +31,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=30, blank=True, verbose_name='last name')
     is_active = models.BooleanField(default=True, verbose_name='active')
     is_staff = models.BooleanField(default=False, verbose_name='staff status')
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     role = models.CharField(max_length=20, 
                             choices=(
                                 ("user","user"),

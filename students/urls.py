@@ -1,0 +1,31 @@
+# urls.py
+from django.urls import path
+from . import views
+
+
+
+urlpatterns = [
+    # Main student views
+    path('students/', views.student_list, name='students'),
+    path('dashboard/', views.student_dashboard, name='student_dashboard'),
+    path('create/', views.student_create, name='student_create'),
+    path('student_detail/<uuid:pk>/', views.student_detail, name='student_detail'),
+    path('student_update/<uuid:pk>/edit/', views.student_update, name='student_update'),
+    path('student_update/<uuid:pk>/delete/', views.student_delete, name='student_delete'),
+    
+    # Student status management
+    path('<uuid:pk>/disable/', views.disable_student, name='disable_student'),
+    path('<uuid:pk>/enable/', views.enable_student, name='enable_student'),
+    
+    # Document management
+    path('<uuid:pk>/upload-document/', views.upload_document, name='upload_document'),
+    path('<uuid:pk>/document/<int:doc_pk>/delete/', views.delete_document, name='delete_document'),
+    
+    # Bulk actions and exports
+    path('bulk-action/', views.bulk_action, name='bulk_action'),
+    path('export/', views.export_students, name='export_students'),
+    
+    # AJAX endpoints
+    path('ajax/search/', views.search_students_ajax, name='search_students_ajax'),
+    path('ajax/stats/', views.student_stats_ajax, name='student_stats_ajax'),
+]

@@ -1,0 +1,164 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+
+
+
+<!-- Fixed Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-plus"></i>
+                        <span>Admissions</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-users"></i>
+                    <span>All Students</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <!-- Main Content -->
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-users"></i> All Students List</h3>
+            <a href="{% url 'student_create' %}" class="add-item-button">
+                <span class="add-event"><i class="fas fa-plus"></i></span>
+                <span style="margin-left: 10px;">Add Student</span>
+            </a>
+        </div>
+
+        <div class="card-content">
+            <!-- Students Table with DataTables -->
+            <div class="table-responsive-1">
+                <table id="studentsTable" class="display">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll"></th>
+                            <th>Student</th>
+                            <th>Student ID</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Year Group</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td><input type="checkbox" class="student-checkbox" value="{{ student.pk }}"></td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div class="avatar">
+                                        {{ student.first_name|first }}{{ student.last_name|first }}
+                                    </div>
+                                    <div>
+                                        <strong style="font-weight: 600; color: var(--e-global-color-text); font-size: 12px;">
+                                            {{ student.get_full_name }}</strong>
+                                        <br><small
+                                            style="color: var(--e-global-color-text); opacity: 0.7; font-size: 10px;">
+                                           {{ student.nationality }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><strong style="color: var(--e-global-color-primary); font-size: 12px;">
+                                   {{ student.student_id }}</strong></td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                               {{ student.email|default:"-" }}</td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                               {{ student.phone_number|default:"-" }}</td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ student.get_year_group_display }}</td>
+                            <td>
+                                <span class="status-badge status-{{ student.status }}">
+                                    {{ student.get_status_display }}
+                                </span>
+                            </td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ student.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 2px;">
+                                    <a href="{% url 'student_detail' student.pk %}" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'student_update' student.pk %}" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if student.is_active %}
+                                    <a href="{% url 'disable_student' student.pk %}" title="Disable">
+                                        <i class="fas fa-ban"></i>
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'enable_student' student.pk %}" title="Enable">
+                                        <i class="fas fa-check"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9"
+                                style="text-align: center; padding: 40px 20px; color: var(--e-global-color-text);">
+                                <div style="opacity: 0.6;">
+                                    <i class="fas fa-users"
+                                        style="font-size: 48px; margin-bottom: 15px; color: var(--e-global-color-primary);"></i>
+                                    <br>
+                                    <h4 style="margin: 0; font-weight: 600; color: var(--e-global-color-text); font-size: 16px;">No
+                                        students found</h4>
+                                    <p style="margin: 8px 0 0 0; font-size: 12px;">Start by adding some students to your
+                                        database</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Action Form -->
+<form id="bulkActionForm" method="post" action="{% url 'bulk_action' %}" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" id="bulkAction">
+    <div id="selectedStudents"></div>
+</form>
+
+
+<!-- DataTables CSS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<link rel="stylesheet" href="{%static 'css\jquery.dataTables.min.css' %}">
+
+<!-- DataTables JS (load after jQuery) -->
+<script src="{%static 'js\jquery.dataTables.min.js' %}"></script>
+
+<script>
+  $(document).ready(function () {
+    if ($.fn.DataTable) {
+      console.log("DataTable is loaded.");
+      $('#studentsTable').DataTable();
+    } else {
+      console.error("DataTable is not loaded.");
+    }
+  });
+</script>
+{% endblock %}

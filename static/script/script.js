@@ -833,14 +833,7 @@ window.NurseryDashboard = {
 };
 
 // Initialize everything when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Nursery ERP Dashboard initialized successfully!');
-        showToast('Dashboard loaded successfully!', 'success');
-    });
-} else {
-    console.log('Nursery ERP Dashboard initialized successfully!');
-}
+
 
 // Service Worker Registration (for future PWA implementation)
 if ('serviceWorker' in navigator) {

@@ -1,0 +1,304 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+  <style>
+        :root {
+            --primary-blue: #214888;
+            --secondary-pink: #D54395;
+            --accent-purple: #8B5FBF;
+            --light-purple: #F3EBFF;
+            --soft-yellow: #FFD700;
+            --coral: #FF6B6B;
+            --light-bg: #F8F6FF;
+            --white: #FFFFFF;
+            --text-dark: #453F4E;
+            --text-light: #6B7280;
+            --success: #10B981;
+            --error: #EF4444;
+        }
+
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 4px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-dark);
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 45px 12px 40px;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-icon {
+            position: absolute;
+            left: 14px;
+            top: 56%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .form-control:focus ~ .form-icon {
+            color: var(--primary-blue);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 14px;
+            top: 56%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-blue);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -8px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #E5E7EB;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .custom-checkbox input {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .custom-checkbox input:checked + .checkmark {
+            background: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .custom-checkbox input:checked + .checkmark::after {
+            opacity: 1;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .checkmark::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--white);
+            font-size: 10px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .forgot-password {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: var(--accent-purple);
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+            color: var(--white);
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .submit-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .submit-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(33, 72, 136, 0.3);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .submit-button span {
+            position: relative;
+            z-index: 2;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .col {
+            flex: 1 1 220px;
+            min-width: 220px;
+            margin-top: 10px;
+            padding: 10px;
+        }
+        @media (max-width: 900px) {
+            .row {
+            gap: 12px;
+            }
+            .col {
+            min-width: 180px;
+            padding: 8px;
+            }
+        }
+        @media (max-width: 600px) {
+            .row {
+            flex-direction: column;
+            gap: 8px;
+            }
+            .col {
+            min-width: 100%;
+            padding: 6px;
+            }
+        }
+
+       
+    </style>
+
+
+<!-- Fixed Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'students' %}" class="breadcrumb-link">
+                        <i class="fas fa-users"></i>
+                        <span>All Students</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-user"></i>
+                    <span>Add Student</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <!-- Main Content -->
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-user"></i> Add Student </h3>
+            
+        </div>
+
+        <div class="card-content">
+
+            <form enctype="multipart/form-data" method="post">
+                {% csrf_token %}
+
+                <div class="row">
+                    {% for field in form %}
+                    <div class="col">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="submit-button">Add Student</button>
+            </form>
+
+
+        </div>
+    </div>
+    
+
+
+</div>
+{% endblock %}
