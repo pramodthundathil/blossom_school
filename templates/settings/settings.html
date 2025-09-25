@@ -1,0 +1,403 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+
+<style>
+    .btn-outline-primary {
+        border: #214888 .5px solid !important;
+        color: #214888 !important;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #214888 !important;
+        color: white !important;
+    }
+
+    .custom-modal .modal-content {
+        border: none;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-heavy);
+        background-color: var(--e-global-color-aa4a27d);
+        font-family: var(--e-global-typography-primary-font-family);
+    }
+
+    .custom-modal .modal-header {
+        background: linear-gradient(135deg, var(--e-global-color-primary) 0%, #1e3a6f 100%);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        padding: 20px 24px;
+    }
+
+    .custom-modal .modal-title {
+        font-weight: 600;
+        font-size: 1.25rem;
+        margin: 0;
+        color: white;
+    }
+
+    .custom-modal .btn-close {
+        background: none;
+        border: none;
+        color: white;
+        opacity: 0.8;
+        font-size: 1.2rem;
+        filter: invert(1);
+        transition: all 0.3s ease;
+    }
+
+    .custom-modal .btn-close:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    .custom-modal .modal-body {
+        padding: 24px;
+        color: var(--e-global-color-text);
+        line-height: 1.6;
+        background-color: var(--e-global-color-aa4a27d);
+    }
+
+    .custom-modal .modal-footer {
+        padding: 16px 24px 24px;
+        border: none;
+        background-color: var(--e-global-color-aa4a27d);
+        gap: 12px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .custom-modal .btn-custom-secondary {
+        background-color: var(--e-global-color-5d90ead);
+        border: 2px solid var(--e-global-color-5d90ead);
+        color: var(--e-global-color-text);
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        transition: all 0.3s ease;
+        font-family: var(--e-global-typography-primary-font-family);
+    }
+
+    .custom-modal .btn-custom-secondary:hover {
+        background-color: var(--e-global-color-eecedb7);
+        border-color: var(--e-global-color-eecedb7);
+        color: var(--e-global-color-primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .custom-modal .btn-custom-primary {
+        background: linear-gradient(135deg, var(--e-global-color-secondary) 0%, #b93875 100%);
+        border: 2px solid var(--e-global-color-secondary);
+        color: white;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        transition: all 0.3s ease;
+        font-family: var(--e-global-typography-primary-font-family);
+        box-shadow: var(--shadow-light);
+    }
+
+    .custom-modal .btn-custom-primary:hover {
+        background: linear-gradient(135deg, #b93875 0%, var(--e-global-color-secondary) 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        border-color: #b93875;
+    }
+
+    .custom-modal .btn-custom-primary:active {
+        transform: translateY(0);
+    }
+
+    /* Modal backdrop */
+    .custom-modal .modal-backdrop {
+        background-color: rgba(33, 72, 136, 0.4);
+        backdrop-filter: blur(4px);
+    }
+
+    /* Animation */
+    .custom-modal.fade .modal-dialog {
+        transition: transform 0.4s ease-out;
+        transform: translate(0, -50px) scale(0.9);
+    }
+
+    .custom-modal.show .modal-dialog {
+        transform: translate(0, 0) scale(1);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: var(--white);
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-input.error {
+        border-color: var(--error);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        background-color: rgba(239, 68, 68, 0.05);
+    }
+
+    .form-input.success {
+        border-color: var(--success);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    textarea.form-input {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    select.form-input {
+        cursor: pointer;
+    }
+
+    input[type="file"].form-input {
+        padding: 0.5rem;
+        border-style: dashed;
+    }
+
+    /* Action buttons styling */
+    .action-buttons {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .action-buttons a {
+        text-decoration: none;
+        padding: 5px 8px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .action-buttons a:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .text-primary { color: #007bff !important; }
+    .text-info { color: #17a2b8 !important; }
+    .text-danger { color: #dc3545 !important; }
+</style>
+
+<!-- Fixed Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-school"></i>
+                    <span>School settings</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <!-- Main Content -->
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-users"></i> School Settings </h3>
+        </div>
+
+        <div class="card-content">
+            <div class="container">
+                <div class="" style="width: 10%;">
+                    <button data-bs-toggle="modal" data-bs-target="#customModal1" class="btn btn-outline-primary mb-1">
+                        <i class="fas fa-plus"></i>
+                        Add Class
+                    </button>
+                </div>
+                <div class="table-responsive-1">
+                    <table id="studentsTable" class="display">
+                        <thead>
+                            <th>Sl no</th>
+                            <th>Class</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </thead>
+
+                        <tbody>
+                            {% for class in class_rooms %}
+                            <tr>
+                                <td>{{forloop.counter}}</td>
+                                <td>{{ class.class_name }}</td>
+                                <td>{{ class.created_at }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a data-bs-target="#update{{ class.id }}" data-bs-toggle="modal" class="text-primary">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <a href="#" class="text-info">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a data-bs-target="#deleteModal{{ class.id }}" data-bs-toggle="modal" class="text-danger">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Class Modals (outside the loop) -->
+{% for class in class_rooms %}
+<div class="modal fade custom-modal" id="update{{ class.id }}" tabindex="-1" aria-labelledby="updateModalLabel{{ class.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel{{ class.id }}">
+                    Update Class
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <form method="post" action="{% url 'update_class' class.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="classNameUpdate{{ class.id }}" class="form-label">Class Name</label>
+                                <input type="text" 
+                                       id="classNameUpdate{{ class.id }}"
+                                       value="{{ class.class_name }}" 
+                                       name="class_room" 
+                                       class="form-input"
+                                       style="border: .5px solid #1e3a6f !important;" 
+                                       placeholder="Class Name" 
+                                       required>
+                            </div>
+                        </div>
+                        <br>
+                        <button type="submit" class="btn btn-custom-primary">Update Class</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal{{ class.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ class.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel{{ class.id }}">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the class "<strong>{{ class.class_name }}</strong>"?</p>
+                <p class="text-muted">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="{% url 'delete_class' class.id %}" class="btn btn-danger">Yes, Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Add Class Modal -->
+<div class="modal fade custom-modal" id="customModal1" tabindex="-1" aria-labelledby="customModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customModalLabel">
+                    Add New Class
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="className" class="form-label">Class Name</label>
+                                <input type="text" 
+                                       id="className"
+                                       name="class_room" 
+                                       class="form-input"
+                                       style="border: .5px solid #1e3a6f !important;" 
+                                       placeholder="Enter class name" 
+                                       required>
+                            </div>
+                        </div>
+                        <br>
+                        <button type="submit" class="btn btn-custom-primary">Add Class</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DataTables CSS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css' %}">
+
+<!-- DataTables JS (load after jQuery) -->
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+        if ($.fn.DataTable) {
+            console.log("DataTable is loaded.");
+            $('#studentsTable').DataTable({
+                "pageLength": 10,
+                "responsive": true,
+                "language": {
+                    "search": "Search classes:",
+                    "lengthMenu": "Show _MENU_ classes per page",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ classes",
+                    "paginate": {
+                        "first": "First",
+                        "last": "Last",
+                        "next": "Next",
+                        "previous": "Previous"
+                    }
+                }
+            });
+        } else {
+            console.error("DataTable is not loaded.");
+        }
+    });
+</script>
+
+{% endblock %}

@@ -22,10 +22,9 @@
     }
 
 
-
-    /* .card-header {
-        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
-        color: var(--white);
+    .card-header {
+        /* background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white); */
         padding: 1.5rem 2rem;
         border-radius: var(--border-radius) var(--border-radius) 0 0;
     }
@@ -37,7 +36,7 @@
         display: flex;
         align-items: center;
         gap: 0.75rem;
-    } */
+    }
 
     .card-content {
         padding: 2rem;
@@ -295,10 +294,10 @@
     }
 
     
+
     /* Responsive Design */
     @media (max-width: 768px) {
        
-
         .form-grid {
             grid-template-columns: 1fr;
         }
@@ -401,7 +400,7 @@
 <div class="students-container">
     <div class="dashboard-card-1 fade-in">
         <div class="card-header">
-            <h3><i class="fas fa-user-plus"></i> Student Registration Form</h3>
+            <h3><i class="fas fa-user-plus"></i> Student Update Form</h3>
         </div>
 
         <div class="card-content">
@@ -413,7 +412,7 @@
             <!-- Alert Messages -->
             <div id="alertContainer"></div>
 
-            <form id="studentForm" enctype="multipart/form-data" method="post" novalidate>
+            <form  enctype="multipart/form-data" method="post" >
                 {% csrf_token %}
                 
                 <div class="form-sections">
@@ -716,7 +715,7 @@
                         
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="id_term_to_begin" class="form-label">Term to Begin</label>
+                                <label for="id_term_to_begin" class="form-label required-field">Term to Begin</label>
                                 {{ form.term_to_begin }}
                                 <div class="error-message" id="error_term_to_begin"></div>
                             </div>
@@ -750,7 +749,8 @@
                                 {{ form.date_end }}
                                 <div class="error-message" id="error_date_end"></div>
                             </div>
-                             <div class="form-group">
+
+                            <div class="form-group">
                                 <label for="id_class_room" class="form-label">Class room</label>
                                 {{ form.class_room }}
                                 <div class="error-message" id="error_class_room"></div>
@@ -770,7 +770,7 @@
                         <div class="loading-spinner" id="loadingSpinner"></div>
                         <span id="submitText">
                             <i class="fas fa-user-plus"></i>
-                            Register Student
+                            Update Student
                         </span>
                     </button>
                     <p style="margin-top: 1rem; color: var(--text-light); font-size: 0.875rem;">
@@ -793,11 +793,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Form validation and progress tracking
     const requiredFields = [
-        'first_name', 'last_name', 'nationality', 'gender', 'date_of_birth',
-        'father_name', 'father_nationality', 'mother_name', 'mother_nationality',
-        'full_home_address', 'city', 'first_contact_person', 'first_contact_relationship',
-        'first_contact_telephone', 'days_per_week', 'year_of_admission','class_room'
-    ];
+    'first_name', 'last_name', 'nationality', 'gender', 'date_of_birth',
+    'father_name', 'father_nationality', 'mother_name', 'mother_nationality',
+    'full_home_address', 'city', 'first_contact_person', 'first_contact_relationship',
+    'first_contact_telephone', 'days_per_week', 'year_of_admission', 'term_to_begin','class_room'
+];
     
     // Real-time validation function
     function validateField(fieldName, value) {

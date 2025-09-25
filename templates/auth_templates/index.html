@@ -11,6 +11,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+  <link href="{% static 'glightbox/glightbox.min.css' %}" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
 </head>
 
@@ -45,14 +49,14 @@
     </div>
     <!-- Top Navigation Bar -->
     <!-- ADD THIS TOP BAR BEFORE YOUR EXISTING NAV -->
-    <div class="" style="position: fixed;z-index: 1050 !important;right:10px;top:15px;">
+    <!-- <div class="" style="position: fixed;z-index: 1050 !important;right:10px;top:15px;">
         <button class="nav-toggle-btn" style="color: #D54395;" onclick="toggleMainNav()">
             <i class="fas fa-eye"></i>
         </button>
-    </div>
+    </div> -->
 
 
-    <nav class="top-nav">
+    <!-- <nav class="top-nav">
         <div class="nav-container">
             <div class="nav-left">
                 <div class="logo" style="background-color: white;padding: 5px; border-radius: 10px;">
@@ -61,7 +65,7 @@
                     </div>
 
                 </div>
-                <!-- REPLACE YOUR MOBILE TOGGLE BUTTON WITH THIS -->
+                
                 <button class="mobile-nav-toggle" id="mobileToggle">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -79,7 +83,7 @@
                             <i class="fas fa-chevron-down"></i>
                         </a>
                         <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item"><i class="fas fa-user-plus"></i> Add Student</a>
+                            <a href="{% url 'student_create' %}" class="dropdown-item"><i class="fas fa-user-plus"></i> Add Student</a>
                             <a href="{% url 'students' %}" class="dropdown-item"><i class="fas fa-list"></i> All Students</a>
                             <a href="#" class="dropdown-item"><i class="fas fa-search"></i> Search Student</a>
                         </div>
@@ -149,9 +153,143 @@
                 </div>
             </div>
         </div>
-    </nav>
+    </nav> -->
 
 
+ <nav class="navbar navbar-expand-lg custom-navbar sticky-top">
+    <div class="container-fluid px-4">
+        <!-- Logo -->
+        <a class="navbar-brand" href="{% url 'index' %}">
+            <img src="{% static 'img/BB_LOGO_V1.png' %}" alt="Blossom British"  style="max-width: 100px;">
+        </a>
+
+        <!-- Mobile Toggle -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false">
+            <i class="fas fa-bars text-white"></i>
+        </button>
+
+        <!-- Navigation Menu -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto ms-4">
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                </li>
+
+                <!-- Students -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-users"></i>
+                        Students
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'student_create' %}">
+                            <i class="fas fa-user-plus"></i> Add Student
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'students' %}">
+                            <i class="fas fa-list"></i> All Students
+                        </a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-search"></i> Search Student
+                        </a></li>
+                    </ul>
+                </li>
+
+                <!-- Payments -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-credit-card"></i>
+                        Payments
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-dollar-sign"></i> Fee Collection
+                        </a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-receipt"></i> Generate Receipt
+                        </a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-exclamation-triangle"></i> Outstanding Fees
+                        </a></li>
+                    </ul>
+                </li>
+
+                <!-- Reports -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-chart-bar"></i>
+                        Reports
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-file-pdf"></i> Financial Reports
+                        </a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-users"></i> Student Reports
+                        </a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-bus"></i> Transport Reports
+                        </a></li>
+                    </ul>
+                </li>
+
+                <!-- Settings -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-user-cog"></i> User Management
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'site_setting' %}">
+                            <i class="fas fa-school"></i> School Settings
+                        </a></li>
+                        <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-backup"></i> Backup & Restore
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- Right Side Menu -->
+            <ul class="navbar-nav ms-auto">
+                <!-- Notifications -->
+                <!-- <li class="nav-item">
+                    <a class="nav-link notification-link" href="#">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </a>
+                </li> -->
+
+                <!-- User Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle user-menu text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="User" class="user-avatar">
+                        {% else %}
+                            <img src="{% static 'img/userplaceholder.png' %}" alt="User" class="user-avatar">
+                        {% endif %}
+                        <span class="user-name">{{ user.username }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'profile' %}">
+                            <i class="fas fa-user"></i> Profile
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'signout' %}">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -436,6 +574,8 @@
 
 
     <!-- scripts  -->
+      <script src="{% static 'glightbox/glightbox.min.js' %}"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'script/script.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>

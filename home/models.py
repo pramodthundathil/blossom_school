@@ -55,3 +55,16 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         
     def __str__(self):
         return str(self.first_name + " " + self.last_name)
+    
+
+
+class ClassRooms(models.Model):
+    class_name = models.CharField(max_length=20)
+    
+    created_by = models.ForeignKey(CustomUser,on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
+
+
+    def __str__(self):
+        return str(self.class_name)

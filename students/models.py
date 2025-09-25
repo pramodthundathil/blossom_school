@@ -1,247 +1,191 @@
-# models.py
+import uuid
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.urls import reverse
-import uuid
-from django.contrib.auth import get_user_model
+from PIL import Image
+import os
+from home.models import ClassRooms
 
 
-User = get_user_model()
+User  = get_user_model()
 
 class Student(models.Model):
-    # Basic Information
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    student_id = models.CharField(max_length=20, unique=True, blank=True)
-    
-    # Personal Details
-    first_name = models.CharField(max_length=100)
-    middle_name = models.CharField(max_length=100, blank=True)
-    last_name = models.CharField(max_length=100)
-    date_of_birth = models.DateField()
-    
     GENDER_CHOICES = [
         ('M', 'Male'),
         ('F', 'Female'),
-        ('O', 'Other'),
-        ('P', 'Prefer not to say'),
     ]
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     
-    # Contact Information
-    phone_regex = RegexValidator(
-        regex=r'^\+?1?\d{9,15}$',
-        message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
-    )
-    phone_number = models.CharField(validators=[phone_regex], max_length=17, blank=True)
-    email = models.EmailField(blank=True)
     
-    # Address
-    address_line_1 = models.CharField(max_length=255)
-    address_line_2 = models.CharField(max_length=255, blank=True)
-    city = models.CharField(max_length=100)
-    county = models.CharField(max_length=100)
-    postcode = models.CharField(max_length=10)
-    country = models.CharField(max_length=100, default='United Kingdom')
-    
-    # Nationality and Immigration
-    nationality = models.CharField(max_length=100)
-    passport_number = models.CharField(max_length=50, blank=True)
-    visa_status = models.CharField(max_length=100, blank=True)
-    
-    # Academic Information
-    YEAR_GROUP_CHOICES = [
-        ('Y7', 'Year 7'),
-        ('Y8', 'Year 8'),
-        ('Y9', 'Year 9'),
-        ('Y10', 'Year 10'),
-        ('Y11', 'Year 11'),
-        ('Y12', 'Year 12 (Sixth Form)'),
-        ('Y13', 'Year 13 (Sixth Form)'),
-    ]
-    year_group = models.CharField(max_length=3, choices=YEAR_GROUP_CHOICES)
-    intended_start_date = models.DateField()
-    previous_school = models.CharField(max_length=255, blank=True)
-    previous_school_address = models.TextField(blank=True)
-    
-    # Special Educational Needs
-    has_sen = models.BooleanField(default=False, verbose_name="Has Special Educational Needs")
-    sen_details = models.TextField(blank=True, verbose_name="SEN Details")
-    has_ehcp = models.BooleanField(default=False, verbose_name="Has Education, Health and Care Plan")
-    
-    # Medical Information
-    medical_conditions = models.TextField(blank=True)
-    allergies = models.TextField(blank=True)
-    medications = models.TextField(blank=True)
-    emergency_medical_info = models.TextField(blank=True)
-    
-    # Dietary Requirements
-    dietary_requirements = models.TextField(blank=True)
-    
-    # Status and Metadata
     STATUS_CHOICES = [
-        ('pending', 'Pending Review'),
-        ('accepted', 'Accepted'),
-        ('rejected', 'Rejected'),
-        ('waitlist', 'Waitlisted'),
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
         ('enrolled', 'Enrolled'),
-        ('disabled', 'Disabled'),
+        ('rejected', 'Rejected'),
+        ('graduated', 'Graduated'),
+        ('transferred', 'Transferred'),
+        ('withdrawn', 'Withdrawn'),
     ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    DAYS_CHOICES = [
+        ('2_days', '2 Days'),
+        ('3_days', '3 Days'),
+        ('4_days', '4 Days'),
+        ('5_days', '5 Days'),
+        ('6_days', '6 Days'),
+        ('full_week', 'Full Week'),
+    ]
+    
+    # Primary Key
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    student_id = models.CharField(max_length=20, unique=True, blank=True)
+    
+    # Child Information
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    family_name = models.CharField(max_length=100, blank=True)
+    nationality = models.CharField(max_length=100)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    date_of_birth = models.DateField()
+    age_at_enrollment = models.IntegerField(blank=True, null=True)
+    religion = models.CharField(max_length=100, blank=True)
+    child_emirates_id = models.CharField(max_length=20, blank=True)
+    languages_spoken = models.TextField(blank=True)
+    
+    # Photos
+    child_photo = models.ImageField(upload_to='student_photos/child/', blank=True, null=True)
+    mother_photo = models.ImageField(upload_to='student_photos/mother/', blank=True, null=True)
+    father_photo = models.ImageField(upload_to='student_photos/father/', blank=True, null=True)
+    
+    # Father Information
+    father_name = models.CharField(max_length=100)
+    father_nationality = models.CharField(max_length=100)
+    father_place_of_work = models.CharField(max_length=200, blank=True)
+    father_position_held = models.CharField(max_length=200, blank=True)
+    father_mobile = models.CharField(max_length=20, blank=True)
+    father_work_telephone = models.CharField(max_length=20, blank=True)
+    father_email = models.EmailField(blank=True)
+    
+    # Mother Information
+    mother_name = models.CharField(max_length=100)
+    mother_nationality = models.CharField(max_length=100)
+    mother_place_of_work = models.CharField(max_length=200, blank=True)
+    mother_position_held = models.CharField(max_length=200, blank=True)
+    mother_mobile = models.CharField(max_length=20, blank=True)
+    mother_work_telephone = models.CharField(max_length=20, blank=True)
+    mother_email = models.EmailField(blank=True)
+    
+    # Siblings Information
+    siblings_info = models.TextField(blank=True, help_text="Sibling names and ages")
+    
+    # Home Information
+    home_telephone = models.CharField(max_length=20, blank=True)
+    full_home_address = models.TextField()
+    po_box_number = models.CharField(max_length=50, blank=True)
+    city = models.CharField(max_length=100, default='Dubai')
+    
+    # Emergency Contacts
+    first_contact_person = models.CharField(max_length=100)
+    first_contact_relationship = models.CharField(max_length=50)
+    first_contact_telephone = models.CharField(max_length=20)
+    
+    second_contact_person = models.CharField(max_length=100, blank=True)
+    second_contact_relationship = models.CharField(max_length=50, blank=True)
+    second_contact_telephone = models.CharField(max_length=20, blank=True)
+    
+    # School Information
+    term_to_begin = models.TextField(null=True, blank=True)
+    days_per_week = models.CharField(max_length=10, choices=DAYS_CHOICES, default="5_days")
+    hours_required = models.CharField(max_length=200, blank=True)
+    class_room = models.ForeignKey(ClassRooms, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # Status and Administrative
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending',null=True, blank=True)
+    approved = models.BooleanField(default=False)
+    year_of_admission = models.IntegerField()
+    date_start = models.DateField(blank=True, null=True)
+    date_end = models.DateField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    
+    # Contact Information (for main contact)
+    email = models.EmailField(blank=True)
+    phone_number = models.CharField(max_length=20, blank=True)
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     
-    # Photo
-    photo = models.ImageField(upload_to='student_photos/', blank=True, null=True)
+    # Parent signature and date
+    parent_signature_date = models.DateField(blank=True, null=True)
     
     class Meta:
-        ordering = ['last_name', 'first_name']
+        ordering = ['-created_at']
         indexes = [
             models.Index(fields=['student_id']),
-            models.Index(fields=['last_name', 'first_name']),
             models.Index(fields=['status']),
-            models.Index(fields=['year_group']),
             models.Index(fields=['created_at']),
         ]
     
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.student_id})"
+        return f"{self.get_full_name()} - {self.student_id}"
+    
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
     
     def get_absolute_url(self):
         return reverse('student_detail', kwargs={'pk': self.pk})
     
-    def get_full_name(self):
-        if self.middle_name:
-            return f"{self.first_name} {self.middle_name} {self.last_name}"
-        return f"{self.first_name} {self.last_name}"
-    
     def save(self, *args, **kwargs):
         if not self.student_id:
-            # Generate student ID automatically
-            year = self.intended_start_date.year if self.intended_start_date else 2024
-            last_student = Student.objects.filter(
-                student_id__startswith=f"STU{year}"
-            ).order_by('-student_id').first()
-            
-            if last_student:
-                last_number = int(last_student.student_id[-4:])
-                new_number = last_number + 1
-            else:
-                new_number = 1
-            
-            self.student_id = f"STU{year}{new_number:04d}"
+            self.student_id = self.generate_student_id()
         
+        if not self.email and self.father_email:
+            self.email = self.father_email
+        elif not self.email and self.mother_email:
+            self.email = self.mother_email
+            
+        if not self.phone_number and self.father_mobile:
+            self.phone_number = self.father_mobile
+        elif not self.phone_number and self.mother_mobile:
+            self.phone_number = self.mother_mobile
+            
         super().save(*args, **kwargs)
+    
+    def generate_student_id(self):
+        """Generate unique student ID"""
+        import datetime
+        year = datetime.datetime.now().year
+        last_student = Student.objects.filter(
+            student_id__startswith=f'BS{year}'
+        ).order_by('-student_id').first()
+        
+        if last_student:
+            last_number = int(last_student.student_id[-4:])
+            new_number = last_number + 1
+        else:
+            new_number = 1
+        
+        return f'BS{year}{new_number:04d}'
 
 
-class Parent(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='parents')
-    
-    # Personal Details
-    title = models.CharField(max_length=10, blank=True)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    
-    RELATIONSHIP_CHOICES = [
-        ('mother', 'Mother'),
-        ('father', 'Father'),
-        ('guardian', 'Guardian'),
-        ('step_mother', 'Step Mother'),
-        ('step_father', 'Step Father'),
-        ('grandparent', 'Grandparent'),
+class StudentDocument(models.Model):
+    DOCUMENT_TYPES = [
+        ('birth_certificate', 'Birth Certificate'),
+        ('passport', 'Passport Copy'),
+        ('emirates_id', 'Emirates ID'),
+        ('medical_records', 'Medical Records'),
+        ('previous_school_records', 'Previous School Records'),
+        ('photo', 'Passport Photo'),
         ('other', 'Other'),
     ]
-    relationship = models.CharField(max_length=20, choices=RELATIONSHIP_CHOICES)
     
-    # Contact Information
-    phone_regex = RegexValidator(
-        regex=r'^\+?1?\d{9,15}$',
-        message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
-    )
-    phone_number = models.CharField(validators=[phone_regex], max_length=17)
-    email = models.EmailField()
-    
-    # Address (if different from student)
-    same_address_as_student = models.BooleanField(default=True)
-    address_line_1 = models.CharField(max_length=255, blank=True)
-    address_line_2 = models.CharField(max_length=255, blank=True)
-    city = models.CharField(max_length=100, blank=True)
-    county = models.CharField(max_length=100, blank=True)
-    postcode = models.CharField(max_length=10, blank=True)
-    
-    # Professional Information
-    occupation = models.CharField(max_length=100, blank=True)
-    employer = models.CharField(max_length=255, blank=True)
-    work_phone = models.CharField(validators=[phone_regex], max_length=17, blank=True)
-    
-    # Emergency Contact
-    is_emergency_contact = models.BooleanField(default=True)
-    
-    # Parental Responsibility
-    has_parental_responsibility = models.BooleanField(default=True)
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        ordering = ['relationship', 'last_name', 'first_name']
-        unique_together = ['student', 'email']
-    
-    def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.get_relationship_display()})"
-    
-    def get_full_name(self):
-        if self.title:
-            return f"{self.title} {self.first_name} {self.last_name}"
-        return f"{self.first_name} {self.last_name}"
-
-
-class EmergencyContact(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='emergency_contacts')
-    
-    name = models.CharField(max_length=200)
-    relationship = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=17)
-    email = models.EmailField(blank=True)
-    address = models.TextField(blank=True)
-    
-    # Priority order
-    priority = models.PositiveIntegerField(default=1, help_text="1 = Primary, 2 = Secondary, etc.")
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        ordering = ['priority', 'name']
-        unique_together = ['student', 'priority']
-    
-    def __str__(self):
-        return f"{self.name} - {self.relationship} (Priority {self.priority})"
-
-
-class Document(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='documents')
-    
-    DOCUMENT_TYPE_CHOICES = [
-        ('birth_certificate', 'Birth Certificate'),
-        ('passport', 'Passport'),
-        ('visa', 'Visa'),
-        ('school_report', 'School Report'),
-        ('medical_report', 'Medical Report'),
-        ('sen_report', 'SEN Report'),
-        ('ehcp', 'Education, Health and Care Plan'),
-        ('other', 'Other'),
-    ]
-    document_type = models.CharField(max_length=50, choices=DOCUMENT_TYPE_CHOICES)
-    
-    name = models.CharField(max_length=255)
+    document_type = models.CharField(max_length=30, choices=DOCUMENT_TYPES)
+    document = models.FileField(upload_to='student_documents/')
     description = models.TextField(blank=True)
-    file = models.FileField(upload_to='student_documents/')
-    
     uploaded_at = models.DateTimeField(auto_now_add=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     
@@ -249,4 +193,19 @@ class Document(models.Model):
         ordering = ['-uploaded_at']
     
     def __str__(self):
-        return f"{self.name} - {self.get_document_type_display()}"
+        return f"{self.student.get_full_name()} - {self.get_document_type_display()}"
+
+
+class StudentNote(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='notes')
+    note = models.TextField()
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_important = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Note for {self.student.get_full_name()}"

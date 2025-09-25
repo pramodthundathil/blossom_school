@@ -7,7 +7,7 @@ from . import views
 urlpatterns = [
     # Main student views
     path('students/', views.student_list, name='students'),
-    path('dashboard/', views.student_dashboard, name='student_dashboard'),
+
     path('create/', views.student_create, name='student_create'),
     path('student_detail/<uuid:pk>/', views.student_detail, name='student_detail'),
     path('student_update/<uuid:pk>/edit/', views.student_update, name='student_update'),
@@ -19,7 +19,7 @@ urlpatterns = [
     
     # Document management
     path('<uuid:pk>/upload-document/', views.upload_document, name='upload_document'),
-    path('<uuid:pk>/document/<int:doc_pk>/delete/', views.delete_document, name='delete_document'),
+    path('document/delete/<uuid:pk>', views.delete_document, name='delete_document'),
     
     # Bulk actions and exports
     path('bulk-action/', views.bulk_action, name='bulk_action'),
@@ -28,4 +28,7 @@ urlpatterns = [
     # AJAX endpoints
     path('ajax/search/', views.search_students_ajax, name='search_students_ajax'),
     path('ajax/stats/', views.student_stats_ajax, name='student_stats_ajax'),
+
+    # AJAX validation endpoint
+    path('students/validate-field/', views.student_validate_field, name='student_validate_field'),
 ]

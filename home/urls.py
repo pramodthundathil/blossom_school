@@ -14,7 +14,11 @@ urlpatterns = [
     path('profile/activity/', views.get_user_activity, name='user_activity'),
 
     
-    #students management and students profile handling
+    #Settings of site including 
+
+    path("settings",views.site_setting,name="site_setting"),
+    path("update_class/<int:pk>",views.update_class,name="update_class"),
+    path("delete_class/<int:pk>",views.delete_class,name="delete_class"),
 
 # ''' Need to be created'''
 

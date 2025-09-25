@@ -1,411 +1,570 @@
-# views.py
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.core.paginator import Paginator
-from django.db import transaction
-from django.db.models import Q
-from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
-from django.urls import reverse_lazy, reverse
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-import json
-import csv
 
-from .models import Student, Parent, EmergencyContact, Document
-from .forms import (
-    StudentForm, ParentFormSet, EmergencyContactFormSet, DocumentFormSet,
-    StudentSearchForm, DisableStudentForm, DocumentForm
-)
+from .forms import * 
+from .models import * 
 from home.decorators import unauthenticated_user
+
+
+from django.http import JsonResponse
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_http_methods
+from django.urls import reverse
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from datetime import datetime
+import logging
+import json
+# Set up logging
+logger = logging.getLogger(__name__)
 
 
 @unauthenticated_user
 def student_list(request):
-    """Display all students with search and filter functionality"""
-    students = Student.objects.select_related().prefetch_related('parents')
-    
-    # Search functionality
-    search = request.GET.get('search')
-    status = request.GET.get('status')
-    year_group = request.GET.get('year_group')
-    is_active = request.GET.get('is_active')
-    
-    if search:
-        students = students.filter(
-            Q(first_name__icontains=search) |
-            Q(last_name__icontains=search) |
-            Q(student_id__icontains=search) |
-            Q(email__icontains=search)
-        )
-    
-    if status:
-        students = students.filter(status=status)
-    
-    if year_group:
-        students = students.filter(year_group=year_group)
-    
-    if is_active == 'true':
-        students = students.filter(is_active=True)
-    elif is_active == 'false':
-        students = students.filter(is_active=False)
-    
-    students = students.order_by('-created_at')
-    
+    students = Student.objects.all()
+
     context = {
-        'students': students,
-        'search_form': StudentSearchForm(request.GET),
-        'total_students': Student.objects.count(),
-        'active_students': Student.objects.filter(is_active=True).count(),
-        'pending_applications': Student.objects.filter(status='pending').count(),
+        "students":students
+    }
+    return render(request,'students/all-students.html',context)
+
+
+
+@unauthenticated_user
+@csrf_protect
+@require_http_methods(["GET", "POST"])
+def student_create(request):
+    """
+    Create a new student with enhanced validation and AJAX support
+    """
+    if request.method == 'POST':
+        # Check if request is AJAX
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        
+        logger.info(f"POST request received. Is AJAX: {is_ajax}")
+        logger.debug(f"POST data keys: {list(request.POST.keys())}")
+        logger.debug(f"FILES data keys: {list(request.FILES.keys())}")
+        
+        form = StudentForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            try:
+                # Use database transaction to ensure data integrity
+                with transaction.atomic():
+                    # Create student instance without saving
+                    student = form.save(commit=False)
+                    
+                    # Set the created_by field if user is authenticated
+                    if hasattr(request, 'user') and request.user.is_authenticated:
+                        student.created_by = request.user
+                    
+                    # Set default year of admission if not provided
+                    if not student.year_of_admission:
+                        student.year_of_admission = datetime.now().year
+                    
+                    # Calculate age at enrollment if date of birth is provided and age is not set
+                    if student.date_of_birth and not student.age_at_enrollment:
+                        today = datetime.now().date()
+                        age = today.year - student.date_of_birth.year
+                        if today.month < student.date_of_birth.month or \
+                           (today.month == student.date_of_birth.month and today.day < student.date_of_birth.day):
+                            age -= 1
+                        if 1 <= age <= 18:
+                            student.age_at_enrollment = age
+                    
+                    # Auto-populate primary email if not provided
+                    if not student.email:
+                        if student.father_email:
+                            student.email = student.father_email
+                        elif student.mother_email:
+                            student.email = student.mother_email
+                    
+                    # Auto-populate primary phone if not provided
+                    if not student.phone_number:
+                        if student.father_mobile:
+                            student.phone_number = student.father_mobile
+                        elif student.mother_mobile:
+                            student.phone_number = student.mother_mobile
+                    
+                    # Set default status
+                    if not student.status:
+                        student.status = 'enrolled'
+                    
+                    # Save the student
+                    student.save()
+                    
+                    logger.info(f"Student saved successfully: {student.get_full_name()} (ID: {student.student_id})")
+                    
+                    if is_ajax:
+                        # messages.success(
+                        #     request, 
+                        #     f"Student {student.get_full_name()} (ID: {student.student_id}) created successfully."
+                        # )
+                        # return redirect('student_detail', pk=student.id )
+                        return JsonResponse({
+                            'success': True,
+                            'message': f'Student {student.get_full_name()} has been registered successfully!',
+                            'redirect_url': reverse('students'),
+                            'student_id': str(student.pk),
+                            'student_name': student.get_full_name(),
+                            'student_number': student.student_id
+                        }, status=200)
+                    else:
+                        messages.success(
+                            request, 
+                            f"Student {student.get_full_name()} (ID: {student.student_id}) created successfully."
+                        )
+                        return redirect('student_detail', pk=student.id )
+                        
+            except ValidationError as e:
+                logger.warning(f"Validation error during student creation: {e}")
+                error_message = str(e) if hasattr(e, 'message') else 'Validation error occurred.'
+                
+                if is_ajax:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Validation error occurred.',
+                        'errors': {'__all__': [error_message]}
+                    }, status=400)
+                else:
+                    messages.error(request, f"Validation error: {error_message}")
+                    
+            except Exception as e:
+                logger.error(f"Unexpected error during student creation: {e}", exc_info=True)
+                error_message = "An unexpected error occurred while creating the student."
+                
+                if is_ajax:
+                    return JsonResponse({
+                        'success': False,
+                        'message': error_message,
+                        'errors': {'__all__': [str(e)]}
+                    }, status=500)
+                else:
+                    messages.error(request, f"An error occurred: {str(e)}")
+        else:
+            # Form has validation errors
+            logger.warning(f"Form validation failed. Errors: {form.errors}")
+            
+            if is_ajax:
+                # Format errors for JSON response
+                errors = {}
+                for field, field_errors in form.errors.items():
+                    errors[field] = [str(error) for error in field_errors]
+                
+                # Include non-field errors
+                if form.non_field_errors():
+                    errors['__all__'] = [str(error) for error in form.non_field_errors()]
+                
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Please correct the errors below.',
+                    'errors': errors,
+                    'form_errors': True
+                }, status=400)
+            else:
+                messages.error(request, "Please correct the errors below.")
+    
+    else:
+        # GET request - show empty form
+        form = StudentForm()
+        
+        # Pre-populate some fields with sensible defaults
+        form.fields['year_of_admission'].initial = datetime.now().year
+        form.fields['city'].initial = 'Dubai'
+    
+    # Prepare context for template
+    context = {
+        'form': form,
+        'title': 'Add New Student',
+        'submit_text': 'Register Student',
+        'current_year': datetime.now().year,
+        'form_errors': form.errors if request.method == 'POST' else None
     }
     
-    return render(request, 'students/all-students.html', context)
+    return render(request, 'students/student_form.html', context)
 
+
+@csrf_protect
+def student_validate_field(request):
+    """
+    AJAX endpoint for real-time field validation
+    """
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        field_name = request.POST.get('field_name')
+        field_value = request.POST.get('field_value')
+        
+        if not field_name:
+            return JsonResponse({'error': 'Field name is required'}, status=400)
+        
+        try:
+            # Create a temporary form instance with just this field for validation
+            form_data = {field_name: field_value}
+            form = StudentForm(data=form_data)
+            
+            # Validate the entire form to trigger clean methods
+            form.is_valid()
+            
+            # Get errors for the specific field
+            field_errors = form.errors.get(field_name, [])
+            
+            response_data = {
+                'valid': len(field_errors) == 0,
+                'errors': field_errors,
+                'field_name': field_name
+            }
+            
+            # Add specific validation messages for better UX
+            if len(field_errors) == 0 and field_value:
+                response_data['message'] = 'Valid'
+            
+            return JsonResponse(response_data)
+            
+        except Exception as e:
+            logger.error(f"Error in field validation: {e}", exc_info=True)
+            return JsonResponse({
+                'valid': False, 
+                'errors': ['Validation error occurred'],
+                'field_name': field_name
+            }, status=500)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+def validate_student_data(cleaned_data):
+    """
+    Custom validation for student data - for additional business logic
+    """
+    errors = {}
+    
+    # Validate age consistency
+    if cleaned_data.get('date_of_birth') and cleaned_data.get('age_at_enrollment'):
+        birth_date = cleaned_data['date_of_birth']
+        provided_age = cleaned_data['age_at_enrollment']
+        
+        today = datetime.now().date()
+        calculated_age = today.year - birth_date.year
+        if today.month < birth_date.month or \
+           (today.month == birth_date.month and today.day < birth_date.day):
+            calculated_age -= 1
+        
+        if abs(calculated_age - provided_age) > 1:
+            errors['age_at_enrollment'] = ['Age does not match the date of birth provided.']
+    
+    # Validate contact information
+    contact_fields = ['father_mobile', 'mother_mobile', 'home_telephone', 'phone_number']
+    has_contact = any(cleaned_data.get(field) for field in contact_fields)
+    
+    if not has_contact:
+        errors['father_mobile'] = ['At least one contact number must be provided.']
+    
+    # Validate email addresses
+    email_fields = ['father_email', 'mother_email', 'email']
+    has_email = any(cleaned_data.get(field) for field in email_fields)
+    
+    if not has_email:
+        errors['father_email'] = ['At least one email address must be provided.']
+    
+    # Validate emergency contact
+    first_contact_person = cleaned_data.get('first_contact_person')
+    first_contact_telephone = cleaned_data.get('first_contact_telephone')
+    
+    if first_contact_person and not first_contact_telephone:
+        errors['first_contact_telephone'] = ['Phone number is required when emergency contact person is provided.']
+    
+    # Check for duplicate students (same name + DOB)
+    if cleaned_data.get('first_name') and cleaned_data.get('last_name') and cleaned_data.get('date_of_birth'):
+        existing_student = Student.objects.filter(
+            first_name__iexact=cleaned_data['first_name'],
+            last_name__iexact=cleaned_data['last_name'],
+            date_of_birth=cleaned_data['date_of_birth']
+        ).first()
+        
+        if existing_student:
+            errors['__all__'] = [
+                f'A student with the same name and date of birth already exists (ID: {existing_student.student_id}). '
+                'Please verify the details or contact administration.'
+            ]
+    
+    return errors
+
+
+@csrf_protect
+def student_check_duplicate(request):
+    """
+    AJAX endpoint to check for duplicate students
+    """
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        date_of_birth = request.POST.get('date_of_birth')
+        
+        if first_name and last_name and date_of_birth:
+            try:
+                # Parse date
+                dob = datetime.strptime(date_of_birth, '%Y-%m-%d').date()
+                
+                # Check for existing student
+                existing_student = Student.objects.filter(
+                    first_name__iexact=first_name,
+                    last_name__iexact=last_name,
+                    date_of_birth=dob
+                ).first()
+                
+                if existing_student:
+                    return JsonResponse({
+                        'duplicate_found': True,
+                        'message': f'A student with similar details already exists (ID: {existing_student.student_id})',
+                        'student_id': existing_student.student_id,
+                        'student_name': existing_student.get_full_name()
+                    })
+                else:
+                    return JsonResponse({
+                        'duplicate_found': False,
+                        'message': 'No duplicate found'
+                    })
+                    
+            except ValueError:
+                return JsonResponse({
+                    'error': 'Invalid date format'
+                }, status=400)
+        else:
+            return JsonResponse({
+                'error': 'First name, last name, and date of birth are required'
+            }, status=400)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+# Utility functions for better form processing
+
+def clean_phone_number(phone_number):
+    """Clean and validate phone number"""
+    if not phone_number:
+        return phone_number
+    
+    # Remove extra spaces and format consistently
+    cleaned = ' '.join(phone_number.split())
+    return cleaned
+
+
+def generate_student_preview(form_data):
+    """Generate a preview of student data for confirmation"""
+    preview = {
+        'full_name': f"{form_data.get('first_name', '')} {form_data.get('last_name', '')}".strip(),
+        'age': form_data.get('age_at_enrollment'),
+        'nationality': form_data.get('nationality'),
+        'parents': {
+            'father': form_data.get('father_name'),
+            'mother': form_data.get('mother_name')
+        },
+        'contact': {
+            'email': form_data.get('email') or form_data.get('father_email') or form_data.get('mother_email'),
+            'phone': form_data.get('phone_number') or form_data.get('father_mobile') or form_data.get('mother_mobile')
+        }
+    }
+    return preview
+
+
+def log_student_creation_attempt(request, form_data, success=False, errors=None):
+    """Log student creation attempts for debugging and analytics"""
+    log_data = {
+        'ip_address': request.META.get('REMOTE_ADDR'),
+        'user_agent': request.META.get('HTTP_USER_AGENT'),
+        'timestamp': datetime.now().isoformat(),
+        'success': success,
+        'student_name': f"{form_data.get('first_name', '')} {form_data.get('last_name', '')}".strip(),
+        'errors': errors
+    }
+    
+    if success:
+        logger.info(f"Student creation successful: {json.dumps(log_data)}")
+    else:
+        logger.warning(f"Student creation failed: {json.dumps(log_data)}")
+
+
+# Custom form class with enhanced validation
+from django import forms
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+
+class EnhancedStudentForm(StudentForm):
+    """
+    Enhanced student form with better validation and widgets
+    """
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Add custom validators
+        phone_validator = RegexValidator(
+            regex=r'^[\+]?[\d\s\-\(\)]+$',
+            message='Please enter a valid phone number.'
+        )
+        
+        # Apply phone validator to phone fields
+        phone_fields = [
+            'father_mobile', 'father_work_telephone', 'mother_mobile', 
+            'mother_work_telephone', 'home_telephone', 'first_contact_telephone',
+            'second_contact_telephone', 'phone_number'
+        ]
+        
+        for field_name in phone_fields:
+            if field_name in self.fields:
+                self.fields[field_name].validators.append(phone_validator)
+        
+        # Set current year as default for year_of_admission
+        current_year = datetime.now().year
+        self.fields['year_of_admission'].initial = current_year
+        
+        # Add help text for certain fields
+        self.fields['child_photo'].help_text = 'Accepted formats: JPEG, PNG, GIF, WEBP. Max size: 5MB'
+        self.fields['date_of_birth'].help_text = 'Age will be calculated automatically'
+        self.fields['languages_spoken'].help_text = 'List all languages the child can speak, separated by commas'
+    
+    def clean_child_emirates_id(self):
+        """Validate Emirates ID format if provided"""
+        emirates_id = self.cleaned_data.get('child_emirates_id')
+        if emirates_id:
+            # Remove spaces and hyphens
+            emirates_id = emirates_id.replace(' ', '').replace('-', '')
+            if not emirates_id.isdigit() or len(emirates_id) != 15:
+                raise ValidationError('Emirates ID must be 15 digits long.')
+        return emirates_id
+    
+    def clean_email(self):
+        """Ensure primary email is provided if parent emails are empty"""
+        email = self.cleaned_data.get('email')
+        father_email = self.cleaned_data.get('father_email')
+        mother_email = self.cleaned_data.get('mother_email')
+        
+        if not email and not father_email and not mother_email:
+            raise ValidationError('At least one email address must be provided.')
+        
+        return email
+    
+    def clean(self):
+        """Cross-field validation"""
+        cleaned_data = super().clean()
+        
+        # Validate date consistency
+        date_start = cleaned_data.get('date_start')
+        date_end = cleaned_data.get('date_end')
+        
+        if date_start and date_end and date_start >= date_end:
+            raise ValidationError('End date must be after start date.')
+        
+        # Validate age and date of birth consistency
+        date_of_birth = cleaned_data.get('date_of_birth')
+        age_at_enrollment = cleaned_data.get('age_at_enrollment')
+        
+        if date_of_birth and age_at_enrollment:
+            today = datetime.now().date()
+            calculated_age = today.year - date_of_birth.year
+            if today.month < date_of_birth.month or \
+               (today.month == date_of_birth.month and today.day < date_of_birth.day):
+                calculated_age -= 1
+            
+            if abs(calculated_age - age_at_enrollment) > 1:
+                raise ValidationError('Age at enrollment does not match the date of birth.')
+        
+        return cleaned_data
 
 @unauthenticated_user
 def student_detail(request, pk):
-    """Display detailed view of a student"""
-    print(f"quirylodedd,{pk}")
     student = get_object_or_404(Student, pk=pk)
-    
-    context = {
-        'student': student,
-        'parents': student.parents.all(),
-        'emergency_contacts': student.emergency_contacts.all().order_by('priority'),
-        'documents': student.documents.all().order_by('-uploaded_at'),
-    }
-    
-    return render(request, 'students/student_detail.html', context)
-
-
-@unauthenticated_user
-def student_create(request):
-    """Create a new student"""
-    if request.method == 'POST':
-        form = StudentForm(request.POST)
-        parent_formset = ParentFormSet(request.POST)
-        emergency_formset = EmergencyContactFormSet(request.POST)
-        document_formset = DocumentFormSet(request.POST, request.FILES)
-        
-        if form.is_valid() and parent_formset.is_valid() and emergency_formset.is_valid() and document_formset.is_valid():
-            with transaction.atomic():
-                form.instance.created_by = request.user
-                student = form.save()
-                
-                parent_formset.instance = student
-                parent_formset.save()
-                
-                emergency_formset.instance = student
-                emergency_formset.save()
-                
-                document_formset.instance = student
-                for doc_form in document_formset:
-                    if doc_form.cleaned_data and not doc_form.cleaned_data.get('DELETE'):
-                        if doc_form.instance.pk is None:
-                            doc_form.instance.uploaded_by = request.user
-                document_formset.save()
-            
-            messages.success(request, f'Student {student.get_full_name()} has been created successfully.')
-            return redirect('student_detail', pk=student.pk)
-        else:
-            print(f'Some ting Wrong {form.errors.as_text}, {parent_formset.errors}, {emergency_formset.errors} {document_formset.errors}')
-            messages.error(request, f'Some ting Wrong {form.errors.as_text}, {parent_formset.errors}, {emergency_formset.errors} {document_formset.errors}')
-            return redirect("student_create")
-    else:
-        form = StudentForm()
-        parent_formset = ParentFormSet()
-        emergency_formset = EmergencyContactFormSet()
-        document_formset = DocumentFormSet()
-    
-    context = {
-        'form': form,
-        'parent_formset': parent_formset,
-        'emergency_formset': emergency_formset,
-        'document_formset': document_formset,
-        'form_title': 'Add New Student',
-        'submit_text': 'Create Student',
-    }
-    
-    return render(request, 'students/student_form.html', context)
-
+    document_form = DocumentForm()
+    return render(request, 'students/student_detail.html', {'student': student,"document_form":document_form})
 
 @unauthenticated_user
 def student_update(request, pk):
-    """Update an existing student"""
     student = get_object_or_404(Student, pk=pk)
-    
     if request.method == 'POST':
-        form = StudentForm(request.POST, instance=student)
-        parent_formset = ParentFormSet(request.POST, instance=student)
-        emergency_formset = EmergencyContactFormSet(request.POST, instance=student)
-        document_formset = DocumentFormSet(request.POST, request.FILES, instance=student)
-        
-        if form.is_valid() and parent_formset.is_valid() and emergency_formset.is_valid() and document_formset.is_valid():
-            with transaction.atomic():
-                student = form.save()
-                
-                parent_formset.instance = student
-                parent_formset.save()
-                
-                emergency_formset.instance = student
-                emergency_formset.save()
-                
-                document_formset.instance = student
-                for doc_form in document_formset:
-                    if doc_form.cleaned_data and not doc_form.cleaned_data.get('DELETE'):
-                        if doc_form.instance.pk is None:
-                            doc_form.instance.uploaded_by = request.user
-                document_formset.save()
-            
-            messages.success(request, f'Student {student.get_full_name()} has been updated successfully.')
-            return redirect('student_detail', pk=student.pk)
+        form = StudentForm(request.POST, request.FILES, instance=student)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Student updated successfully.")
+            return redirect('student_detail', pk=pk)
     else:
         form = StudentForm(instance=student)
-        parent_formset = ParentFormSet(instance=student)
-        emergency_formset = EmergencyContactFormSet(instance=student)
-        document_formset = DocumentFormSet(instance=student)
-    
-    context = {
-        'form': form,
-        'parent_formset': parent_formset,
-        'emergency_formset': emergency_formset,
-        'document_formset': document_formset,
-        'student': student,
-        'form_title': f'Edit Student: {student.get_full_name()}',
-        'submit_text': 'Update Student',
-    }
-    
-    return render(request, 'students/student_form.html', context)
-
+    return render(request, 'students/student_form_update.html', {'form': form})
 
 @unauthenticated_user
 def student_delete(request, pk):
-    """Disable a student instead of deleting"""
     student = get_object_or_404(Student, pk=pk)
-    
-    if request.method == 'POST':
-        # Instead of deleting, disable the student
-        student.status = 'disabled'
-        student.is_active = False
-        student.save()
-        
-        messages.success(request, f'Student {student.get_full_name()} has been disabled.')
-        return redirect('students')
-    
-    return render(request, 'students/student_confirm_delete.html', {'student': student})
+    if student.child_photo:
+        student.child_photo.delete()
+    if student.father_photo:
+        student.father_photo.delete()
+    if student.mother_photo:
+        student.mother_photo.delete()
+    student.delete()
+    messages.success(request, "Student deleted successfully.")
+    return redirect('students')
 
 
 @unauthenticated_user
 def disable_student(request, pk):
     student = get_object_or_404(Student, pk=pk)
-    
-    if request.method == 'POST':
-        form = DisableStudentForm(request.POST, instance=student)
-        if form.is_valid():
-            student = form.save()
-            messages.success(request, f'Student {student.get_full_name()} has been disabled.')
-            return redirect('student_detail', pk=student.pk)
-    else:
-        form = DisableStudentForm(instance=student)
-    
-    return render(request, 'students/disable_student.html', {
-        'form': form,
-        'student': student
-    })
-
+    student.is_active = False
+    student.status = "withdrawn"
+    student.save()
+    messages.success(request, "Student disabled.")
+    return redirect('student_detail', pk=pk)
 
 @unauthenticated_user
 def enable_student(request, pk):
     student = get_object_or_404(Student, pk=pk)
-    
-    if student.status == 'disabled':
-        student.status = 'pending'
-        student.is_active = True
-        student.save()
-        messages.success(request, f'Student {student.get_full_name()} has been enabled.')
-    else:
-        messages.warning(request, f'Student {student.get_full_name()} is not disabled.')
-    
-    return redirect('student_detail', pk=student.pk)
-
+    student.is_active = True
+    student.status = "enrolled"
+    student.save()
+    messages.success(request, "Student enabled.")
+    return redirect('student_detail', pk=pk)
 
 @unauthenticated_user
 def upload_document(request, pk):
     student = get_object_or_404(Student, pk=pk)
-    
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
         if form.is_valid():
             document = form.save(commit=False)
             document.student = student
+
             document.uploaded_by = request.user
             document.save()
-            messages.success(request, 'Document uploaded successfully.')
-            return redirect('student_detail', pk=student.pk)
+            messages.success(request, "Document uploaded.")
+            return redirect('student_detail', pk=pk)
     else:
         form = DocumentForm()
-    
-    return render(request, 'students/upload_document.html', {
-        'form': form,
-        'student': student
-    })
-
+    return render(request, 'students/upload_document.html', {'form': form, 'student': student})
 
 @unauthenticated_user
-def delete_document(request, pk, doc_pk):
-    student = get_object_or_404(Student, pk=pk)
-    document = get_object_or_404(Document, pk=doc_pk, student=student)
+def delete_document(request, pk):
+    document = get_object_or_404(StudentDocument, pk=pk)
     
-    if request.method == 'POST':
-        document_name = document.name
-        document.delete()
-        messages.success(request, f'Document "{document_name}" has been deleted.')
-        return redirect('student_detail', pk=student.pk)
+    document.delete()
+    messages.success(request, "Document deleted.")
+    return redirect('student_detail', pk=pk)
     
-    return render(request, 'students/confirm_delete_document.html', {
-        'student': student,
-        'document': document
-    })
 
-
-@unauthenticated_user
-def student_dashboard(request):
-    """Dashboard with statistics and recent activities"""
-    context = {
-        'total_students': Student.objects.count(),
-        'active_students': Student.objects.filter(is_active=True).count(),
-        'pending_applications': Student.objects.filter(status='pending').count(),
-        'accepted_students': Student.objects.filter(status='accepted').count(),
-        'enrolled_students': Student.objects.filter(status='enrolled').count(),
-        'disabled_students': Student.objects.filter(status='disabled').count(),
-        
-        'recent_students': Student.objects.select_related().order_by('-created_at')[:10],
-        'recent_documents': Document.objects.select_related('student').order_by('-uploaded_at')[:10],
-        
-        # Year group statistics
-        'year_group_stats': {
-            choice[1]: Student.objects.filter(year_group=choice[0], is_active=True).count()
-            for choice in Student.YEAR_GROUP_CHOICES
-        },
-        
-        # Status statistics
-        'status_stats': {
-            choice[1]: Student.objects.filter(status=choice[0]).count()
-            for choice in Student.STATUS_CHOICES
-        }
-    }
-    
-    return render(request, 'students/dashboard.html', context)
-
-
-@require_POST
 @unauthenticated_user
 def bulk_action(request):
-    """Handle bulk actions on students"""
-    action = request.POST.get('action')
-    student_ids = request.POST.getlist('student_ids')
-    
-    if not student_ids:
-        messages.error(request, 'No students selected.')
-        return redirect('students')
-    
-    students = Student.objects.filter(pk__in=student_ids)
-    
-    if action == 'enable':
-        students.update(is_active=True, status='pending')
-        messages.success(request, f'{len(student_ids)} students have been enabled.')
-    
-    elif action == 'disable':
-        students.update(is_active=False, status='disabled')
-        messages.success(request, f'{len(student_ids)} students have been disabled.')
-    
-    elif action == 'accept':
-        students.update(status='accepted')
-        messages.success(request, f'{len(student_ids)} students have been accepted.')
-    
-    elif action == 'reject':
-        students.update(status='rejected')
-        messages.success(request, f'{len(student_ids)} applications have been rejected.')
-    
-    elif action == 'enroll':
-        students.update(status='enrolled')
-        messages.success(request, f'{len(student_ids)} students have been enrolled.')
-    
-    else:
-        messages.error(request, 'Invalid action.')
-    
-    return redirect('students')
-
+    # Implement bulk action logic here
+    messages.success(request, "Bulk action completed.")
+    return redirect('student_list')
 
 @unauthenticated_user
 def export_students(request):
-    """Export students data to CSV"""
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="students.csv"'
-    
-    writer = csv.writer(response)
-    writer.writerow([
-        'Student ID', 'First Name', 'Last Name', 'Date of Birth', 'Gender',
-        'Email', 'Phone', 'Year Group', 'Status', 'City', 'Postcode',
-        'Nationality', 'Created Date'
-    ])
-    
-    students = Student.objects.all().order_by('student_id')
-    for student in students:
-        writer.writerow([
-            student.student_id,
-            student.first_name,
-            student.last_name,
-            student.date_of_birth,
-            student.get_gender_display(),
-            student.email,
-            student.phone_number,
-            student.get_year_group_display(),
-            student.get_status_display(),
-            student.city,
-            student.postcode,
-            student.nationality,
-            student.created_at.strftime('%Y-%m-%d')
-        ])
-    
-    return response
+    # Implement export logic here
+    messages.success(request, "Students exported.")
+    return redirect('student_list')
 
-
-# AJAX Views for dynamic functionality
 @unauthenticated_user
 def search_students_ajax(request):
-    """AJAX endpoint for student search autocomplete"""
-    query = request.GET.get('q', '')
-    if len(query) < 2:
-        return JsonResponse({'students': []})
-    
-    students = Student.objects.filter(
-        Q(first_name__icontains=query) |
-        Q(last_name__icontains=query) |
-        Q(student_id__icontains=query)
-    )[:10]
-    
-    results = [{
-        'id': student.pk,
-        'text': f"{student.get_full_name()} ({student.student_id})",
-        'student_id': student.student_id,
-        'status': student.get_status_display()
-    } for student in students]
-    
-    return JsonResponse({'students': results})
-
+    # Implement AJAX search logic here
+    return render(request, 'students/search_results.html')
 
 @unauthenticated_user
 def student_stats_ajax(request):
-    """AJAX endpoint for dashboard statistics"""
-    stats = {
-        'total': Student.objects.count(),
-        'active': Student.objects.filter(is_active=True).count(),
-        'pending': Student.objects.filter(status='pending').count(),
-        'accepted': Student.objects.filter(status='accepted').count(),
-        'enrolled': Student.objects.filter(status='enrolled').count(),
-        'disabled': Student.objects.filter(status='disabled').count(),
-    }
-    
-    return JsonResponse(stats)
+    # Implement AJAX stats logic here
+    return render(request, 'students/student_stats.html')

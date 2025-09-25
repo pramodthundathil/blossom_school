@@ -350,3 +350,48 @@ def get_user_activity(request):
         'success': True,
         'activities': activities
     })
+
+
+
+
+# settings for school
+# 
+# 
+# 
+#  
+
+
+
+@unauthenticated_user 
+def site_setting(request):
+    class_rooms = ClassRooms.objects.all().order_by('-id')
+    if request.method == "POST":
+        try:
+            name = request.POST['class_room']
+            class_room = ClassRooms.objects.create(class_name = name, created_by = request.user)
+            class_room.save()
+            messages.success(request, "Class room saved successfully...")
+        except:
+            messages.info(request, 'Something wrong....')
+
+        return redirect("site_setting")
+    else:
+        context = {"class_rooms":class_rooms}
+        return render(request,"settings/settings.html",context)
+    
+@unauthenticated_user
+def update_class(request, pk):
+    class_room = get_object_or_404(ClassRooms, id = pk)
+    if request.method == "POST":
+        name = request.POST['class_room']
+        class_room.class_name = name 
+        class_room.save()
+        messages.info(request, 'Class Updated.....')
+    return redirect("site_setting")
+
+@unauthenticated_user
+def delete_class(request, pk):
+    class_room = get_object_or_404(ClassRooms, id = pk)
+    class_room.delete()
+    messages.info(request,"Class room deleted success.....")
+    return redirect(site_setting)
