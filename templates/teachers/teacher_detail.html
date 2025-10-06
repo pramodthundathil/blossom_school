@@ -1,0 +1,683 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-blue: #214888;
+        --accent-purple: #8B5FBF;
+        --light-bg: #F8F6FF;
+        --white: #FFFFFF;
+        --text-dark: #453F4E;
+        --text-light: #6B7280;
+        --success: #10B981;
+        --border-color: #E5E7EB;
+        --border-radius: 12px;
+    }
+
+    .detail-container {
+        padding: 2rem 1rem;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .profile-photo {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--white);
+        background: var(--white);
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: var(--white);
+        color: var(--primary-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 600;
+        border: 4px solid var(--white);
+    }
+
+    .profile-info h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2rem;
+    }
+
+    .profile-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .info-section {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 500;
+        color: var(--text-light);
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: var(--text-dark);
+        text-align: right;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .status-on_probation {
+        background: rgba(255, 193, 7, 0.1);
+        color: #FFA000;
+    }
+
+    .status-on_leave {
+        background: rgba(33, 150, 243, 0.1);
+        color: #1976D2;
+    }
+
+    .status-resigned, .status-terminated {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(33, 72, 136, 0.3);
+    }
+
+    .btn-secondary {
+        background: var(--white);
+        color: var(--primary-blue);
+        border: 2px solid var(--primary-blue);
+    }
+
+    .btn-secondary:hover {
+        background: var(--primary-blue);
+        color: var(--white);
+    }
+
+    .btn-danger {
+        background: #EF4444;
+        color: var(--white);
+    }
+
+    .btn-danger:hover {
+        background: #DC2626;
+    }
+
+    .salary-box {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+    }
+
+    .salary-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+
+    .salary-breakdown {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .salary-item {
+        text-align: center;
+    }
+
+    .salary-item-label {
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-bottom: 0.25rem;
+    }
+
+    .salary-item-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .profile-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .profile-info h2 {
+            font-size: 1.5rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .breadcrumb-link span {
+            display: none;
+        }
+    }
+</style>
+
+<!-- Fixed Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'teacher_list' %}" class="breadcrumb-link">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span>All Teachers</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-user"></i>
+                    <span>{{ teacher.full_name }}</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="detail-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        {% if teacher.photo %}
+            <img src="{{ teacher.photo.url }}" alt="{{ teacher.full_name }}" class="profile-photo">
+        {% else %}
+            <div class="profile-avatar">
+                {{ teacher.first_name|first }}{{ teacher.last_name|first }}
+            </div>
+        {% endif %}
+        
+        <div class="profile-info" style="flex: 1;">
+            <h2>{{ teacher.full_name }}</h2>
+            <p style="margin: 0; opacity: 0.9;">{{ teacher.get_position_display }}</p>
+            
+            <div class="profile-meta">
+                <div class="meta-item">
+                    <span class="status-badge status-{{ teacher.status }}">
+                        {{ teacher.get_status_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'teacher_update' teacher.pk %}" class="btn btn-primary">
+            <i class="fas fa-edit"></i>
+            Edit Information
+        </a>
+        <a href="{% url 'teacher_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Back to List
+        </a>
+        {% if teacher.is_active %}
+        <a href="{% url 'disable_teacher' teacher.pk %}" class="btn btn-secondary" onclick="return confirm('Are you sure you want to disable this teacher?');">
+            <i class="fas fa-ban"></i>
+            Disable
+        </a>
+        {% else %}
+        <a href="{% url 'enable_teacher' teacher.pk %}" class="btn btn-secondary">
+            <i class="fas fa-check"></i>
+            Enable
+        </a>
+        {% endif %}
+
+         <a href="{% url 'teacher_attendance_detail' teacher.pk %}" class="btn btn-info">
+            <i class="fas fa-check"></i>
+            Attendance
+        </a>
+        <form method="post" action="{% url 'teacher_delete' teacher.pk %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this teacher? This action cannot be undone.');">
+                <i class="fas fa-trash"></i>
+                Delete
+            </button>
+        </form>
+
+        
+    </div>
+
+    <!-- Information Grid -->
+    <div class="info-grid">
+        <!-- Personal Information -->
+        <div class="info-section">
+            <h3 class="section-title">
+                <i class="fas fa-user"></i>
+                Personal Information
+            </h3>
+            <div class="info-item">
+                <span class="info-label">Full Name:</span>
+                <span class="info-value">{{ teacher.full_name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Gender:</span>
+                <span class="info-value">{{ teacher.get_gender_display }}</span>
+            </div>
+            {% if teacher.date_of_birth %}
+            <div class="info-item">
+                <span class="info-label">Date of Birth:</span>
+                <span class="info-value">{{ teacher.date_of_birth|date:"M d, Y" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Age:</span>
+                <span class="info-value">{{ teacher.get_age }} years</span>
+            </div>
+            {% endif %}
+            <div class="info-item">
+                <span class="info-label">Nationality:</span>
+                <span class="info-value">{{ teacher.nationality }}</span>
+            </div>
+            {% if teacher.religion %}
+            <div class="info-item">
+                <span class="info-label">Religion:</span>
+                <span class="info-value">{{ teacher.religion }}</span>
+            </div>
+            {% endif %}
+            {% if teacher.emirates_id %}
+            <div class="info-item">
+                <span class="info-label">Emirates ID:</span>
+                <span class="info-value">{{ teacher.emirates_id }}</span>
+            </div>
+            {% endif %}
+            {% if teacher.passport_number %}
+            <div class="info-item">
+                <span class="info-label">Passport:</span>
+                <span class="info-value">{{ teacher.passport_number }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Contact Information -->
+        <div class="info-section">
+            <h3 class="section-title">
+                <i class="fas fa-address-book"></i>
+                Contact Information
+            </h3>
+            <div class="info-item">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ teacher.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Phone:</span>
+                <span class="info-value">{{ teacher.phone_number }}</span>
+            </div>
+            {% if teacher.alternative_phone %}
+            <div class="info-item">
+                <span class="info-label">Alternative Phone:</span>
+                <span class="info-value">{{ teacher.alternative_phone }}</span>
+            </div>
+            {% endif %}
+            <div class="info-item">
+                <span class="info-label">Address:</span>
+                <span class="info-value">{{ teacher.full_address }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">City:</span>
+                <span class="info-value">{{ teacher.city }}</span>
+            </div>
+            {% if teacher.po_box %}
+            <div class="info-item">
+                <span class="info-label">PO Box:</span>
+                <span class="info-value">{{ teacher.po_box }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Employment Details -->
+        <div class="info-section">
+            <h3 class="section-title">
+                <i class="fas fa-briefcase"></i>
+                Employment Details
+            </h3>
+            <div class="info-item">
+                <span class="info-label">Position:</span>
+                <span class="info-value">{{ teacher.get_position_display }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Start Date:</span>
+                <span class="info-value">{{ teacher.start_date|date:"M d, Y" }}</span>
+            </div>
+            {% if teacher.end_date %}
+            <div class="info-item">
+                <span class="info-label">End Date:</span>
+                <span class="info-value">{{ teacher.end_date|date:"M d, Y" }}</span>
+            </div>
+            {% endif %}
+            <div class="info-item">
+                <span class="info-label">Years Employed:</span>
+                <span class="info-value">{{ teacher.get_years_employed }} years</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Reporting To:</span>
+                <span class="info-value">{{ teacher.reporting_to }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Work Location:</span>
+                <span class="info-value">{{ teacher.work_location }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Working Hours:</span>
+                <span class="info-value">{{ teacher.working_hours_start|time:"H:i" }} - {{ teacher.working_hours_end|time:"H:i" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Working Days:</span>
+                <span class="info-value">{{ teacher.working_days }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Probation Period:</span>
+                <span class="info-value">{{ teacher.probation_period_months }} months</span>
+            </div>
+            {% if teacher.is_on_probation %}
+            <div class="info-item">
+                <span class="info-label">Probation Ends:</span>
+                <span class="info-value">{{ teacher.probation_end_date|date:"M d, Y" }}</span>
+            </div>
+            {% endif %}
+            <div class="info-item">
+                <span class="info-label">Annual Leave:</span>
+                <span class="info-value">{{ teacher.annual_leave_days }} days</span>
+            </div>
+        </div>
+
+        <!-- Salary Information -->
+        <div class="info-section">
+            <h3 class="section-title">
+                <i class="fas fa-money-bill-wave"></i>
+                Salary Information
+            </h3>
+            <div class="salary-box">
+                <div style="font-size: 0.875rem; opacity: 0.9;">Total Monthly Salary</div>
+                <div class="salary-amount">AED {{ teacher.total_salary|floatformat:2 }}</div>
+                
+                <div class="salary-breakdown">
+                    <div class="salary-item">
+                        <div class="salary-item-label">Basic</div>
+                        <div class="salary-item-value">{{ teacher.basic_salary|floatformat:2 }}</div>
+                    </div>
+                    <div class="salary-item">
+                        <div class="salary-item-label">Accommodation</div>
+                        <div class="salary-item-value">{{ teacher.accommodation_allowance|floatformat:2 }}</div>
+                    </div>
+                    <div class="salary-item">
+                        <div class="salary-item-label">Transportation</div>
+                        <div class="salary-item-value">{{ teacher.transportation_allowance|floatformat:2 }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Qualifications -->
+        <div class="info-section">
+            <h3 class="section-title">
+                <i class="fas fa-graduation-cap"></i>
+                Qualifications & Experience
+            </h3>
+            <div class="info-item">
+                <span class="info-label">Highest Qualification:</span>
+                <span class="info-value">{{ teacher.highest_qualification }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Years of Experience:</span>
+                <span class="info-value">{{ teacher.years_of_experience }} years</span>
+            </div>
+            {% if teacher.languages_spoken %}
+            <div class="info-item">
+                <span class="info-label">Languages:</span>
+                <span class="info-value">{{ teacher.languages_spoken }}</span>
+            </div>
+            {% endif %}
+            {% if teacher.certifications %}
+            <div class="info-item" style="flex-direction: column; align-items: flex-start;">
+                <span class="info-label">Certifications:</span>
+                <span class="info-value" style="white-space: pre-line; margin-top: 0.5rem;">{{ teacher.certifications }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="info-section">
+            <h3 class="section-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                Emergency Contact
+            </h3>
+            <div class="info-item">
+                <span class="info-label">Contact Name:</span>
+                <span class="info-value">{{ teacher.emergency_contact_name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Relationship:</span>
+                <span class="info-value">{{ teacher.emergency_contact_relationship }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Phone:</span>
+                <span class="info-value">{{ teacher.emergency_contact_phone }}</span>
+            </div>
+        </div>
+
+        <!-- References -->
+        {% if teacher.reference_1_name or teacher.reference_2_name %}
+        <div class="info-section">
+            <h3 class="section-title">
+                <i class="fas fa-user-check"></i>
+                Professional References
+            </h3>
+            {% if teacher.reference_1_name %}
+            <div class="info-item">
+                <span class="info-label">Reference 1:</span>
+                <span class="info-value">{{ teacher.reference_1_name }}</span>
+            </div>
+            {% if teacher.reference_1_contact %}
+            <div class="info-item">
+                <span class="info-label">Contact:</span>
+                <span class="info-value">{{ teacher.reference_1_contact }}</span>
+            </div>
+            {% endif %}
+            {% endif %}
+            {% if teacher.reference_2_name %}
+            <div class="info-item">
+                <span class="info-label">Reference 2:</span>
+                <span class="info-value">{{ teacher.reference_2_name }}</span>
+            </div>
+            {% if teacher.reference_2_contact %}
+            <div class="info-item">
+                <span class="info-label">Contact:</span>
+                <span class="info-value">{{ teacher.reference_2_contact }}</span>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Contract Status -->
+        <div class="info-section">
+            <h3 class="section-title">
+                <i class="fas fa-file-signature"></i>
+                Contract Status
+            </h3>
+            <div class="info-item">
+                <span class="info-label">Offer Accepted:</span>
+                <span class="info-value">
+                    {% if teacher.offer_accepted %}
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i> Yes
+                    {% else %}
+                        <i class="fas fa-times-circle" style="color: #EF4444;"></i> No
+                    {% endif %}
+                </span>
+            </div>
+            {% if teacher.offer_acceptance_date %}
+            <div class="info-item">
+                <span class="info-label">Acceptance Date:</span>
+                <span class="info-value">{{ teacher.offer_acceptance_date|date:"M d, Y" }}</span>
+            </div>
+            {% endif %}
+            <div class="info-item">
+                <span class="info-label">Contract Signed:</span>
+                <span class="info-value">
+                    {% if teacher.contract_signed %}
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i> Yes
+                    {% else %}
+                        <i class="fas fa-times-circle" style="color: #EF4444;"></i> No
+                    {% endif %}
+                </span>
+            </div>
+            {% if teacher.contract_signed_date %}
+            <div class="info-item">
+                <span class="info-label">Signed Date:</span>
+                <span class="info-value">{{ teacher.contract_signed_date|date:"M d, Y" }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Additional Notes -->
+        {% if teacher.notes %}
+        <div class="info-section" style="grid-column: 1 / -1;">
+            <h3 class="section-title">
+                <i class="fas fa-sticky-note"></i>
+                Additional Notes
+            </h3>
+            <div style="padding: 1rem; background: var(--light-bg); border-radius: 8px; white-space: pre-line;">
+                {{ teacher.notes }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- System Information -->
+        <div class="info-section">
+            <h3 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                System Information
+            </h3>
+            <div class="info-item">
+                <span class="info-label">Teacher ID:</span>
+                <span class="info-value">{{ teacher.teacher_id }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Created:</span>
+                <span class="info-value">{{ teacher.created_at|date:"M d, Y H:i" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Last Updated:</span>
+                <span class="info-value">{{ teacher.updated_at|date:"M d, Y H:i" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Active Status:</span>
+                <span class="info-value">
+                    {% if teacher.is_active %}
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i> Active
+                    {% else %}
+                        <i class="fas fa-times-circle" style="color: #EF4444;"></i> Inactive
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}"                    

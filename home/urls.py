@@ -19,6 +19,10 @@ urlpatterns = [
     path("settings",views.site_setting,name="site_setting"),
     path("update_class/<int:pk>",views.update_class,name="update_class"),
     path("delete_class/<int:pk>",views.delete_class,name="delete_class"),
+    #fee Caategory
+    path("fee_category/", views.fee_category, name="fee_category"),
+    path("update_fee_category/<int:pk>/", views.update_fee_category, name="update_fee_category"),
+    path("delete_fee_category/<int:pk>/", views.delete_fee_category, name="delete_fee_category"),
 
 # ''' Need to be created'''
 

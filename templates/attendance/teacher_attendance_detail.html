@@ -1,0 +1,482 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-blue: #214888;
+        --secondary-pink: #D54395;
+        --accent-purple: #8B5FBF;
+        --light-purple: #F3EBFF;
+        --white: #FFFFFF;
+        --text-dark: #453F4E;
+        --success: #10B981;
+        --error: #EF4444;
+        --warning: #f59e0b;
+        --border-color: #E5E7EB;
+        --border-radius: 12px;
+    }
+
+    .teacher-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .teacher-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--white);
+        color: var(--primary-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .teacher-info h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.75rem;
+    }
+
+    .teacher-info p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    .month-selector {
+        background: var(--light-purple);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .month-selector label {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .month-selector select {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        background: var(--white);
+    }
+
+    .month-selector button {
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-blue);
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .month-selector button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(33, 72, 136, 0.3);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        border: 2px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card.present {
+        border-color: var(--success);
+    }
+
+    .stat-card.absent {
+        border-color: var(--error);
+    }
+
+    .stat-card.half-day {
+        border-color: var(--warning);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card.present .stat-icon {
+        color: var(--success);
+    }
+
+    .stat-card.absent .stat-icon {
+        color: var(--error);
+    }
+
+    .stat-card.half-day .stat-icon {
+        color: var(--warning);
+    }
+
+    .stat-card.total .stat-icon {
+        color: var(--primary-blue);
+    }
+
+    .stat-card h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-dark);
+        font-size: 0.875rem;
+    }
+
+    .stat-card p {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+
+    .attendance-calendar {
+        background: var(--white);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .calendar-header h3 {
+        margin: 0;
+        color: var(--primary-blue);
+        font-size: 1.25rem;
+    }
+
+    .attendance-records-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .attendance-records-table thead {
+        background: var(--light-purple);
+    }
+
+    .attendance-records-table thead th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.875rem;
+    }
+
+    .attendance-records-table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s ease;
+    }
+
+    .attendance-records-table tbody tr:hover {
+        background: var(--light-purple);
+    }
+
+    .attendance-records-table tbody td {
+        padding: 1rem;
+        font-size: 0.875rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-badge.present {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 2px solid var(--success);
+    }
+
+    .status-badge.absent {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+        border: 2px solid var(--error);
+    }
+
+    .status-badge.half_day {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+        border: 2px solid var(--warning);
+    }
+
+    .status-badge.sunday {
+        background: rgba(107, 114, 128, 0.1);
+        color: #6b7280;
+        border: 2px solid #6b7280;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-dark);
+        opacity: 0.6;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: var(--primary-blue);
+        opacity: 0.3;
+    }
+
+    @media (max-width: 768px) {
+        .teacher-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .month-selector {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .attendance-records-table {
+            font-size: 0.75rem;
+        }
+
+        .attendance-records-table thead th,
+        .attendance-records-table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'attendance_dashboard' %}" class="breadcrumb-link">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Attendance</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-user"></i>
+                    <span>Teacher Detail</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <div class="dashboard-card-1">
+        <!-- Teacher Header -->
+        <div class="teacher-header">
+            <div class="teacher-avatar">
+                {{ teacher.first_name|first }}{{ teacher.last_name|first }}
+            </div>
+            <div class="teacher-info">
+                <h2>{{ teacher.full_name }}</h2>
+                <p><strong>{{ teacher.teacher_id }}</strong> • {{ teacher.get_position_display }}</p>
+                <p><i class="fas fa-envelope"></i> {{ teacher.email }} • <i class="fas fa-phone"></i> {{ teacher.phone_number }}</p>
+            </div>
+        </div>
+
+        <div class="card-content">
+            <!-- Month Selector -->
+            <form method="get" class="month-selector">
+                <label for="month"><i class="fas fa-calendar-alt"></i> Select Month:</label>
+                <select name="month" id="month">
+                    {% for m in "123456789012"|make_list %}
+                        {% with month_num=forloop.counter %}
+                        <option value="{{ month_num }}" {% if month_num == month %}selected{% endif %}>
+                            {{ month_num|date:"F" }}
+                        </option>
+                        {% endwith %}
+                    {% endfor %}
+                </select>
+                
+                <label for="year">Year:</label>
+                <select name="year" id="year">
+                    {% for y in "2024202520262027"|make_list %}
+                        {% with year_num=forloop.counter|add:2023 %}
+                        <option value="{{ year_num }}" {% if year_num == year %}selected{% endif %}>
+                            {{ year_num }}
+                        </option>
+                        {% endwith %}
+                    {% endfor %}
+                </select>
+                
+                <button type="submit">
+                    <i class="fas fa-search"></i> View
+                </button>
+            </form>
+
+            <!-- Statistics Grid -->
+            <div class="stats-grid">
+                <div class="stat-card total">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <h4>Working Days</h4>
+                    <p>{{ working_days }}</p>
+                </div>
+
+                <div class="stat-card present">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h4>Present</h4>
+                    <p>{{ present_count }}</p>
+                </div>
+
+                <div class="stat-card absent">
+                    <div class="stat-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <h4>Absent</h4>
+                    <p>{{ absent_count }}</p>
+                </div>
+
+                <div class="stat-card half-day">
+                    <div class="stat-icon">
+                        <i class="fas fa-adjust"></i>
+                    </div>
+                    <h4>Half Days</h4>
+                    <p>{{ half_day_count }}</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <h4>Sundays</h4>
+                    <p>{{ sundays }}</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h4>Unmarked</h4>
+                    <p>{{ unmarked_days }}</p>
+                </div>
+            </div>
+
+            <!-- Attendance Records -->
+            <div class="attendance-calendar">
+                <div class="calendar-header">
+                    <h3><i class="fas fa-list"></i> Attendance Records</h3>
+                    <span style="color: var(--text-dark);">
+                        {{ month|date:"F Y" }}
+                    </span>
+                </div>
+
+                {% if attendances %}
+                <div style="overflow-x: auto;">
+                    <table class="attendance-records-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Status</th>
+                                <th>Remarks</th>
+                                <th>Marked By</th>
+                                <th>Marked At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attendance in attendances %}
+                            <tr>
+                                <td><strong>{{ attendance.date|date:"M d, Y" }}</strong></td>
+                                <td>{{ attendance.date|date:"l" }}</td>
+                                <td>
+                                    <span class="status-badge {{ attendance.status }}">
+                                        {% if attendance.status == 'present' %}
+                                            <i class="fas fa-check"></i> Present
+                                        {% elif attendance.status == 'absent' %}
+                                            <i class="fas fa-times"></i> Absent
+                                        {% elif attendance.status == 'half_day' %}
+                                            <i class="fas fa-adjust"></i> Half Day
+                                        {% else %}
+                                            <i class="fas fa-calendar-times"></i> Sunday
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>{{ attendance.remarks|default:"-" }}</td>
+                                <td>{{ attendance.marked_by|default:"-" }}</td>
+                                <td>{{ attendance.marked_at|date:"M d, h:i A" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-calendar-times"></i>
+                    <h4>No Attendance Records</h4>
+                    <p>No attendance has been marked for this month yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-submit form when month/year changes
+document.getElementById('month').addEventListener('change', function() {
+    this.form.submit();
+});
+
+document.getElementById('year').addEventListener('change', function() {
+    this.form.submit();
+});
+</script>
+
+{% endblock %}

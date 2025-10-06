@@ -1,0 +1,172 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Fixed Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Salary Dashboard</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <!-- Stats Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Total Staff Card -->
+        <div class="dashboard-card-1" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div style="padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 2rem; font-weight: bold;">{{ total_staff }}</h3>
+                        <p style="margin: 0.5rem 0 0; opacity: 0.9;">Total Staff</p>
+                    </div>
+                    <i class="fas fa-users" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculated Card -->
+        <div class="dashboard-card-1" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+            <div style="padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 2rem; font-weight: bold;">{{ calculated_count }}</h3>
+                        <p style="margin: 0.5rem 0 0; opacity: 0.9;">Salary Calculated</p>
+                    </div>
+                    <i class="fas fa-calculator" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paid Card -->
+        <div class="dashboard-card-1" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+            <div style="padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 2rem; font-weight: bold;">{{ paid_count }}</h3>
+                        <p style="margin: 0.5rem 0 0; opacity: 0.9;">Paid This Month</p>
+                    </div>
+                    <i class="fas fa-check-circle" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Payable Card -->
+        <div class="dashboard-card-1" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white;">
+            <div style="padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.5rem; font-weight: bold;">AED {{ total_payable|floatformat:2 }}</h3>
+                        <p style="margin: 0.5rem 0 0; opacity: 0.9;">Total Payable</p>
+                    </div>
+                    <i class="fas fa-money-check-alt" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+        </div>
+        <div class="card-content">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <a href="{% url 'calculate_monthly_salary' %}" class="add-item-button" style="text-decoration: none; text-align: center; padding: 1rem;">
+                    <i class="fas fa-calculator" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <br>
+                    <span>Calculate Salaries</span>
+                </a>
+                
+                <a href="{% url 'salary_list' %}" class="add-item-button" style="text-decoration: none; text-align: center; padding: 1rem;">
+                    <i class="fas fa-list" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <br>
+                    <span>View Salary Records</span>
+                </a>
+                
+                <a href="{% url 'attendance_dashboard' %}" class="add-item-button" style="text-decoration: none; text-align: center; padding: 1rem;">
+                    <i class="fas fa-calendar-check" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <br>
+                    <span>Attendance Management</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Salary Records -->
+    {% if recent_salaries %}
+    <div class="dashboard-card-1" style="margin-top: 2rem;">
+        <div class="card-header">
+            <h3><i class="fas fa-history"></i> Recent Salary Records</h3>
+        </div>
+        <div class="card-content">
+            <div class="table-responsive-1">
+                <table class="display">
+                    <thead>
+                        <tr>
+                            <th>Staff Member</th>
+                            <th>Month</th>
+                            <th>Gross Salary</th>
+                            <th>Net Salary</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for salary in recent_salaries %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div class="avatar">
+                                        {{ salary.teacher.first_name|first }}{{ salary.teacher.last_name|first }}
+                                    </div>
+                                    <strong style="color: var(--e-global-color-text); font-size: 12px;">{{ salary.teacher.full_name }}</strong>
+                                </div>
+                            </td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ salary.get_month_name }} {{ salary.year }}
+                            </td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px; font-weight: 600;">
+                                AED {{ salary.gross_salary|floatformat:2 }}
+                            </td>
+                            <td style="color: var(--e-global-color-primary); font-size: 12px; font-weight: 600;">
+                                AED {{ salary.net_salary|floatformat:2 }}
+                            </td>
+                            <td>
+                                {% if salary.payment_status == 'paid' %}
+                                    <span class="status-badge" style="background: #d1fae5; color: #065f46;">Paid</span>
+                                {% elif salary.payment_status == 'processed' %}
+                                    <span class="status-badge" style="background: #dbeafe; color: #1e40af;">Processed</span>
+                                {% else %}
+                                    <span class="status-badge" style="background: #fef3c7; color: #92400e;">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'salary_detail' salary.id %}" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

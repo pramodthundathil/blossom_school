@@ -1,0 +1,506 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-blue: #214888;
+        --secondary-pink: #D54395;
+        --accent-purple: #8B5FBF;
+        --light-purple: #F3EBFF;
+        --white: #FFFFFF;
+        --text-dark: #453F4E;
+        --success: #10B981;
+        --error: #EF4444;
+        --warning: #f59e0b;
+        --border-color: #E5E7EB;
+        --border-radius: 12px;
+    }
+
+    .bulk-attendance-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .date-selector {
+        background: var(--light-purple);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .date-selector label {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .date-selector input {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+    }
+
+    .bulk-actions {
+        background: var(--white);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        border: 2px solid var(--border-color);
+    }
+
+    .bulk-action-btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .bulk-action-btn.present {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 2px solid var(--success);
+    }
+
+    .bulk-action-btn.absent {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+        border: 2px solid var(--error);
+    }
+
+    .bulk-action-btn.half-day {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+        border: 2px solid var(--warning);
+    }
+
+    .bulk-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .attendance-table-container {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .attendance-table thead {
+        background: var(--primary-blue);
+        color: var(--white);
+    }
+
+    .attendance-table thead th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .attendance-table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s ease;
+    }
+
+    .attendance-table tbody tr:hover {
+        background: var(--light-purple);
+    }
+
+    .attendance-table tbody td {
+        padding: 1rem;
+        font-size: 0.875rem;
+    }
+
+    .teacher-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+        color: var(--white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .teacher-details h5 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.875rem;
+    }
+
+    .teacher-details p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 0.75rem;
+    }
+
+    .status-radio-group {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .status-radio-group input[type="radio"] {
+        display: none;
+    }
+
+    .status-radio-label {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-radio-group input[type="radio"]:checked + .status-radio-label.present {
+        background: var(--success);
+        color: var(--white);
+        border-color: var(--success);
+    }
+
+    .status-radio-group input[type="radio"]:checked + .status-radio-label.absent {
+        background: var(--error);
+        color: var(--white);
+        border-color: var(--error);
+    }
+
+    .status-radio-group input[type="radio"]:checked + .status-radio-label.half-day {
+        background: var(--warning);
+        color: var(--white);
+        border-color: var(--warning);
+    }
+
+    .status-radio-label:hover {
+        transform: translateY(-1px);
+    }
+
+    .remarks-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 2px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-family: inherit;
+    }
+
+    .remarks-input:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+    }
+
+    .submit-section {
+        background: var(--light-purple);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .submit-button {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        border: none;
+        padding: 1rem 3rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(33, 72, 136, 0.3);
+    }
+
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-card {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: 2px solid var(--border-color);
+        text-align: center;
+    }
+
+    .summary-card h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.875rem;
+        color: var(--text-dark);
+    }
+
+    .summary-card p {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+
+    @media (max-width: 768px) {
+        .attendance-table-container {
+            overflow-x: auto;
+        }
+
+        .status-radio-group {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'attendance_dashboard' %}" class="breadcrumb-link">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Attendance</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-users"></i>
+                    <span>Bulk Mark Attendance</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-users"></i> Bulk Mark Attendance</h3>
+            <a href="{% url 'mark_attendance' %}" class="add-item-button">
+                <span class="add-event"><i class="fas fa-user-check"></i></span>
+                <span style="margin-left: 10px;">Single Mark</span>
+            </a>
+        </div>
+
+        <div class="card-content">
+            <div class="bulk-attendance-container">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}" style="padding: 1rem; margin-bottom: 1rem; border-radius: 8px; background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success);">
+                            <i class="fas fa-check-circle"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" id="bulkAttendanceForm">
+                    {% csrf_token %}
+                    
+                    <!-- Date Selector -->
+                    <div class="date-selector">
+                        <label for="attendance_date">
+                            <i class="fas fa-calendar-day"></i> Select Date:
+                        </label>
+                        <input type="date" name="attendance_date" id="attendance_date" value="{{ today|date:'Y-m-d' }}" required>
+                        <div style="margin-left: auto; font-weight: 600; color: var(--primary-blue);">
+                            {{ today|date:"l, F d, Y" }}
+                        </div>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <h4><i class="fas fa-users"></i> Total Staff</h4>
+                            <p id="totalStaff">{{ teachers_data|length }}</p>
+                        </div>
+                        <div class="summary-card">
+                            <h4><i class="fas fa-check-circle"></i> Marked</h4>
+                            <p id="markedCount">0</p>
+                        </div>
+                        <div class="summary-card">
+                            <h4><i class="fas fa-clock"></i> Pending</h4>
+                            <p id="pendingCount">{{ teachers_data|length }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Bulk Actions -->
+                    <div class="bulk-actions">
+                        <strong style="align-self: center;">Quick Actions:</strong>
+                        <button type="button" class="bulk-action-btn present" onclick="markAllAs('present')">
+                            <i class="fas fa-check-circle"></i> Mark All Present
+                        </button>
+                        <button type="button" class="bulk-action-btn absent" onclick="markAllAs('absent')">
+                            <i class="fas fa-times-circle"></i> Mark All Absent
+                        </button>
+                        <button type="button" class="bulk-action-btn half-day" onclick="markAllAs('half_day')">
+                            <i class="fas fa-adjust"></i> Mark All Half Day
+                        </button>
+                    </div>
+
+                    <!-- Attendance Table -->
+                    <div class="attendance-table-container">
+                        <table class="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">#</th>
+                                    <th style="width: 30%;">Teacher/Staff</th>
+                                    <th style="width: 35%;">Status</th>
+                                    <th style="width: 30%;">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in teachers_data %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        <div class="teacher-info">
+                                            <div class="avatar">
+                                                {{ data.teacher.first_name|first }}{{ data.teacher.last_name|first }}
+                                            </div>
+                                            <div class="teacher-details">
+                                                <h5>{{ data.teacher.full_name }}</h5>
+                                                <p>{{ data.teacher.teacher_id }} - {{ data.teacher.get_position_display }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="status-radio-group">
+                                            <input type="radio" name="status_{{ data.teacher.id }}" 
+                                                   id="present_{{ data.teacher.id }}" value="present"
+                                                   {% if data.existing_status == 'present' %}checked{% endif %}
+                                                   onchange="updateCount()">
+                                            <label for="present_{{ data.teacher.id }}" class="status-radio-label present">
+                                                <i class="fas fa-check"></i> Present
+                                            </label>
+
+                                            <input type="radio" name="status_{{ data.teacher.id }}" 
+                                                   id="absent_{{ data.teacher.id }}" value="absent"
+                                                   {% if data.existing_status == 'absent' %}checked{% endif %}
+                                                   onchange="updateCount()">
+                                            <label for="absent_{{ data.teacher.id }}" class="status-radio-label absent">
+                                                <i class="fas fa-times"></i> Absent
+                                            </label>
+
+                                            <input type="radio" name="status_{{ data.teacher.id }}" 
+                                                   id="half_{{ data.teacher.id }}" value="half_day"
+                                                   {% if data.existing_status == 'half_day' %}checked{% endif %}
+                                                   onchange="updateCount()">
+                                            <label for="half_{{ data.teacher.id }}" class="status-radio-label half-day">
+                                                <i class="fas fa-adjust"></i> Half Day
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="remarks_{{ data.teacher.id }}" 
+                                               class="remarks-input" placeholder="Add remarks..."
+                                               value="{{ data.existing_remarks }}">
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: 3rem; color: var(--text-dark);">
+                                        <i class="fas fa-users" style="font-size: 3rem; opacity: 0.3;"></i>
+                                        <p>No active staff members found</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Submit Section -->
+                    <div class="submit-section">
+                        <button type="submit" class="submit-button">
+                            <i class="fas fa-save"></i>
+                            Save Attendance Records
+                        </button>
+                        <p style="margin-top: 1rem; color: var(--text-dark); opacity: 0.7;">
+                            Please ensure all attendance is marked before submitting
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function markAllAs(status) {
+    const radios = document.querySelectorAll(`input[type="radio"][value="${status}"]`);
+    radios.forEach(radio => {
+        radio.checked = true;
+    });
+    updateCount();
+}
+
+function updateCount() {
+    const totalStaff = parseInt(document.getElementById('totalStaff').textContent);
+    let markedCount = 0;
+    
+    // Count how many teachers have a status selected
+    const statusInputs = document.querySelectorAll('input[type="radio"][name^="status_"]');
+    const teacherIds = new Set();
+    
+    statusInputs.forEach(input => {
+        const teacherId = input.name.replace('status_', '');
+        teacherIds.add(teacherId);
+    });
+    
+    teacherIds.forEach(teacherId => {
+        const radios = document.querySelectorAll(`input[name="status_${teacherId}"]`);
+        radios.forEach(radio => {
+            if (radio.checked) {
+                markedCount++;
+            }
+        });
+    });
+    
+    document.getElementById('markedCount').textContent = markedCount;
+    document.getElementById('pendingCount').textContent = totalStaff - markedCount;
+}
+
+// Initialize count on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateCount();
+});
+
+
+</script>
+{% endblock %}

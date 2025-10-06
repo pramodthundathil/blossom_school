@@ -1,0 +1,152 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Fixed Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'teacher_list' %}" class="breadcrumb-link">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span>Staff</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-users"></i>
+                    <span>All Teachers</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <!-- Main Content -->
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-chalkboard-teacher"></i> All Teachers & Staff List</h3>
+            <a href="{% url 'teacher_create' %}" class="add-item-button">
+                <span class="add-event"><i class="fas fa-plus"></i></span>
+                <span style="margin-left: 10px;">Add Teacher/Staff</span>
+            </a>
+        </div>
+
+        <div class="card-content">
+            <!-- Teachers Table with DataTables -->
+            <div class="table-responsive-1">
+                <table id="teachersTable" class="display">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll"></th>
+                            <th>Teacher</th>
+                            <th>Teacher ID</th>
+                            <th>Position</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Join Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in teachers %}
+                        <tr>
+                            <td><input type="checkbox" class="teacher-checkbox" value="{{ teacher.pk }}"></td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div class="avatar">
+                                        {{ teacher.first_name|first }}{{ teacher.last_name|first }}
+                                    </div>
+                                    <div>
+                                        <strong style="font-weight: 600; color: var(--e-global-color-text); font-size: 12px;">
+                                            {{ teacher.full_name }}</strong>
+                                        <br><small style="color: var(--e-global-color-text); opacity: 0.7; font-size: 10px;">
+                                            {{ teacher.nationality }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><strong style="color: var(--e-global-color-primary); font-size: 12px;">
+                                {{ teacher.teacher_id }}</strong></td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ teacher.get_position_display }}</td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ teacher.email }}</td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ teacher.phone_number }}</td>
+                            <td>
+                                <span class="status-badge status-{{ teacher.status }}">
+                                    {{ teacher.get_status_display }}
+                                </span>
+                            </td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ teacher.start_date|date:"M d, Y" }}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 2px;">
+                                    <a href="{% url 'teacher_detail' teacher.pk %}" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'teacher_update' teacher.pk %}" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if teacher.is_active %}
+                                    <a href="{% url 'disable_teacher' teacher.pk %}" title="Disable">
+                                        <i class="fas fa-ban"></i>
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'enable_teacher' teacher.pk %}" title="Enable">
+                                        <i class="fas fa-check"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 40px 20px; color: var(--e-global-color-text);">
+                                <div style="opacity: 0.6;">
+                                    <i class="fas fa-chalkboard-teacher" style="font-size: 48px; margin-bottom: 15px; color: var(--e-global-color-primary);"></i>
+                                    <br>
+                                    <h4 style="margin: 0; font-weight: 600; color: var(--e-global-color-text); font-size: 16px;">No teachers found</h4>
+                                    <p style="margin: 8px 0 0 0; font-size: 12px;">Start by adding teachers/staff to your database</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Action Form -->
+<form id="bulkActionForm" method="post" action="{% url 'bulk_action_teachers' %}" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="action" id="bulkAction">
+    <div id="selectedTeachers"></div>
+</form>
+
+<!-- DataTables CSS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+
+<script>
+$(document).ready(function () {
+    if ($.fn.DataTable) {
+        console.log("DataTable is loaded.");
+        $('#teachersTable').DataTable();
+    } else {
+        console.error("DataTable is not loaded.");
+    }
+});
+</script>
+{% endblock %}

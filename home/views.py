@@ -360,11 +360,12 @@ def get_user_activity(request):
 # 
 #  
 
-
+#site setting and class room Update
 
 @unauthenticated_user 
 def site_setting(request):
     class_rooms = ClassRooms.objects.all().order_by('-id')
+    fee_category = FeeCategory.objects.all().order_by("-id")
     if request.method == "POST":
         try:
             name = request.POST['class_room']
@@ -376,7 +377,7 @@ def site_setting(request):
 
         return redirect("site_setting")
     else:
-        context = {"class_rooms":class_rooms}
+        context = {"class_rooms":class_rooms,"fee_category":fee_category}
         return render(request,"settings/settings.html",context)
     
 @unauthenticated_user
@@ -395,3 +396,38 @@ def delete_class(request, pk):
     class_room.delete()
     messages.info(request,"Class room deleted success.....")
     return redirect(site_setting)
+
+#Fee category Section
+@unauthenticated_user
+def fee_category(request):
+    if request.method == "POST":
+        try:
+            name = request.POST['name']
+            fee_cat = FeeCategory.objects.create(name = name)
+            fee_cat.save()
+            messages.success(request, "Fee Category saved successfully...")
+        except:
+            messages.info(request, 'Something wrong....')
+
+        return redirect("site_setting")
+    return redirect("site_setting")
+
+
+@unauthenticated_user
+def update_fee_category(request, pk):
+    cat = get_object_or_404(FeeCategory, id = pk)
+    if request.method == "POST":
+        name = request.POST['name']
+        cat.name = name 
+        cat.save()
+        messages.info(request, 'Fee Category Updated.....')
+    return redirect("site_setting")
+
+
+@unauthenticated_user
+def delete_fee_category(request, pk):
+    cat = get_object_or_404(FeeCategory, id = pk)
+    cat.delete()
+    messages.info(request,"Fee Category deleted success.....")
+    return redirect("site_setting")
+    

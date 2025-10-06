@@ -1,0 +1,1024 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+.overdue-report-container {
+    background: var(--e-global-color-fe7363b);
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 0 8px;
+}
+
+.page-title {
+    color: var(--e-global-color-primary);
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-title i {
+    font-size: 24px;
+    color: var(--e-global-color-7d1e931);
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--e-global-color-primary) 0%, #2c5aa0 100%);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #1a3a70;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    color: white;
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--e-global-color-primary);
+    border: 2px solid var(--e-global-color-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--e-global-color-eecedb7);
+    transform: translateY(-1px);
+    color: var(--e-global-color-primary);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, var(--e-global-color-3a7e2f2) 0%, #ffcc33 100%);
+    color: white;
+    border: none;
+}
+
+.btn-warning:hover {
+    background: #e6a700;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    color: white;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-light);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border-left: 4px solid transparent;
+}
+
+.summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--card-color) 0%, var(--card-color-secondary) 100%);
+}
+
+.summary-card.urgent {
+    --card-color: var(--e-global-color-7d1e931);
+    --card-color-secondary: #ff6b6b;
+    border-left-color: var(--e-global-color-7d1e931);
+}
+
+.summary-card.warning {
+    --card-color: var(--e-global-color-3a7e2f2);
+    --card-color-secondary: #ffcc33;
+    border-left-color: var(--e-global-color-3a7e2f2);
+}
+
+.summary-card.info {
+    --card-color: var(--e-global-color-bea3118);
+    --card-color-secondary: #5d9cec;
+    border-left-color: var(--e-global-color-bea3118);
+}
+
+.summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+}
+
+.summary-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color-secondary) 100%);
+    flex-shrink: 0;
+}
+
+.summary-content {
+    flex: 1;
+}
+
+.summary-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--e-global-color-text);
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.summary-label {
+    font-size: 14px;
+    color: var(--e-global-color-text);
+    opacity: 0.8;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.summary-trend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    background: rgba(255, 149, 135, 0.1);
+    color: var(--e-global-color-7d1e931);
+    width: fit-content;
+}
+
+/* Report Controls */
+.report-controls {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-light);
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.controls-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-input {
+    padding: 10px 16px 10px 40px;
+    border: 1px solid var(--e-global-color-5d90ead);
+    border-radius: var(--border-radius);
+    background: white;
+    font-size: 14px;
+    color: var(--e-global-color-text);
+    width: 300px;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--e-global-color-primary);
+    box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--e-global-color-text);
+    opacity: 0.5;
+}
+
+.filter-select {
+    padding: 10px 16px;
+    border: 1px solid var(--e-global-color-5d90ead);
+    border-radius: var(--border-radius);
+    background: white;
+    font-size: 14px;
+    color: var(--e-global-color-text);
+    cursor: pointer;
+}
+
+.controls-right {
+    display: flex;
+    gap: 12px;
+}
+
+.export-btn {
+    background: var(--e-global-color-4e9ef99);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.export-btn:hover {
+    background: #3a9465;
+    transform: translateY(-1px);
+}
+
+/* Overdue Table */
+.overdue-table-container {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+}
+
+.table-header {
+    background: linear-gradient(135deg, var(--e-global-color-7d1e931) 0%, #ff6b6b 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.urgency-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.overdue-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.overdue-table th {
+    background: var(--e-global-color-eecedb7);
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--e-global-color-text);
+    font-size: 14px;
+    border-bottom: 2px solid var(--e-global-color-5d90ead);
+}
+
+.overdue-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--e-global-color-5d90ead);
+    color: var(--e-global-color-text);
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.overdue-table tr:hover {
+    background: var(--e-global-color-fe7363b);
+}
+
+.overdue-table tr.urgent {
+    background: rgba(255, 149, 135, 0.05);
+    border-left: 4px solid var(--e-global-color-7d1e931);
+}
+
+.overdue-table tr.urgent:hover {
+    background: rgba(255, 149, 135, 0.1);
+}
+
+/* Student Info */
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.student-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--e-global-color-primary) 0%, var(--e-global-color-secondary) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.student-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.student-name {
+    font-weight: 600;
+    color: var(--e-global-color-text);
+}
+
+.student-meta {
+    font-size: 12px;
+    color: var(--e-global-color-text);
+    opacity: 0.7;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-overdue {
+    background: rgba(255, 149, 135, 0.2);
+    color: var(--e-global-color-7d1e931);
+}
+
+.status-partial {
+    background: rgba(255, 184, 4, 0.2);
+    color: var(--e-global-color-3a7e2f2);
+}
+
+/* Amount Styles */
+.amount-due {
+    font-weight: 700;
+    color: var(--e-global-color-text);
+}
+
+.late-fee {
+    font-size: 12px;
+    color: var(--e-global-color-7d1e931);
+    font-weight: 600;
+}
+
+.days-overdue {
+    font-weight: 700;
+    color: var(--e-global-color-7d1e931);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn-small {
+    padding: 6px 12px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-pay {
+    background: var(--e-global-color-primary);
+    color: white;
+}
+
+.btn-pay:hover {
+    background: #1a3a70;
+    transform: translateY(-1px);
+}
+
+.btn-remind {
+    background: var(--e-global-color-3a7e2f2);
+    color: white;
+}
+
+.btn-remind:hover {
+    background: #e6a700;
+    transform: translateY(-1px);
+}
+
+.btn-view {
+    background: var(--e-global-color-bea3118);
+    color: white;
+}
+
+.btn-view:hover {
+    background: #5d9cec;
+    transform: translateY(-1px);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--e-global-color-text);
+    opacity: 0.6;
+}
+
+.empty-state i {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+    color: var(--e-global-color-4e9ef99);
+}
+
+.empty-state h4 {
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Bulk Actions */
+.bulk-actions {
+    background: var(--e-global-color-fe7363b);
+    padding: 16px 20px;
+    border-top: 1px solid var(--e-global-color-5d90ead);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bulk-select {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bulk-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .overdue-report-container {
+        padding: 16px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    
+    .page-title {
+        font-size: 24px;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .report-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .controls-left {
+        justify-content: center;
+    }
+    
+    .search-input {
+        width: 100%;
+    }
+    
+    .overdue-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+    
+    .summary-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 20px;
+    }
+    
+    .student-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    
+    .bulk-actions {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.summary-card,
+.report-controls,
+.overdue-table-container {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.summary-card:nth-child(2) { animation-delay: 0.1s; }
+.summary-card:nth-child(3) { animation-delay: 0.2s; }
+
+/* Pulse animation for urgent items */
+@keyframes pulseUrgent {
+    0% { background: rgba(255, 149, 135, 0.05); }
+    50% { background: rgba(255, 149, 135, 0.1); }
+    100% { background: rgba(255, 149, 135, 0.05); }
+}
+
+.overdue-table tr.urgent {
+    animation: pulseUrgent 2s ease-in-out infinite;
+}
+</style>
+
+<div class="overdue-report-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-exclamation-triangle"></i>
+            Overdue Payments Report
+        </h1>
+        <div class="header-actions">
+            <a href="{% url 'payment_dashboard' %}" class="action-btn btn-primary">
+                <i class="fas fa-arrow-left"></i>Back to Dashboard
+            </a>
+            <a href="{% url 'bulk_reminder' %}" class="action-btn btn-warning">
+                <i class="fas fa-bell"></i>Send Bulk Reminders
+            </a>
+            <button class="action-btn btn-secondary" onclick="window.print()">
+                <i class="fas fa-print"></i>Print Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card urgent">
+            <div class="summary-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="summary-content">
+                <div class="summary-value">{{ overdue_installments|length }}</div>
+                <div class="summary-label">Overdue Installments</div>
+                <div class="summary-trend">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Requires Immediate Attention</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-card warning">
+            <div class="summary-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="summary-content">
+                <div class="summary-value">${{ total_overdue_amount|floatformat:2 }}</div>
+                <div class="summary-label">Total Overdue Amount</div>
+                <div class="summary-trend">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Outstanding Balance</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-card info">
+            <div class="summary-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="summary-content">
+                <div class="summary-value">
+                    {% with students=overdue_installments|dictsort:"payment_plan.student.id" %}
+                        {{ students|length }}
+                    {% endwith %}
+                </div>
+                <div class="summary-label">Students Affected</div>
+                <div class="summary-trend">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Multiple Students</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Controls -->
+    <div class="report-controls">
+        <div class="controls-left">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search students or installments...">
+            </div>
+            <select class="filter-select">
+                <option value="">All Classes</option>
+                <option value="urgent">Urgent (30+ days)</option>
+                <option value="recent">Recent (1-7 days)</option>
+                <option value="moderate">Moderate (8-30 days)</option>
+            </select>
+            <select class="filter-select">
+                <option value="">All Fee Categories</option>
+                <option value="tuition">Tuition Fees</option>
+                <option value="transport">Transportation</option>
+                <option value="other">Other Fees</option>
+            </select>
+        </div>
+        <div class="controls-right">
+            <button class="export-btn">
+                <i class="fas fa-download"></i>Export CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Overdue Table -->
+    <div class="overdue-table-container">
+        <div class="table-header">
+            <h3>
+                <i class="fas fa-list"></i>
+                Overdue Payment Details
+            </h3>
+            <div class="urgency-indicator">
+                <i class="fas fa-fire"></i>
+                <span>Sorted by Due Date (Oldest First)</span>
+            </div>
+        </div>
+
+        {% if overdue_installments %}
+        <table class="overdue-table">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">
+                        <input type="checkbox" id="selectAll">
+                    </th>
+                    <th>Student</th>
+                    <th>Installment</th>
+                    <th>Due Date</th>
+                    <th>Days Overdue</th>
+                    <th>Amount Due</th>
+                    <th>Late Fee</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for installment in overdue_installments %}
+                <tr class="{% if installment.days_overdue > 30 %}urgent{% endif %}">
+                    <td>
+                        <input type="checkbox" class="installment-checkbox" value="{{ installment.id }}">
+                    </td>
+                    <td>
+                        <div class="student-info">
+                            <div class="student-avatar">
+                                {{ installment.payment_plan.student.first_name|first }}{{ installment.payment_plan.student.last_name|first }}
+                            </div>
+                            <div class="student-details">
+                                <div class="student-name">{{ installment.payment_plan.student.get_full_name }}</div>
+                                <div class="student-meta">
+                                    ID: {{ installment.payment_plan.student.student_id }}
+                                    • {{ installment.payment_plan.student.current_class|default:"No Class" }}
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <strong>{{ installment.fee_category.name }}</strong>
+                        <div style="font-size: 12px; color: #666;">
+                            {{ installment.payment_plan.fee_structure.name }}
+                        </div>
+                    </td>
+                    <td>
+                        {{ installment.due_date|date:"M d, Y" }}
+                    </td>
+                    <td>
+                        <span class="days-overdue">
+                            {% with days_overdue=installment.days_overdue %}
+                                {{ days_overdue }} day{{ days_overdue|pluralize }}
+                            {% endwith %}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="amount-due">${{ installment.get_outstanding_amount|floatformat:2 }}</div>
+                        <div style="font-size: 12px; color: #666;">
+                            Total: ${{ installment.amount|floatformat:2 }}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="late-fee">
+                            ${{ installment.late_fee|floatformat:2|default:"0.00" }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-overdue">
+                            <i class="fas fa-clock"></i>
+                            Overdue
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'create_payment' %}?student_id={{ installment.payment_plan.student.id }}&installment_id={{ installment.id }}"
+                               class="action-btn-small btn-pay"
+                               title="Record Payment">
+                                <i class="fas fa-credit-card"></i>
+                            </a>
+                            <a href="{% url 'student_payment_details' installment.payment_plan.student.id %}"
+                               class="action-btn-small btn-view"
+                               title="View Student Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="action-btn-small btn-remind"
+                                    onclick="sendReminder({{ installment.id }})"
+                                    title="Send Reminder">
+                                <i class="fas fa-bell"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Bulk Actions -->
+        <div class="bulk-actions">
+            <div class="bulk-select">
+                <input type="checkbox" id="bulkSelect">
+                <label for="bulkSelect" style="font-size: 14px; font-weight: 500;">
+                    Select all {{ overdue_installments|length }} items
+                </label>
+            </div>
+            <div class="bulk-buttons">
+                <button class="action-btn-small btn-remind" onclick="sendBulkReminders()">
+                    <i class="fas fa-bell"></i>Remind Selected
+                </button>
+                <button class="action-btn-small btn-secondary" onclick="exportSelected()">
+                    <i class="fas fa-download"></i>Export Selected
+                </button>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <h4>No Overdue Payments!</h4>
+            <p>All payments are up to date. Great job managing the finances!</p>
+            <div style="margin-top: 20px;">
+                <a href="{% url 'payment_dashboard' %}" class="action-btn btn-primary">
+                    <i class="fas fa-tachometer-alt"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Overdue payments report loaded');
+    console.log('Total overdue installments:', {{ overdue_installments|length }});
+    console.log('Total overdue amount: ${{ total_overdue_amount|floatformat:2 }}');
+
+    // Select All functionality
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.installment-checkbox');
+    
+    selectAll.addEventListener('change', function() {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateBulkSelect();
+    });
+
+    // Individual checkbox functionality
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateBulkSelect);
+    });
+
+    function updateBulkSelect() {
+        const checkedCount = document.querySelectorAll('.installment-checkbox:checked').length;
+        const bulkSelect = document.getElementById('bulkSelect');
+        const bulkLabel = bulkSelect.nextElementSibling;
+        
+        if (checkedCount === checkboxes.length) {
+            bulkSelect.checked = true;
+            bulkSelect.indeterminate = false;
+        } else if (checkedCount > 0) {
+            bulkSelect.checked = false;
+            bulkSelect.indeterminate = true;
+        } else {
+            bulkSelect.checked = false;
+            bulkSelect.indeterminate = false;
+        }
+        
+        bulkLabel.textContent = `Select ${checkedCount} item${checkedCount !== 1 ? 's' : ''}`;
+    }
+
+    // Search functionality
+    const searchInput = document.querySelector('.search-input');
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.overdue-table tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Filter functionality
+    const filterSelects = document.querySelectorAll('.filter-select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', filterTable);
+    });
+
+    function filterTable() {
+        // Implement filter logic based on selected options
+        console.log('Filtering table...');
+    }
+
+    // Add hover effects
+    const tableRows = document.querySelectorAll('.overdue-table tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(4px)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+});
+
+function sendReminder(installmentId) {
+    if (confirm('Send payment reminder for this installment?')) {
+        // Simulate API call
+        console.log('Sending reminder for installment:', installmentId);
+        
+        // Show success message
+        showNotification('Reminder sent successfully!', 'success');
+    }
+}
+
+function sendBulkReminders() {
+    const selected = document.querySelectorAll('.installment-checkbox:checked');
+    if (selected.length === 0) {
+        alert('Please select at least one installment to send reminders.');
+        return;
+    }
+    
+    if (confirm(`Send reminders for ${selected.length} selected installment(s)?`)) {
+        const installmentIds = Array.from(selected).map(cb => cb.value);
+        console.log('Sending bulk reminders for:', installmentIds);
+        
+        // Simulate API call
+        showNotification(`Reminders sent for ${selected.length} installment(s)!`, 'success');
+    }
+}
+
+function exportSelected() {
+    const selected = document.querySelectorAll('.installment-checkbox:checked');
+    if (selected.length === 0) {
+        alert('Please select at least one installment to export.');
+        return;
+    }
+    
+    const installmentIds = Array.from(selected).map(cb => cb.value);
+    console.log('Exporting selected installments:', installmentIds);
+    
+    // Simulate export functionality
+    showNotification(`Exporting ${selected.length} installment(s) to CSV...`, 'info');
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 20px;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+        box-shadow: var(--shadow-medium);
+    `;
+    
+    if (type === 'success') {
+        notification.style.background = 'var(--e-global-color-4e9ef99)';
+    } else if (type === 'error') {
+        notification.style.background = 'var(--e-global-color-7d1e931)';
+    } else {
+        notification.style.background = 'var(--e-global-color-bea3118)';
+    }
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Add CSS for notification animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

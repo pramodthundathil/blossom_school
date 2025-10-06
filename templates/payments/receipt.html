@@ -1,0 +1,639 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+:root {
+    --primary-color: #214888;
+    --secondary-color: #D54395;
+    --success-color: #43A574;
+    --warning-color: #FF854B;
+    --light-bg: #F8F9FA;
+}
+
+.receipt-container {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.receipt-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: none;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.receipt-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px 20px 0 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.receipt-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+}
+
+.receipt-badge {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.receipt-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.receipt-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+.receipt-body {
+    padding: 2rem;
+}
+
+.school-info {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px dashed #e9ecef;
+}
+
+.school-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.school-address {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.receipt-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.detail-card {
+    background: var(--light-bg);
+    border-radius: 15px;
+    padding: 1.5rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.detail-card h5 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.detail-value {
+    font-weight: 500;
+    color: #212529;
+}
+
+.payment-items-table {
+    width: 100%;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.payment-items-table thead {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #2c5ba3 100%);
+    color: white;
+}
+
+.payment-items-table th {
+    padding: 1rem;
+    font-weight: 600;
+    text-align: left;
+}
+
+.payment-items-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.payment-items-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.payment-items-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.amount-cell {
+    text-align: right;
+    font-weight: 500;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    border: 2px solid #e9ecef;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    font-size: 1.1rem;
+}
+
+.summary-row.total {
+    border-top: 2px solid #dee2e6;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--success-color);
+}
+
+.receipt-footer {
+    text-align: center;
+    padding: 2rem;
+    border-top: 2px dashed #e9ecef;
+    margin-top: 2rem;
+}
+
+.status-badge {
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.print-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px dashed #e9ecef;
+}
+
+.btn-print {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-print:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.thank-you {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+/* Print Styles */
+@media print {
+    .receipt-container {
+        background: white !important;
+        padding: 0 !important;
+    }
+    
+    .receipt-card {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+    
+    .btn-print {
+        display: none !important;
+    }
+    
+    .print-section {
+        display: none !important;
+    }
+}
+
+/* Watermark effect */
+.watermark {
+    position: absolute;
+    opacity: 0.03;
+    font-size: 120px;
+    font-weight: 900;
+    color: var(--primary-color);
+    transform: rotate(-45deg);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .receipt-container {
+        padding: 1rem;
+    }
+    
+    .receipt-header {
+        padding: 1.5rem;
+    }
+    
+    .receipt-title {
+        font-size: 2rem;
+    }
+    
+    .receipt-body {
+        padding: 1.5rem;
+    }
+    
+    .receipt-details-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .payment-items-table {
+        font-size: 0.9rem;
+    }
+    
+    .payment-items-table th,
+    .payment-items-table td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.receipt-card {
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* Icon styles */
+.receipt-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+/* Security features */
+.security-features {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+    opacity: 0.7;
+}
+
+.security-feature {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+</style>
+
+<div class="receipt-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10">
+                <div class="receipt-card">
+                    <!-- Header -->
+                    <div class="receipt-header">
+                        <div class="watermark">PAID</div>
+                        <div class="receipt-badge">
+                            <i class="fas fa-check-circle me-2"></i>PAYMENT RECEIPT
+                        </div>
+                        <h1 class="receipt-title">Payment Confirmed</h1>
+                        <p class="receipt-subtitle">Transaction Receipt • {{ payment.payment_id }}</p>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="receipt-body">
+                        <!-- School Information -->
+                        <div class="school-info">
+                            <h2 class="school-name">{{ school_name }}</h2>
+                            <p class="school-address">{{ school_address }}</p>
+                        </div>
+
+                        <!-- Payment Details Grid -->
+                        <div class="receipt-details-grid">
+                            <!-- Student Information -->
+                            <div class="detail-card">
+                                <h5><i class="fas fa-user-graduate me-2"></i>Student Information</h5>
+                                <div class="detail-item">
+                                    <span class="detail-label">Student Name:</span>
+                                    <span class="detail-value">{{ payment.student.get_full_name }}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Student ID:</span>
+                                    <span class="detail-value">{{ payment.student.student_id }}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Grade/Class:</span>
+                                    <span class="detail-value">
+                                        {% if payment.student.current_class %}
+                                            {{ payment.student.current_class }}
+                                        {% else %}
+                                            Not assigned
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Payment Information -->
+                            <div class="detail-card">
+                                <h5><i class="fas fa-credit-card me-2"></i>Payment Information</h5>
+                                <div class="detail-item">
+                                    <span class="detail-label">Payment ID:</span>
+                                    <span class="detail-value">{{ payment.payment_id }}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Payment Date:</span>
+                                    <span class="detail-value">{{ payment.payment_date|date:"F d, Y" }}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Payment Method:</span>
+                                    <span class="detail-value">{{ payment.get_payment_method_display }}</span>
+                                </div>
+                                {% if payment.transaction_reference %}
+                                <div class="detail-item">
+                                    <span class="detail-label">Reference No:</span>
+                                    <span class="detail-value">{{ payment.transaction_reference }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Payment Items Table -->
+                        <h5 class="mb-3"><i class="fas fa-list-alt me-2"></i>Payment Breakdown</h5>
+                        <div class="payment-items-table">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Fee Category</th>
+                                        <th>Description</th>
+                                        <th class="text-end">Amount</th>
+                                        <th class="text-end">Discount</th>
+                                        <th class="text-end">Late Fee</th>
+                                        <th class="text-end">Net Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in payment.payment_items.all %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ item.fee_category.name }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if item.description %}
+                                                {{ item.description }}
+                                            {% else %}
+                                                {{ item.fee_category.name }} Payment
+                                            {% endif %}
+                                        </td>
+                                        <td class="amount-cell">${{ item.amount|floatformat:2 }}</td>
+                                        <td class="amount-cell text-success">- ${{ item.discount_amount|floatformat:2 }}</td>
+                                        <td class="amount-cell text-warning">
+                                            {% if item.late_fee > 0 %}
+                                                + ${{ item.late_fee|floatformat:2 }}
+                                            {% else %}
+                                                $0.00
+                                            {% endif %}
+                                        </td>
+                                        <td class="amount-cell">
+                                            <strong>${{ item.net_amount|floatformat:2 }}</strong>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Payment Summary -->
+                        <div class="summary-card">
+                            <div class="summary-row">
+                                <span>Subtotal:</span>
+                                <strong>${{ payment.total_amount|floatformat:2 }}</strong>
+                            </div>
+                            {% if payment.discount_amount > 0 %}
+                            <div class="summary-row text-success">
+                                <span>Total Discount:</span>
+                                <strong>- ${{ payment.discount_amount|floatformat:2 }}</strong>
+                            </div>
+                            {% endif %}
+                            {% if payment.late_fee_amount > 0 %}
+                            <div class="summary-row text-warning">
+                                <span>Total Late Fee:</span>
+                                <strong>+ ${{ payment.late_fee_amount|floatformat:2 }}</strong>
+                            </div>
+                            {% endif %}
+                            <div class="summary-row total">
+                                <span>NET TOTAL PAID:</span>
+                                <strong>${{ payment.net_amount|floatformat:2 }}</strong>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="receipt-footer">
+                            <div class="mb-3">
+                                <span class="status-badge status-completed">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    PAYMENT {{ payment.payment_status|upper }}
+                                </span>
+                            </div>
+                            
+                            <div class="security-features">
+                                <div class="security-feature">
+                                    <i class="fas fa-shield-alt me-1"></i>Secure Transaction
+                                </div>
+                                <div class="security-feature">
+                                    <i class="fas fa-clock me-1"></i>Generated on {% now "F d, Y \a\t g:i A" %}
+                                </div>
+                                <div class="security-feature">
+                                    <i class="fas fa-user me-1"></i>Processed by: {{ payment.collected_by.get_full_name }}
+                                </div>
+                            </div>
+
+                            {% if payment.remarks %}
+                            <div class="mt-3 p-3 bg-light rounded">
+                                <strong>Remarks:</strong> {{ payment.remarks }}
+                            </div>
+                            {% endif %}
+
+                            <div class="thank-you">
+                                <i class="fas fa-heart me-2" style="color: var(--secondary-color);"></i>
+                                Thank you for your payment!
+                            </div>
+                        </div>
+
+                        <!-- Print Section -->
+                        <div class="print-section text-center">
+                            <button onclick="window.print()" class="btn btn-print">
+                                <i class="fas fa-print me-2"></i>Print Receipt
+                            </button>
+                            <div class="mt-2 text-muted">
+                                <small>This is an official receipt. Please keep it for your records.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center mt-4">
+                    <a href="{% url 'create_payment' %}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus me-2"></i>Create New Payment
+                    </a>
+                    <a href="{% url 'payment_dashboard' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-tachometer-alt me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Receipt loaded for payment: {{ payment.payment_id }}');
+    
+    // Add some interactive effects
+    const receiptCard = document.querySelector('.receipt-card');
+    
+    // Add hover effect
+    receiptCard.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px)';
+        this.style.transition = 'transform 0.3s ease';
+    });
+    
+    receiptCard.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+    });
+    
+    // Print functionality enhancement
+    const printBtn = document.querySelector('.btn-print');
+    if (printBtn) {
+        printBtn.addEventListener('click', function() {
+            // Add a small delay to ensure the print dialog shows after any animations
+            setTimeout(function() {
+                window.print();
+            }, 100);
+        });
+    }
+    
+    // Add copy payment ID functionality
+    const paymentId = '{{ payment.payment_id }}';
+    const paymentIdElement = document.querySelector('.detail-value');
+    
+    if (paymentIdElement) {
+        paymentIdElement.style.cursor = 'pointer';
+        paymentIdElement.title = 'Click to copy Payment ID';
+        
+        paymentIdElement.addEventListener('click', function() {
+            navigator.clipboard.writeText(paymentId).then(function() {
+                // Show temporary feedback
+                const originalText = this.textContent;
+                this.textContent = 'Copied!';
+                this.style.color = 'var(--success-color)';
+                
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.style.color = '';
+                }, 2000);
+            }.bind(this));
+        });
+    }
+});
+
+// Enhanced print functionality
+function enhancePrint() {
+    // Add print-specific styles
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .receipt-container, .receipt-container * {
+                visibility: visible;
+            }
+            .receipt-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .btn-print, .print-section {
+                display: none !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Call enhance print on load
+enhancePrint();
+</script>
+{% endblock %}

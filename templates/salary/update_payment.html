@@ -1,0 +1,443 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-blue: #214888;
+        --secondary-pink: #D54395;
+        --accent-purple: #8B5FBF;
+        --light-purple: #F3EBFF;
+        --white: #FFFFFF;
+        --text-dark: #453F4E;
+        --success: #10B981;
+        --border-color: #E5E7EB;
+    }
+
+    .update-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .salary-summary {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .salary-summary h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+    }
+
+    .salary-summary .amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 1rem 0;
+    }
+
+    .salary-summary p {
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .form-section {
+        background: var(--white);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--light-purple);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-dark);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .required-field::after {
+        content: '*';
+        color: var(--error);
+        margin-left: 0.25rem;
+    }
+
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: var(--white);
+        box-sizing: border-box;
+    }
+
+    .form-textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+    }
+
+    .form-hint {
+        font-size: 0.75rem;
+        color: var(--text-dark);
+        opacity: 0.6;
+        margin-top: 0.25rem;
+    }
+
+    .info-box {
+        background: var(--light-purple);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .info-box h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--primary-blue);
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-box p {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--text-dark);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 1rem;
+        border-top: 2px solid var(--border-color);
+    }
+
+    .btn-action {
+        padding: 0.875rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+    }
+
+    .btn-secondary {
+        background: var(--white);
+        color: var(--text-dark);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .btn-action:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .status-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .status-option {
+        position: relative;
+    }
+
+    .status-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .status-option label {
+        display: block;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .status-option input[type="radio"]:checked + label {
+        background: var(--primary-blue);
+        color: var(--white);
+        border-color: var(--primary-blue);
+    }
+
+    .status-option label:hover {
+        border-color: var(--primary-blue);
+    }
+
+    @media (max-width: 768px) {
+        .update-container {
+            padding: 0 1rem;
+        }
+
+        .form-section {
+            padding: 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .status-options {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'salary_dashboard' %}" class="breadcrumb-link">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Salary</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'salary_list' %}" class="breadcrumb-link">
+                        <i class="fas fa-list"></i>
+                        <span>Salary List</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-edit"></i>
+                    <span>Update Payment</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-edit"></i> Update Payment Information</h3>
+            <a href="{% url 'salary_detail' salary.id %}" class="add-item-button">
+                <span class="add-event"><i class="fas fa-arrow-left"></i></span>
+                <span style="margin-left: 10px;">Back to Detail</span>
+            </a>
+        </div>
+
+        <div class="card-content">
+            <div class="update-container">
+                <!-- Salary Summary -->
+                <div class="salary-summary">
+                    <h3>{{ salary.teacher.full_name }}</h3>
+                    <p>{{ salary.teacher.teacher_id }} | {{ salary.get_month_name }} {{ salary.year }}</p>
+                    <div class="amount">AED {{ salary.net_salary|floatformat:2 }}</div>
+                    <p>Net Salary Payable</p>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div style="padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px; background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success);">
+                            <i class="fas fa-check-circle"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Info Box -->
+                <div class="info-box">
+                    <h4><i class="fas fa-info-circle"></i> Payment Information</h4>
+                    <p>Update the payment status and details for this salary record. All fields marked with * are required when marking as paid.</p>
+                </div>
+
+                <form method="post" id="paymentForm">
+                    {% csrf_token %}
+                    
+                    <div class="form-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-credit-card"></i>
+                            Payment Details
+                        </h4>
+
+                        <!-- Payment Status -->
+                        <div class="form-group">
+                            <label class="form-label required-field">Payment Status</label>
+                            <div class="status-options">
+                                <div class="status-option">
+                                    <input type="radio" name="payment_status" id="status_pending" value="pending" 
+                                           {% if salary.payment_status == 'pending' %}checked{% endif %} required>
+                                    <label for="status_pending">
+                                        <i class="fas fa-clock"></i><br>
+                                        Pending
+                                    </label>
+                                </div>
+                                <div class="status-option">
+                                    <input type="radio" name="payment_status" id="status_processed" value="processed"
+                                           {% if salary.payment_status == 'processed' %}checked{% endif %}>
+                                    <label for="status_processed">
+                                        <i class="fas fa-cog"></i><br>
+                                        Processed
+                                    </label>
+                                </div>
+                                <div class="status-option">
+                                    <input type="radio" name="payment_status" id="status_paid" value="paid"
+                                           {% if salary.payment_status == 'paid' %}checked{% endif %}>
+                                    <label for="status_paid">
+                                        <i class="fas fa-check-circle"></i><br>
+                                        Paid
+                                    </label>
+                                </div>
+                                <div class="status-option">
+                                    <input type="radio" name="payment_status" id="status_hold" value="hold"
+                                           {% if salary.payment_status == 'hold' %}checked{% endif %}>
+                                    <label for="status_hold">
+                                        <i class="fas fa-pause-circle"></i><br>
+                                        On Hold
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Date -->
+                        <div class="form-group">
+                            <label for="payment_date" class="form-label">Payment Date</label>
+                            <input type="date" 
+                                   name="payment_date" 
+                                   id="payment_date" 
+                                   class="form-input"
+                                   value="{{ salary.payment_date|date:'Y-m-d' }}"
+                                   max="{{ today|date:'Y-m-d' }}">
+                            <div class="form-hint">Leave empty if not yet paid</div>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="form-group">
+                            <label for="payment_method" class="form-label">Payment Method</label>
+                            <select name="payment_method" id="payment_method" class="form-select">
+                                <option value="">-- Select Payment Method --</option>
+                                <option value="Bank Transfer" {% if salary.payment_method == 'Bank Transfer' %}selected{% endif %}>Bank Transfer</option>
+                                <option value="Cash" {% if salary.payment_method == 'Cash' %}selected{% endif %}>Cash</option>
+                                <option value="Cheque" {% if salary.payment_method == 'Cheque' %}selected{% endif %}>Cheque</option>
+                                <option value="Online Payment" {% if salary.payment_method == 'Online Payment' %}selected{% endif %}>Online Payment</option>
+                            </select>
+                            <div class="form-hint">How the payment was made</div>
+                        </div>
+
+                        <!-- Payment Reference -->
+                        <div class="form-group">
+                            <label for="payment_reference" class="form-label">Payment Reference</label>
+                            <input type="text" 
+                                   name="payment_reference" 
+                                   id="payment_reference" 
+                                   class="form-input"
+                                   value="{{ salary.payment_reference }}"
+                                   placeholder="e.g., Transaction ID, Cheque Number">
+                            <div class="form-hint">Transaction ID, cheque number, or reference number</div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <a href="{% url 'salary_detail' salary.id %}" class="btn-action btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn-action btn-primary" id="submitBtn">
+                                <i class="fas fa-save"></i> Update Payment
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const paymentStatus = document.querySelector('input[name="payment_status"]:checked').value;
+    const paymentDate = document.getElementById('payment_date').value;
+    const paymentMethod = document.getElementById('payment_method').value;
+    
+    // Validate if status is 'paid', required fields must be filled
+    if (paymentStatus === 'paid') {
+        if (!paymentDate) {
+            e.preventDefault();
+            alert('Please select a payment date when marking as paid.');
+            return;
+        }
+        if (!paymentMethod) {
+            e.preventDefault();
+            alert('Please select a payment method when marking as paid.');
+            return;
+        }
+    }
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+});
+
+// Auto-fill payment date with today when status is changed to 'paid'
+document.querySelectorAll('input[name="payment_status"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const paymentDateInput = document.getElementById('payment_date');
+        if (this.value === 'paid' && !paymentDateInput.value) {
+            const today = new Date().toISOString().split('T')[0];
+            paymentDateInput.value = today;
+        }
+    });
+});
+</script>
+
+{% endblock %}

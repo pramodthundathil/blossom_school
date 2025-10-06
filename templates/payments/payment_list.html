@@ -1,0 +1,235 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary fw-bold mb-0">Payment Records</h2>
+        <div>
+            <a href="{% url 'create_payment' %}" class="btn btn-primary me-2">
+                <i class="fas fa-plus me-2"></i>New Payment
+            </a>
+            <a href="{% url 'export_payment_data' %}" class="btn btn-success">
+                <i class="fas fa-download me-2"></i>Export
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">From Date</label>
+                    <input type="date" name="date_from" class="form-control" 
+                           value="{{ request.GET.date_from }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">To Date</label>
+                    <input type="date" name="date_to" class="form-control" 
+                           value="{{ request.GET.date_to }}">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="paymentsTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Payment ID</th>
+                            <th>Student</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Collected By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>
+                                <strong class="text-primary">{{ payment.payment_id }}</strong>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ payment.student.get_full_name }}</strong><br>
+                                    <small class="text-muted">{{ payment.student.student_id }}</small>
+                                </div>
+                            </td>
+                            <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                            <td>
+                                <div>
+                                    <strong>${{ payment.net_amount|floatformat:2 }}</strong>
+                                    {% if payment.discount_amount > 0 %}
+                                    <br><small class="text-success">Discount: ${{ payment.discount_amount|floatformat:2 }}</small>
+                                    {% endif %}
+                                    {% if payment.late_fee_amount > 0 %}
+                                    <br><small class="text-warning">Late Fee: ${{ payment.late_fee_amount|floatformat:2 }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">
+                                    {{ payment.get_payment_method_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if payment.payment_status == 'completed' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Completed
+                                    </span>
+                                {% elif payment.payment_status == 'pending' %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-clock me-1"></i>Pending
+                                    </span>
+                                {% elif payment.payment_status == 'failed' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times me-1"></i>Failed
+                                    </span>
+                                {% elif payment.payment_status == 'refunded' %}
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-undo me-1"></i>Refunded
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ payment.get_payment_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.collected_by %}
+                                    <small>{{ payment.collected_by.get_full_name }}</small>
+                                {% else %}
+                                    <small class="text-muted">System</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'payment_receipt' payment.id %}" 
+                                       class="btn btn-sm btn-outline-primary" title="View Receipt">
+                                        <i class="fas fa-receipt"></i>
+                                    </a>
+                                    <a href="{% url 'student_payment_details' payment.student.id %}" 
+                                       class="btn btn-sm btn-outline-info" title="Student Details">
+                                        <i class="fas fa-user"></i>
+                                    </a>
+                                    {% if payment.payment_status == 'completed' %}
+                                    <button class="btn btn-sm btn-outline-secondary" 
+                                            onclick="printReceipt('{{ payment.id }}')" title="Print Receipt">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-search fa-3x mb-3"></i>
+                                    <h5>No payments found</h5>
+                                    <p>Try adjusting your search criteria or <a href="{% url 'create_payment' %}">create a new payment</a>.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="card-footer bg-white border-0">
+            <nav aria-label="Payment pagination">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET.student_name %}student_name={{ request.GET.student_name }}&{% endif %}{% if request.GET.payment_method %}payment_method={{ request.GET.payment_method }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.date_from %}date_from={{ request.GET.date_from }}&{% endif %}{% if request.GET.date_to %}date_to={{ request.GET.date_to }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.student_name %}student_name={{ request.GET.student_name }}&{% endif %}{% if request.GET.payment_method %}payment_method={{ request.GET.payment_method }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.date_from %}date_from={{ request.GET.date_from }}&{% endif %}{% if request.GET.date_to %}date_to={{ request.GET.date_to }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET.student_name %}student_name={{ request.GET.student_name }}&{% endif %}{% if request.GET.payment_method %}payment_method={{ request.GET.payment_method }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.date_from %}date_from={{ request.GET.date_from }}&{% endif %}{% if request.GET.date_to %}date_to={{ request.GET.date_to }}&{% endif %}page={{ page_obj.next_page_number }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            
+            <div class="text-center mt-2">
+                <small class="text-muted">
+                    Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} payments
+                </small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Initialize DataTable if not using Django pagination
+    {% if not is_paginated %}
+    $('#paymentsTable').DataTable({
+        order: [[2, 'desc']], // Sort by date descending
+        pageLength: 25,
+        responsive: true,
+        columnDefs: [
+            { orderable: false, targets: [7] } // Disable sorting on Actions column
+        ],
+        language: {
+            search: "Search payments:",
+            lengthMenu: "Show _MENU_ payments per page",
+            info: "Showing _START_ to _END_ of _TOTAL_ payments",
+            infoEmpty: "No payments found",
+            zeroRecords: "No matching payments found"
+        }
+    });
+    {% endif %}
+});
+
+// Print receipt function
+function printReceipt(paymentId) {
+    window.open(`/payments/receipt/${paymentId}/`, '_blank');
+}
+
+// Export functions
+function exportToExcel() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('format', 'excel');
+    window.location.href = `/payments/export/?${params.toString()}`;
+}
+
+function exportToPDF() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('format', 'pdf');
+    window.location.href = `/payments/export/?${params.toString()}`;
+}
+</script>
+{% endblock %}

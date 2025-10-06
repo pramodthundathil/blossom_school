@@ -1,0 +1,1022 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+:root {
+    --primary-color: #214888;
+    --secondary-color: #D54395;
+    --accent-color: #FFB804;
+    --success-color: #43A574;
+    --warning-color: #FF854B;
+    --light-purple: #DEC8FE;
+    --very-light-purple: #F7F1FF;
+    --light-bg: #F3EBFF;
+    --text-color: #453F4E;
+    --light-blue: #89C0FF;
+}
+
+.payment-form-container {
+    background: linear-gradient(135deg, var(--very-light-purple) 0%, var(--light-bg) 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.form-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.form-header h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.back-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.enhanced-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border: none;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+.enhanced-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.enhanced-card-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--light-blue) 100%);
+    color: white;
+    padding: 1.5rem;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.enhanced-card-header.secondary {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--light-purple) 100%);
+}
+
+.enhanced-card-header.accent {
+    background: linear-gradient(135deg, var(--accent-color) 0%, #ffcc33 100%);
+}
+
+.enhanced-card-header.success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #5cbf8a 100%);
+}
+
+.enhanced-card-header h5 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.enhanced-form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.enhanced-form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(33, 72, 136, 0.1);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.enhanced-form-label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.required-asterisk {
+    color: var(--warning-color);
+    font-weight: bold;
+}
+
+.payment-item {
+    background: var(--very-light-purple);
+    border: 2px solid var(--light-purple);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.payment-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(33, 72, 136, 0.1);
+}
+
+.payment-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: 12px 12px 0 0;
+}
+
+.net-amount-display {
+    background: var(--success-color);
+    color: white;
+    border: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.btn-enhanced {
+    border-radius: 12px;
+    padding: 0.875rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-enhanced:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-add-item {
+    background: linear-gradient(135deg, var(--success-color) 0%, #5cbf8a 100%);
+    color: white;
+}
+
+.btn-remove-item {
+    background: linear-gradient(135deg, var(--warning-color) 0%, #ff6b47 100%);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary-enhanced {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+}
+
+.btn-outline-enhanced {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-outline-enhanced:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.summary-table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.summary-table tr {
+    border: none;
+}
+
+.summary-table td {
+    padding: 1rem;
+    border: none;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.summary-table .total-row {
+    background: var(--light-bg);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.outstanding-fee-card {
+    background: white;
+    border: 2px solid var(--light-purple);
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.outstanding-fee-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(33, 72, 136, 0.1);
+}
+
+.badge-enhanced {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.student-info-alert {
+    background: linear-gradient(135deg, var(--light-blue) 20%, rgba(137, 192, 255, 0.2) 100%);
+    border: 2px solid var(--light-blue);
+    border-radius: 12px;
+    color: var(--primary-color);
+    padding: 1rem;
+}
+
+.installment-pre-alert {
+    background: linear-gradient(135deg, var(--accent-color) 20%, rgba(255, 184, 4, 0.2) 100%);
+    border: 2px solid var(--accent-color);
+    border-radius: 12px;
+    color: #8B5A00;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+    display: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .form-header {
+        padding: 1.5rem;
+    }
+    
+    .form-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .payment-item {
+        padding: 1rem;
+    }
+}
+</style>
+
+<div class="payment-form-container">
+    <div class="container-fluid px-4">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-10">
+                <!-- Form Header -->
+                <div class="form-header">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <h2>
+                            <i class="fas fa-money-bill-wave"></i>
+                            Record New Payment
+                        </h2>
+                        <a href="{% url 'payment_dashboard' %}" class="back-btn">
+                            <i class="fas fa-arrow-left"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+
+                <form id="paymentForm" method="post">
+                    {% csrf_token %}
+                    <!-- Add hidden input for payment items at the top level -->
+                    <input type="hidden" name="payment_items" id="paymentItemsInput" value="">
+                    
+                    <div class="row">
+                        <!-- Left Column - Main Form -->
+                        <div class="col-lg-8">
+                            <!-- Student Information -->
+                            <div class="enhanced-card">
+                                <div class="enhanced-card-header">
+                                    <h5><i class="fas fa-user-graduate"></i>Student Information</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <label class="enhanced-form-label">
+                                                Select Student <span class="required-asterisk">*</span>
+                                            </label>
+                                            <select name="student_id" id="studentSelect" class="form-select enhanced-form-control" required>
+                                                <option value="">Choose a student...</option>
+                                                {% for student in students %}
+                                                <option value="{{ student.id }}"
+                                                    {% if prepopulated and prepopulated.student.id == student.id %}selected{% endif %}>
+                                                    {{ student.get_full_name }} ({{ student.student_id }})
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="enhanced-form-label">
+                                                Payment Date <span class="required-asterisk">*</span>
+                                            </label>
+                                            <input type="date" name="payment_date" class="form-control enhanced-form-control"
+                                                value="{% now 'Y-m-d' %}" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Student Details -->
+                                    <div id="studentDetails" class="mt-4" style="{% if prepopulated %}display: block;{% else %}display: none;{% endif %}">
+                                        <div class="student-info-alert">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-info-circle me-3" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <strong id="selectedStudentName" style="font-size: 1.1rem;">
+                                                        {% if prepopulated %}{{ prepopulated.student.get_full_name }}{% endif %}
+                                                    </strong><br>
+                                                    <small style="opacity: 0.8;">Student ID: <span id="selectedStudentId">
+                                                        {% if prepopulated %}{{ prepopulated.student.student_id }}{% endif %}
+                                                    </span></small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {% if prepopulated %}
+                                        <div class="installment-pre-alert">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-calendar-check me-3" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <strong style="font-size: 1rem;">Pre-populated from Installment</strong><br>
+                                                    <small style="opacity: 0.9;">
+                                                        {{ prepopulated.description }} • 
+                                                        Due: {{ prepopulated.installment.due_date|date:"M d, Y" }} •
+                                                        Amount: AED {{ prepopulated.installment.get_outstanding_amount|floatformat:2 }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Items -->
+                            <div class="enhanced-card">
+                                <div class="enhanced-card-header secondary">
+                                    <h5><i class="fas fa-list-alt"></i>Payment Items</h5>
+                                    <button type="button" id="addPaymentItem" class="btn btn-enhanced btn-add-item">
+                                        <i class="fas fa-plus"></i>Add Item
+                                    </button>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div id="paymentItemsContainer">
+                                        <!-- Initial Payment Item -->
+                                        <div class="payment-item" data-item-index="0" {% if prepopulated %}data-installment-id="{{ prepopulated.installment.id }}"{% endif %}>
+                                            <div class="row align-items-end">
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="enhanced-form-label">Fee Category <span class="required-asterisk">*</span></label>
+                                                    <select name="fee_category_0" class="form-select enhanced-form-control fee-category-select" required>
+                                                        <option value="">Select category...</option>
+                                                        {% for category in fee_categories %}
+                                                        <option value="{{ category.id }}"
+                                                            {% if prepopulated and prepopulated.fee_category.id == category.id %}selected{% endif %}>
+                                                            {{ category.name }}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="enhanced-form-label">Amount <span class="required-asterisk">*</span></label>
+                                                    <input type="number" name="amount_0" class="form-control enhanced-form-control amount-input"
+                                                        step="0.01" min="0" value="{% if prepopulated %}{{ prepopulated.amount }}{% else %}0{% endif %}" required>
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="enhanced-form-label">Discount</label>
+                                                    <input type="number" name="discount_0"
+                                                        class="form-control enhanced-form-control discount-input" step="0.01" min="0" value="0">
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="enhanced-form-label">Late Fee</label>
+                                                    <input type="number" name="late_fee_0"
+                                                        class="form-control enhanced-form-control late-fee-input" step="0.01" min="0" 
+                                                        value="{% if prepopulated %}{{ prepopulated.late_fee }}{% else %}0{% endif %}">
+                                                </div>
+                                                <div class="col-md-2 mb-3">
+                                                    <label class="enhanced-form-label">Net Amount</label>
+                                                    <input type="text" class="form-control enhanced-form-control net-amount net-amount-display" value="AED 0.00" readonly>
+                                                </div>
+                                                <div class="col-md-1 mb-3">
+                                                    <button type="button" class="btn btn-enhanced btn-remove-item remove-item" disabled>
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <label class="enhanced-form-label">Description</label>
+                                                    <input type="text" name="description_0" class="form-control enhanced-form-control"
+                                                        placeholder="Payment description (optional)"
+                                                        value="{% if prepopulated %}{{ prepopulated.description }}{% endif %}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Outstanding Fees -->
+                                    <div id="outstandingFeesSection" style="display: none;">
+                                        <hr class="my-4">
+                                        <h6 class="text-primary mb-3">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>Outstanding Fees
+                                        </h6>
+                                        <div id="outstandingFeesList" class="row"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column - Summary & Payment Details -->
+                        <div class="col-lg-4">
+                            <!-- Payment Summary -->
+                            <div class="enhanced-card">
+                                <div class="enhanced-card-header success">
+                                    <h5><i class="fas fa-calculator"></i>Payment Summary</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <table class="table summary-table mb-0">
+                                        <tbody>
+                                            <tr>
+                                                <td>Subtotal:</td>
+                                                <td class="text-end"><strong id="subtotal">AED 0.00</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Total Discount:</td>
+                                                <td class="text-end text-success"><strong id="totalDiscount">AED 0.00</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Total Late Fee:</td>
+                                                <td class="text-end text-warning"><strong id="totalLateFee">AED 0.00</strong></td>
+                                            </tr>
+                                            <tr class="total-row">
+                                                <td><strong>Net Total:</strong></td>
+                                                <td class="text-end"><strong id="netTotal" style="color: var(--success-color);">AED 0.00</strong></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Payment Details -->
+                            <div class="enhanced-card">
+                                <div class="enhanced-card-header accent">
+                                    <h5><i class="fas fa-credit-card"></i>Payment Details</h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="mb-3">
+                                        <label class="enhanced-form-label">
+                                            Payment Method <span class="required-asterisk">*</span>
+                                        </label>
+                                        <select name="payment_method" class="form-select enhanced-form-control" required>
+                                            <option value="">Select method...</option>
+                                            {% for value, label in payment_methods %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="enhanced-form-label">Transaction Reference</label>
+                                        <input type="text" name="transaction_reference" class="form-control enhanced-form-control"
+                                            placeholder="Reference number (optional)">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="enhanced-form-label">Remarks</label>
+                                        <textarea name="remarks" class="form-control enhanced-form-control" rows="3"
+                                            placeholder="Additional notes (optional)"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-grid gap-3">
+                                <button type="submit" class="btn btn-enhanced btn-primary-enhanced">
+                                    <i class="fas fa-save"></i>
+                                    <span class="btn-text">Process Payment</span>
+                                    <div class="loading-spinner"></div>
+                                </button>
+                                <button type="button" id="resetForm" class="btn btn-enhanced btn-outline-enhanced">
+                                    <i class="fas fa-undo"></i>Reset Form
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Payment form initializing...');
+    
+    let itemCounter = 0;
+    const hasPrepopulated = {{ prepopulated|yesno:"true,false" }};
+
+    // Initialize calculations on page load
+    function initializeCalculations() {
+        console.log('Initializing calculations...');
+        
+        const firstItem = document.querySelector('.payment-item');
+        if (firstItem) {
+            console.log('First item found, updating calculations...');
+            updateCalculations();
+            
+            // If prepopulated, ensure values are properly set
+            if (hasPrepopulated) {
+                console.log('Prepopulated data detected, recalculating...');
+                // Force recalculate after a short delay to ensure DOM is ready
+                setTimeout(updateCalculations, 200);
+            }
+        } else {
+            console.warn('Payment item not found, retrying...');
+            setTimeout(initializeCalculations, 100);
+        }
+    }
+    
+    // Run initialization after DOM is fully loaded
+    setTimeout(initializeCalculations, 100);
+
+    // Load student details and outstanding fees
+    document.getElementById('studentSelect').addEventListener('change', function() {
+        console.log('Student selection changed:', this.value);
+        const studentId = this.value;
+        
+        if (studentId) {
+            const studentName = this.options[this.selectedIndex].text;
+            const studentIdMatch = studentName.match(/\(([^)]+)\)$/);
+            const studentIdValue = studentIdMatch ? studentIdMatch[1] : '';
+
+            document.getElementById('selectedStudentName').textContent = studentName.split(' (')[0];
+            document.getElementById('selectedStudentId').textContent = studentIdValue;
+            document.getElementById('studentDetails').style.display = 'block';
+
+            // Load outstanding fees via AJAX
+            loadOutstandingFees(studentId);
+        } else {
+            document.getElementById('studentDetails').style.display = 'none';
+            document.getElementById('outstandingFeesSection').style.display = 'none';
+        }
+    });
+
+    // If prepopulated, trigger student load
+    if (hasPrepopulated) {
+        const studentSelect = document.getElementById('studentSelect');
+        if (studentSelect.value) {
+            loadOutstandingFees(studentSelect.value);
+        }
+    }
+
+    // Add new payment item
+    document.getElementById('addPaymentItem').addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Add payment item clicked');
+        
+        itemCounter++;
+        
+        // Create new payment item
+        const newItem = createPaymentItem(itemCounter);
+        document.getElementById('paymentItemsContainer').appendChild(newItem);
+        
+        console.log('New payment item added, total items:', document.querySelectorAll('.payment-item').length);
+        
+        // Enable remove buttons for all items except first
+        document.querySelectorAll('.remove-item').forEach(btn => {
+            btn.disabled = document.querySelectorAll('.payment-item').length <= 1;
+        });
+        
+        // Trigger calculation
+        updateCalculations();
+    });
+
+    // Remove payment item
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-item')) {
+            e.preventDefault();
+            console.log('Remove item clicked');
+            
+            const items = document.querySelectorAll('.payment-item');
+            if (items.length > 1) {
+                e.target.closest('.payment-item').remove();
+                console.log('Item removed, remaining items:', items.length - 1);
+                
+                // Re-enable remove button for first item if only one remains
+                if (items.length === 2) {
+                    document.querySelector('.remove-item').disabled = true;
+                }
+                
+                updateCalculations();
+            } else {
+                alert('At least one payment item is required.');
+            }
+        }
+    });
+
+    // Update calculations when inputs change
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('amount-input') || 
+            e.target.classList.contains('discount-input') || 
+            e.target.classList.contains('late-fee-input')) {
+            
+            console.log('Input event triggered on:', e.target.className, 'Value:', e.target.value);
+            updateCalculations();
+        }
+    });
+
+    // Create payment item HTML
+    function createPaymentItem(index) {
+        const div = document.createElement('div');
+        div.className = 'payment-item';
+        div.setAttribute('data-item-index', index);
+        div.innerHTML = `
+            <div class="row align-items-end">
+                <div class="col-md-3 mb-3">
+                    <label class="enhanced-form-label">Fee Category <span class="required-asterisk">*</span></label>
+                    <select name="fee_category_${index}" class="form-select enhanced-form-control fee-category-select" required>
+                        <option value="">Select category...</option>
+                        {% for category in fee_categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="enhanced-form-label">Amount <span class="required-asterisk">*</span></label>
+                    <input type="number" name="amount_${index}" class="form-control enhanced-form-control amount-input"
+                        step="0.01" min="0" value="0" required>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="enhanced-form-label">Discount</label>
+                    <input type="number" name="discount_${index}"
+                        class="form-control enhanced-form-control discount-input" step="0.01" min="0" value="0">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="enhanced-form-label">Late Fee</label>
+                    <input type="number" name="late_fee_${index}"
+                        class="form-control enhanced-form-control late-fee-input" step="0.01" min="0" value="0">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="enhanced-form-label">Net Amount</label>
+                    <input type="text" class="form-control enhanced-form-control net-amount net-amount-display" value="AED 0.00" readonly>
+                </div>
+                <div class="col-md-1 mb-3">
+                    <button type="button" class="btn btn-enhanced btn-remove-item remove-item">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <label class="enhanced-form-label">Description</label>
+                    <input type="text" name="description_${index}" class="form-control enhanced-form-control"
+                        placeholder="Payment description (optional)">
+                </div>
+            </div>
+        `;
+        return div;
+    }
+
+    // Update overall calculations
+    function updateCalculations() {
+        console.log('Updating overall calculations...');
+        
+        let subtotal = 0;
+        let totalDiscount = 0;
+        let totalLateFee = 0;
+
+        // Calculate totals from all payment items
+        document.querySelectorAll('.payment-item').forEach((item, index) => {
+            const amount = parseFloat(item.querySelector('.amount-input').value) || 0;
+            const discount = parseFloat(item.querySelector('.discount-input').value) || 0;
+            const lateFee = parseFloat(item.querySelector('.late-fee-input').value) || 0;
+
+            console.log(`Item ${index + 1}:`, { amount, discount, lateFee });
+
+            subtotal += amount;
+            totalDiscount += discount;
+            totalLateFee += lateFee;
+            
+            // Update individual item net amount - FIXED: removed extra + sign
+            const netAmount = Math.max(0, amount - discount + lateFee);
+            item.querySelector('.net-amount').value = 'AED ' + netAmount.toFixed(2);
+        });
+
+        const netTotal = Math.max(0, subtotal - totalDiscount + totalLateFee);
+
+        console.log('Final calculations:', { subtotal, totalDiscount, totalLateFee, netTotal });
+
+        // Update summary display
+        document.getElementById('subtotal').textContent = 'AED ' + subtotal.toFixed(2);
+        document.getElementById('totalDiscount').textContent = 'AED ' + totalDiscount.toFixed(2);
+        document.getElementById('totalLateFee').textContent = 'AED ' + totalLateFee.toFixed(2);
+        document.getElementById('netTotal').textContent = 'AED ' + netTotal.toFixed(2);
+    }
+
+    // Load outstanding fees function
+    function loadOutstandingFees(studentId) {
+        console.log('Loading outstanding fees for student:', studentId);
+        
+        fetch(`/payments/student/${studentId}/outstanding/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Outstanding fees loaded:', data);
+                
+                if (data.outstanding_fees && data.outstanding_fees.length > 0) {
+                    let feesHtml = '';
+                    data.outstanding_fees.forEach(function (fee) {
+                        feesHtml += `
+                        <div class="col-md-6 mb-3">
+                            <div class="outstanding-fee-card">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <strong style="color: var(--primary-color);">${fee.fee_category}</strong>
+                                    ${fee.is_overdue ? '<span class="badge bg-danger">Overdue</span>' : '<span class="badge bg-warning">Pending</span>'}
+                                </div>
+                                <div class="mb-2">
+                                    <small><strong>Amount:</strong> ${fee.amount}</small><br>
+                                    ${fee.late_fee ? `<small class="text-warning"><strong>Late Fee:</strong> ${fee.late_fee}</small>` : ''}
+                                </div>
+                                <button type="button" class="btn btn-sm btn-primary w-100 add-outstanding-fee" 
+                                        data-category-id="${fee.fee_category_id}" 
+                                        data-amount="${fee.amount}" 
+                                        data-late-fee="${fee.late_fee || 0}"
+                                        data-description="${fee.fee_category}">
+                                    <i class="fas fa-plus me-1"></i>Add to Payment
+                                </button>
+                            </div>
+                        </div>`;
+                    });
+                    document.getElementById('outstandingFeesList').innerHTML = feesHtml;
+                    document.getElementById('outstandingFeesSection').style.display = 'block';
+                } else {
+                    document.getElementById('outstandingFeesSection').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading outstanding fees:', error);
+            });
+    }
+
+    // Add outstanding fee to payment items
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('add-outstanding-fee') || e.target.closest('.add-outstanding-fee')) {
+            e.preventDefault();
+            console.log('Add outstanding fee clicked');
+            
+            const button = e.target.classList.contains('add-outstanding-fee') ? e.target : e.target.closest('.add-outstanding-fee');
+            const categoryId = button.getAttribute('data-category-id');
+            const amount = button.getAttribute('data-amount');
+            const lateFee = button.getAttribute('data-late-fee');
+            const description = button.getAttribute('data-description');
+
+            console.log('Outstanding fee data:', { categoryId, amount, lateFee, description });
+
+            // Add a new item
+            document.getElementById('addPaymentItem').click();
+            
+            // Wait for the new item to be created
+            setTimeout(function() {
+                const newItem = document.querySelector('.payment-item:last-child');
+                newItem.querySelector('.fee-category-select').value = categoryId;
+                newItem.querySelector('.amount-input').value = amount;
+                newItem.querySelector('.late-fee-input').value = lateFee;
+                newItem.querySelector('input[name^="description_"]').value = description;
+
+                updateCalculations();
+
+                // Update button state
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-check me-1"></i>Added';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-success');
+            }, 100);
+        }
+    });
+
+    // Form submission - FIXED: Better payment items collection
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        console.log('Form submission started');
+
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const originalText = btnText.textContent;
+        const spinner = submitBtn.querySelector('.loading-spinner');
+        
+        submitBtn.disabled = true;
+        btnText.textContent = 'Processing...';
+        spinner.style.display = 'inline-block';
+
+        // Collect payment items
+        const paymentItems = [];
+        let hasValidItems = false;
+
+        document.querySelectorAll('.payment-item').forEach((item, index) => {
+            const feeCategorySelect = item.querySelector('.fee-category-select');
+            const amountInput = item.querySelector('.amount-input');
+            const discountInput = item.querySelector('.discount-input');
+            const lateFeeInput = item.querySelector('.late-fee-input');
+            const descriptionInput = item.querySelector('input[name^="description_"]');
+            
+            console.log(`Item ${index + 1} elements found:`, {
+                feeCategorySelect: !!feeCategorySelect,
+                amountInput: !!amountInput,
+                discountInput: !!discountInput,
+                lateFeeInput: !!lateFeeInput,
+                descriptionInput: !!descriptionInput
+            });
+
+            if (!feeCategorySelect || !amountInput) {
+                console.log(`Item ${index + 1} missing required elements`);
+                return;
+            }
+
+            const feeCategoryId = feeCategorySelect.value;
+            const amount = amountInput.value;
+            const discount = discountInput ? discountInput.value : '0';
+            const lateFee = lateFeeInput ? lateFeeInput.value : '0';
+            const description = descriptionInput ? descriptionInput.value : '';
+            const installmentId = item.getAttribute('data-installment-id') || null;
+
+            console.log(`Processing item ${index + 1}:`, { 
+                feeCategoryId, 
+                amount, 
+                discount, 
+                lateFee, 
+                description,
+                installmentId 
+            });
+
+            // Validate item - check if fee category is selected and amount is greater than 0
+            if (feeCategoryId && feeCategoryId !== '' && amount && parseFloat(amount) > 0) {
+                const itemData = {
+                    fee_category_id: parseInt(feeCategoryId),
+                    amount: parseFloat(amount),
+                    discount: parseFloat(discount || 0),
+                    late_fee: parseFloat(lateFee || 0),
+                    description: description || ''
+                };
+                
+                // Add installment ID if exists
+                if (installmentId) {
+                    itemData.installment_id = parseInt(installmentId);
+                }
+                
+                paymentItems.push(itemData);
+                hasValidItems = true;
+                
+                console.log(`Valid item ${index + 1} added:`, itemData);
+            } else {
+                console.log(`Item ${index + 1} is invalid - feeCategoryId: "${feeCategoryId}", amount: "${amount}"`);
+            }
+        });
+
+        console.log('Total payment items collected:', paymentItems.length);
+        console.log('Payment items data:', JSON.stringify(paymentItems, null, 2));
+
+        // Validate form
+        if (!hasValidItems || paymentItems.length === 0) {
+            console.error('No valid payment items found');
+            alert('Please add at least one valid payment item:\n- Select a fee category\n- Enter an amount greater than 0');
+            submitBtn.disabled = false;
+            btnText.textContent = originalText;
+            spinner.style.display = 'none';
+            return false;
+        }
+
+        if (!document.getElementById('studentSelect').value) {
+            alert('Please select a student.');
+            document.getElementById('studentSelect').focus();
+            submitBtn.disabled = false;
+            btnText.textContent = originalText;
+            spinner.style.display = 'none';
+            return false;
+        }
+
+        if (!document.querySelector('select[name="payment_method"]').value) {
+            alert('Please select a payment method.');
+            document.querySelector('select[name="payment_method"]').focus();
+            submitBtn.disabled = false;
+            btnText.textContent = originalText;
+            spinner.style.display = 'none';
+            return false;
+        }
+
+        // Create JSON and add to form
+        try {
+            const paymentItemsJson = JSON.stringify(paymentItems);
+            console.log('Payment items JSON created:', paymentItemsJson);
+
+            // Update the hidden input
+            document.getElementById('paymentItemsInput').value = paymentItemsJson;
+            console.log('Hidden input updated with payment items');
+
+            // Submit the form
+            console.log('Submitting form...');
+            this.submit();
+            
+        } catch (error) {
+            console.error('Error creating JSON or submitting form:', error);
+            alert('An error occurred while preparing the form data. Please try again.');
+            submitBtn.disabled = false;
+            btnText.textContent = originalText;
+            spinner.style.display = 'none';
+        }
+    });
+
+    // Reset form handler
+    document.getElementById('resetForm').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('Are you sure you want to reset the form? All entered data will be lost.')) {
+            console.log('Resetting form...');
+            
+            // Reset form fields
+            document.getElementById('paymentForm').reset();
+            document.getElementById('studentDetails').style.display = 'none';
+            document.getElementById('outstandingFeesSection').style.display = 'none';
+            document.getElementById('paymentItemsInput').value = '';
+            
+            // Reset payment items to just one
+            const items = document.querySelectorAll('.payment-item');
+            items.forEach((item, index) => {
+                if (index > 0) {
+                    item.remove();
+                }
+            });
+            
+            // Reset the first item
+            const firstItem = document.querySelector('.payment-item');
+            firstItem.querySelectorAll('input').forEach(input => {
+                if (input.type === 'number') input.value = '0';
+                else if (input.type === 'text' && !input.classList.contains('net-amount')) input.value = '';
+            });
+            firstItem.querySelector('select').selectedIndex = 0;
+            firstItem.querySelector('.net-amount').value = 'AED 0.00';
+            firstItem.removeAttribute('data-installment-id');
+
+            // Reset counter and enable/disable remove button
+            itemCounter = 0;
+            document.querySelector('.remove-item').disabled = true;
+
+            updateCalculations();
+            console.log('Form reset complete');
+        }
+    });
+
+    console.log('Payment form initialization complete');
+});
+</script>
+{% endblock %}

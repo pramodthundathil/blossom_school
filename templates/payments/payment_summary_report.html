@@ -1,0 +1,1092 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+.payment-summary-container {
+    background: var(--e-global-color-fe7363b);
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 0 8px;
+}
+
+.page-title {
+    color: var(--e-global-color-primary);
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-title i {
+    font-size: 24px;
+    color: var(--e-global-color-4e9ef99);
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--e-global-color-primary) 0%, #2c5aa0 100%);
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #1a3a70;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    color: white;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--e-global-color-4e9ef99) 0%, #5cbf8a 100%);
+    color: white;
+    border: none;
+}
+
+.btn-success:hover {
+    background: #3a9465;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    color: white;
+}
+
+.btn-secondary {
+    background: white;
+    color: var(--e-global-color-primary);
+    border: 2px solid var(--e-global-color-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--e-global-color-eecedb7);
+    transform: translateY(-1px);
+    color: var(--e-global-color-primary);
+}
+
+/* Date Filter Section */
+.date-filter-section {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-light);
+    margin-bottom: 24px;
+}
+
+.filter-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--e-global-color-text);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    align-items: end;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--e-global-color-text);
+}
+
+.form-input {
+    padding: 10px 12px;
+    border: 1px solid var(--e-global-color-5d90ead);
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    color: var(--e-global-color-text);
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--e-global-color-primary);
+    box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-filter {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-apply {
+    background: var(--e-global-color-primary);
+    color: white;
+}
+
+.btn-apply:hover {
+    background: #1a3a70;
+    transform: translateY(-1px);
+}
+
+.btn-reset {
+    background: var(--e-global-color-5d90ead);
+    color: var(--e-global-color-text);
+}
+
+.btn-reset:hover {
+    background: #d1d5db;
+    transform: translateY(-1px);
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-light);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border-left: 4px solid transparent;
+}
+
+.summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--card-color) 0%, var(--card-color-secondary) 100%);
+}
+
+.summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-medium);
+}
+
+.summary-card.primary {
+    --card-color: var(--e-global-color-primary);
+    --card-color-secondary: var(--e-global-color-bea3118);
+    border-left-color: var(--e-global-color-primary);
+}
+
+.summary-card.success {
+    --card-color: var(--e-global-color-4e9ef99);
+    --card-color-secondary: #5cbf8a;
+    border-left-color: var(--e-global-color-4e9ef99);
+}
+
+.summary-card.warning {
+    --card-color: var(--e-global-color-3a7e2f2);
+    --card-color-secondary: #ffcc33;
+    border-left-color: var(--e-global-color-3a7e2f2);
+}
+
+.summary-card.info {
+    --card-color: var(--e-global-color-bea3118);
+    --card-color-secondary: #5d9cec;
+    border-left-color: var(--e-global-color-bea3118);
+}
+
+.summary-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    background: linear-gradient(135deg, var(--card-color) 0%, var(--card-color-secondary) 100%);
+    flex-shrink: 0;
+}
+
+.summary-content {
+    flex: 1;
+}
+
+.summary-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--e-global-color-text);
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.summary-label {
+    font-size: 14px;
+    color: var(--e-global-color-text);
+    opacity: 0.8;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.summary-trend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    width: fit-content;
+}
+
+.trend-positive {
+    background: rgba(67, 165, 116, 0.1);
+    color: var(--e-global-color-4e9ef99);
+}
+
+.trend-neutral {
+    background: rgba(137, 192, 255, 0.1);
+    color: var(--e-global-color-bea3118);
+}
+
+/* Charts Section */
+.charts-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.chart-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+}
+
+.chart-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--e-global-color-5d90ead);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--e-global-color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-container {
+    padding: 20px;
+    height: 300px;
+    position: relative;
+}
+
+/* Payment Methods Table */
+.methods-table-container {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+    margin-bottom: 32px;
+}
+
+.table-header {
+    background: linear-gradient(135deg, var(--e-global-color-primary) 0%, var(--e-global-color-bea3118) 100%);
+    color: white;
+    padding: 20px;
+}
+
+.table-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.methods-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.methods-table th {
+    background: var(--e-global-color-eecedb7);
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--e-global-color-text);
+    font-size: 14px;
+    border-bottom: 2px solid var(--e-global-color-5d90ead);
+}
+
+.methods-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--e-global-color-5d90ead);
+    color: var(--e-global-color-text);
+    font-size: 14px;
+}
+
+.methods-table tr:hover {
+    background: var(--e-global-color-fe7363b);
+}
+
+.method-badge {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.method-cash {
+    background: rgba(67, 165, 116, 0.15);
+    color: var(--e-global-color-4e9ef99);
+}
+
+.method-transfer {
+    background: rgba(33, 72, 136, 0.15);
+    color: var(--e-global-color-primary);
+}
+
+.method-card {
+    background: rgba(255, 184, 4, 0.15);
+    color: var(--e-global-color-3a7e2f2);
+}
+
+.method-online {
+    background: rgba(213, 67, 149, 0.15);
+    color: var(--e-global-color-secondary);
+}
+
+.amount-cell {
+    font-weight: 700;
+    color: var(--e-global-color-text);
+}
+
+.percentage-cell {
+    font-size: 12px;
+    color: var(--e-global-color-text);
+    opacity: 0.7;
+}
+
+/* Daily Summary */
+.daily-summary-container {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-light);
+    overflow: hidden;
+}
+
+.daily-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.daily-table th {
+    background: var(--e-global-color-eecedb7);
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--e-global-color-text);
+    font-size: 14px;
+    border-bottom: 2px solid var(--e-global-color-5d90ead);
+}
+
+.daily-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--e-global-color-5d90ead);
+    color: var(--e-global-color-text);
+    font-size: 14px;
+}
+
+.daily-table tr:hover {
+    background: var(--e-global-color-fe7363b);
+}
+
+.date-cell {
+    font-weight: 600;
+    color: var(--e-global-color-primary);
+}
+
+.count-cell {
+    text-align: center;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--e-global-color-text);
+    opacity: 0.6;
+}
+
+.empty-state i {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+    color: var(--e-global-color-bea3118);
+}
+
+.empty-state h4 {
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.empty-state p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Report Period */
+.report-period {
+    background: rgba(67, 165, 116, 0.1);
+    padding: 12px 16px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--e-global-color-4e9ef99);
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .charts-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .payment-summary-container {
+        padding: 16px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+    
+    .page-title {
+        font-size: 24px;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+    
+    .summary-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .action-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    .methods-table, .daily-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.summary-card,
+.chart-card,
+.methods-table-container,
+.daily-summary-container {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.summary-card:nth-child(2) { animation-delay: 0.1s; }
+.summary-card:nth-child(3) { animation-delay: 0.2s; }
+.summary-card:nth-child(4) { animation-delay: 0.3s; }
+</style>
+
+<div class="payment-summary-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-chart-bar"></i>
+            Payment Summary Report
+        </h1>
+        <div class="header-actions">
+            <a href="{% url 'payment_dashboard' %}" class="action-btn btn-primary">
+                <i class="fas fa-arrow-left"></i>Back to Dashboard
+            </a>
+            <button class="action-btn btn-success" onclick="exportReport()">
+                <i class="fas fa-download"></i>Export Report
+            </button>
+            <button class="action-btn btn-secondary" onclick="window.print()">
+                <i class="fas fa-print"></i>Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Date Filter Section -->
+    <div class="date-filter-section">
+        <div class="filter-title">
+            <i class="fas fa-filter"></i>Filter Report
+        </div>
+        <form method="get" class="filter-form">
+            <div class="form-group">
+                <label class="form-label">From Date</label>
+                <input type="date" name="date_from" class="form-input" value="{{ date_from }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">To Date</label>
+                <input type="date" name="date_to" class="form-input" value="{{ date_to }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">&nbsp;</label>
+                <div class="filter-actions">
+                    <button type="submit" class="btn-filter btn-apply">
+                        <i class="fas fa-check"></i>Apply Filters
+                    </button>
+                    <a href="{% url 'payment_summary_report' %}" class="btn-filter btn-reset">
+                        <i class="fas fa-redo"></i>Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Report Period -->
+    {% if date_from or date_to %}
+    <div class="report-period">
+        <i class="fas fa-calendar-alt"></i>
+        Report Period: 
+        {% if date_from and date_to %}
+            {{ date_from }} to {{ date_to }}
+        {% elif date_from %}
+            From {{ date_from }} to present
+        {% elif date_to %}
+            Up to {{ date_to }}
+        {% else %}
+            All time
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card primary">
+            <div class="summary-icon">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <div class="summary-content">
+                <div class="summary-value">{{ total_payments }}</div>
+                <div class="summary-label">Total Payments</div>
+                <div class="summary-trend trend-positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Completed Transactions</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-card success">
+            <div class="summary-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="summary-content">
+                <div class="summary-value">${{ total_amount|floatformat:2 }}</div>
+                <div class="summary-label">Total Collection</div>
+                <div class="summary-trend trend-positive">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Net Amount</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-card warning">
+            <div class="summary-icon">
+                <i class="fas fa-tag"></i>
+            </div>
+            <div class="summary-content">
+                <div class="summary-value">${{ total_discount|floatformat:2 }}</div>
+                <div class="summary-label">Total Discount</div>
+                <div class="summary-trend trend-neutral">
+                    <i class="fas fa-percentage"></i>
+                    <span>Discounts Applied</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-card info">
+            <div class="summary-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="summary-content">
+                <div class="summary-value">${{ total_late_fees|floatformat:2 }}</div>
+                <div class="summary-label">Late Fees Collected</div>
+                <div class="summary-trend trend-neutral">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Additional Revenue</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">
+                    <i class="fas fa-chart-pie"></i>Payment Methods
+                </h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="paymentMethodsChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">
+                    <i class="fas fa-chart-line"></i>Daily Collection Trend
+                </h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="dailyTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Methods Breakdown -->
+    <div class="methods-table-container">
+        <div class="table-header">
+            <h3>
+                <i class="fas fa-credit-card"></i>
+                Payment Methods Breakdown
+            </h3>
+        </div>
+        
+        {% if payment_method_summary %}
+        <table class="methods-table">
+            <thead>
+                <tr>
+                    <th>Payment Method</th>
+                    <th>Transaction Count</th>
+                    <th>Total Amount</th>
+                    <th>Percentage</th>
+                    <th>Average Transaction</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for method in payment_method_summary %}
+                <tr>
+                    <td>
+                        <span class="method-badge 
+                            {% if method.payment_method == 'cash' %}method-cash
+                            {% elif method.payment_method == 'bank_transfer' %}method-transfer
+                            {% elif method.payment_method == 'credit_card' %}method-card
+                            {% else %}method-online{% endif %}">
+                            {{ method.get_payment_method_display }}
+                        </span>
+                    </td>
+                    <td>{{ method.count }}</td>
+                    <td class="amount-cell">${{ method.total|floatformat:2 }}</td>
+                    <td class="percentage-cell">
+                        {% widthratio method.total total_amount 100 as percentage %}
+                        {{ percentage|floatformat:1 }}%
+                    </td>
+                    <td class="amount-cell">
+                        ${{ method.total|floatformat:2 }}
+                    </td>
+                </tr>
+                {% endfor %}
+                <tr style="background: var(--e-global-color-fe7363b); font-weight: 700;">
+                    <td>Total</td>
+                    <td>{{ total_payments }}</td>
+                    <td class="amount-cell">${{ total_amount|floatformat:2 }}</td>
+                    <td class="percentage-cell">100%</td>
+                    <td class="amount-cell">
+                        {% if total_payments > 0 %}
+                            ${{ total_amount|divisibleby:total_payments|floatformat:2 }}
+                        {% else %}
+                            $0.00
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-credit-card"></i>
+            <h4>No Payment Data</h4>
+            <p>No payment transactions found for the selected period.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Daily Collection Summary -->
+    <div class="daily-summary-container">
+        <div class="table-header">
+            <h3>
+                <i class="fas fa-calendar-day"></i>
+                Last 30 Days Collection
+            </h3>
+        </div>
+        
+        {% if daily_summary %}
+        <table class="daily-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Transactions</th>
+                    <th>Daily Collection</th>
+                    <th>Average per Transaction</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in daily_summary %}
+                <tr>
+                    <td class="date-cell">{{ day.payment_date|date:"M d, Y" }}</td>
+                    <td class="count-cell">{{ day.count }}</td>
+                    <td class="amount-cell">${{ day.total|floatformat:2 }}</td>
+                    <td class="amount-cell">
+                        ${{ day.total|floatformat:2 }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-calendar-times"></i>
+            <h4>No Daily Data</h4>
+            <p>No daily collection data available for the selected period.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Payment summary report loaded');
+    console.log('Total payments:', {{ total_payments }});
+    console.log('Total amount: ${{ total_amount|floatformat:2 }}');
+
+    // Payment Methods Chart Data
+    const methodLabels = [];
+    const methodData = [];
+    
+    {% for method in payment_method_summary %}
+        methodLabels.push('{{ method.get_payment_method_display }}');
+        methodData.push({{ method.total }});
+    {% endfor %}
+
+    // Payment Methods Chart
+    const methodsCtx = document.getElementById('paymentMethodsChart').getContext('2d');
+    const paymentMethodsChart = new Chart(methodsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: methodLabels,
+            datasets: [{
+                data: methodData,
+                backgroundColor: [
+                    'var(--e-global-color-primary)',
+                    'var(--e-global-color-secondary)',
+                    'var(--e-global-color-3a7e2f2)',
+                    'var(--e-global-color-4e9ef99)',
+                    'var(--e-global-color-bea3118)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed;
+                            const total = {{ total_amount }};
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Daily Trend Chart Data
+    const dailyLabels = [];
+    const dailyData = [];
+    
+    {% for day in daily_summary reversed %}
+        dailyLabels.push('{{ day.payment_date|date:"M d" }}');
+        dailyData.push({{ day.total }});
+    {% endfor %}
+
+    // Daily Trend Chart
+    const trendCtx = document.getElementById('dailyTrendChart').getContext('2d');
+    const dailyTrendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: dailyLabels,
+            datasets: [{
+                label: 'Daily Collection',
+                data: dailyData,
+                borderColor: 'var(--e-global-color-primary)',
+                backgroundColor: 'rgba(33, 72, 136, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Add hover effects to table rows
+    const tableRows = document.querySelectorAll('.methods-table tbody tr, .daily-table tbody tr');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(4px)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+
+    // Date validation
+    const dateFrom = document.querySelector('input[name="date_from"]');
+    const dateTo = document.querySelector('input[name="date_to"]');
+    
+    if (dateFrom && dateTo) {
+        dateFrom.addEventListener('change', function() {
+            if (dateTo.value && this.value > dateTo.value) {
+                dateTo.value = this.value;
+            }
+        });
+        
+        dateTo.addEventListener('change', function() {
+            if (dateFrom.value && this.value < dateFrom.value) {
+                dateFrom.value = this.value;
+            }
+        });
+    }
+});
+
+function exportReport() {
+    // Get current filter parameters
+    const params = new URLSearchParams(window.location.search);
+    const dateFrom = params.get('date_from') || '';
+    const dateTo = params.get('date_to') || '';
+    
+    // Create export URL
+    const exportUrl = `{% url 'export_payment_data' %}?report_type=summary&date_from=${dateFrom}&date_to=${dateTo}`;
+    
+    // Show loading state
+    showNotification('Preparing export...', 'info');
+    
+    // Trigger download
+    setTimeout(() => {
+        window.open(exportUrl, '_blank');
+        showNotification('Export started successfully!', 'success');
+    }, 1000);
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 20px;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: 600;
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+        box-shadow: var(--shadow-medium);
+    `;
+    
+    if (type === 'success') {
+        notification.style.background = 'var(--e-global-color-4e9ef99)';
+    } else if (type === 'error') {
+        notification.style.background = 'var(--e-global-color-7d1e931)';
+    } else {
+        notification.style.background = 'var(--e-global-color-bea3118)';
+    }
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Add CSS for notification animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Print styles
+const printStyle = document.createElement('style');
+printStyle.textContent = `
+    @media print {
+        .header-actions,
+        .date-filter-section,
+        .action-btn {
+            display: none !important;
+        }
+        
+        .payment-summary-container {
+            background: white !important;
+            padding: 0 !important;
+        }
+        
+        .summary-card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+        
+        .chart-card,
+        .methods-table-container,
+        .daily-summary-container {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            margin-bottom: 20px !important;
+        }
+    }
+`;
+document.head.appendChild(printStyle);
+</script>
+{% endblock %}

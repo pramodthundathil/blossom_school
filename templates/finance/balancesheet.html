@@ -1,0 +1,346 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+
+<style>
+    .category-add-list {
+        width: 80% !important;
+        margin: auto;
+    }
+
+    @media (max-width:700px) {
+        .category-add-list {
+            width: 100% !important;
+        }
+    }
+
+    .contenttable table {
+        border: .5px solid gray;
+        border-radius: 20px;
+        padding: 20px;
+        width: 100%;
+        /* min-height: 500px; */
+    }
+    .contenttable td{
+        height: 50px;
+    }
+    .contenttable tr:nth-child(even){
+        background-color: rgba(173, 216, 230, 0.305);
+    }
+    .contenttable th, td {
+        padding: 10px;
+        /* border-radius: 20px; */
+        border-right: .5px solid gray;
+    }
+
+    .contenttable th {
+        height: 60px !important;
+    }
+</style>
+<style>
+    .btn-outline-primary {
+        border: #214888 .5px solid !important;
+        color: #214888 !important;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #214888 !important;
+        color: white !important;
+    }
+
+    .custom-modal .modal-content {
+        border: none;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-heavy);
+        background-color: var(--e-global-color-aa4a27d);
+        font-family: var(--e-global-typography-primary-font-family);
+    }
+
+    .custom-modal .modal-header {
+        background: linear-gradient(135deg, var(--e-global-color-primary) 0%, #1e3a6f 100%);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        padding: 20px 24px;
+    }
+
+    .custom-modal .modal-title {
+        font-weight: 600;
+        font-size: 1.25rem;
+        margin: 0;
+        color: white;
+    }
+
+    .custom-modal .btn-close {
+        background: none;
+        border: none;
+        color: white;
+        opacity: 0.8;
+        font-size: 1.2rem;
+        filter: invert(1);
+        transition: all 0.3s ease;
+    }
+
+    .custom-modal .btn-close:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    .custom-modal .modal-body {
+        padding: 24px;
+        color: var(--e-global-color-text);
+        line-height: 1.6;
+        background-color: var(--e-global-color-aa4a27d);
+    }
+
+    .custom-modal .modal-footer {
+        padding: 16px 24px 24px;
+        border: none;
+        background-color: var(--e-global-color-aa4a27d);
+        gap: 12px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .custom-modal .btn-custom-secondary {
+        background-color: var(--e-global-color-5d90ead);
+        border: 2px solid var(--e-global-color-5d90ead);
+        color: var(--e-global-color-text);
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        transition: all 0.3s ease;
+        font-family: var(--e-global-typography-primary-font-family);
+    }
+
+    .custom-modal .btn-custom-secondary:hover {
+        background-color: var(--e-global-color-eecedb7);
+        border-color: var(--e-global-color-eecedb7);
+        color: var(--e-global-color-primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .custom-modal .btn-custom-primary {
+        background: linear-gradient(135deg, var(--e-global-color-secondary) 0%, #b93875 100%);
+        border: 2px solid var(--e-global-color-secondary);
+        color: white;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        transition: all 0.3s ease;
+        font-family: var(--e-global-typography-primary-font-family);
+        box-shadow: var(--shadow-light);
+    }
+
+    .custom-modal .btn-custom-primary:hover {
+        background: linear-gradient(135deg, #b93875 0%, var(--e-global-color-secondary) 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        border-color: #b93875;
+    }
+
+    .custom-modal .btn-custom-primary:active {
+        transform: translateY(0);
+    }
+
+    /* Modal backdrop */
+    .custom-modal .modal-backdrop {
+        background-color: rgba(33, 72, 136, 0.4);
+        backdrop-filter: blur(4px);
+    }
+
+    /* Animation */
+    .custom-modal.fade .modal-dialog {
+        transition: transform 0.4s ease-out;
+        transform: translate(0, -50px) scale(0.9);
+    }
+
+    .custom-modal.show .modal-dialog {
+        transform: translate(0, 0) scale(1);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: var(--white);
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-input.error {
+        border-color: var(--error);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        background-color: rgba(239, 68, 68, 0.05);
+    }
+
+    .form-input.success {
+        border-color: var(--success);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    textarea.form-input {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    select.form-input {
+        cursor: pointer;
+    }
+
+    input[type="file"].form-input {
+        padding: 0.5rem;
+        border-style: dashed;
+    }
+
+    /* Action buttons styling */
+    .action-buttons {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .action-buttons a {
+        text-decoration: none;
+        padding: 5px 8px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .action-buttons a:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .text-primary {
+        color: #007bff !important;
+    }
+
+    .text-info {
+        color: #17a2b8 !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    
+</style>
+
+<div class="category-add-list">
+    <div class="content-page">
+        <div class="container-fluid add-form-list">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between">
+                            <div class="header-title">
+                                <h4 class="card-title">Income and Expense</h4>
+                                <p>Income and Expense sheet of <span class="text-primary h5">{{month}}</span> </p>
+                            </div>
+                            <div class="header-title">
+                                <button class="btn btn-primary" class="btn btn-primary"  data-bs-toggle="modal" data-bs-target="#exampleModal">Search By date</button>
+                            </div>
+                            <div class="modal fade custom-modal" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                   <div class="modal-content">
+                                      <div class="modal-header">
+                                         <h5 class="modal-title" id="exampleModalLabel">Select Date Range</h5>
+                                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                         <span aria-hidden="true">&times;</span>
+                                         </button>
+                                      </div>
+                                      <div class="modal-body">
+                                        <form action="{%url 'balance_sheet_selected' %}" method="post">
+                                            {% csrf_token %}
+                                            <label for="">Start Date</label>
+                                            <input type="date" class="form-control" name="sdate" required>
+                                            <label for="">End Date</label>
+                                            <input type="date" class="form-control" name="edate" required>
+                                    </div>
+                                      
+                                      <div class="modal-footer">
+                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                         <button type="submit" class="btn btn-primary">Search</button>
+                                      </div>
+                                   </div>
+                                </div>
+                             </div>
+  
+                    </div>
+                        </div>
+                  
+
+                    <div class="contenttable">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="border-bottom: .5px solid gray;">Sl No</th>
+                                    <th style="border-bottom: .5px solid gray;">Date</th>
+                                    <th style="width: 70%;border-bottom: .5px solid gray;">Particulars</th>
+                                    <th style="border-bottom: .5px solid gray;">Debit</th>
+                                    <th style="border-bottom: .5px solid gray;">Credit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in combined_list %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{record.date}}</td>
+                                    <td>{{ record.perticulers }}</td>
+                                    <td>
+                                        {% if record.type == 'debit' %}
+                                        {{ record.amount|floatformat:2 }}
+                                        {% else %}
+                                        --
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record.type == 'credit' %}
+                                        {{ record.amount|floatformat:2 }}
+                                        {% else %}
+                                        --
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                <tr>
+                                    <th></th>
+                                    <th colspan="2" style="width: 70%;border-top: .5px solid gray;">Totals</th>
+                                    <th style="border-top: .5px solid gray;">{{ total_expense |floatformat:2 }}</th>
+                                    <th style="border-top: .5px solid gray;">{{ total_income |floatformat:2 }}</th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const startDateInput = document.querySelector('input[name="sdate"]');
+    const endDateInput = document.querySelector('input[name="edate"]');
+
+    startDateInput.addEventListener('change', function() {
+        // Set the minimum value of the end date to the start date
+        endDateInput.min = startDateInput.value;
+    });
+});
+</script>
+
+{% endblock %}

@@ -68,3 +68,12 @@ class ClassRooms(models.Model):
 
     def __str__(self):
         return str(self.class_name)
+    
+class FeeCategory(models.Model):
+    name = models.CharField(max_length=30)
+    created_at = models.DateField(auto_now_add=True)
+    modified_at = models.DateField(auto_now=True)
+
+
+    def __str__(self):
+        return str(self.name)

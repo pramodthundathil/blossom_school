@@ -1,0 +1,279 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+<style>
+       .form-container {
+        position: relative;
+    }
+
+    .form-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .form-section {
+        background: var(--light-bg);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary-blue);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-dark);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .required-field::after {
+        content: '*';
+        color: var(--error);
+        margin-left: 0.25rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: var(--white);
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-input.error {
+        border-color: var(--error);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        background-color: rgba(239, 68, 68, 0.05);
+    }
+
+    .form-input.success {
+        border-color: var(--success);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    textarea.form-input {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    select.form-input {
+        cursor: pointer;
+    }
+
+    input[type="file"].form-input {
+        padding: 0.5rem;
+        border-style: dashed;
+    }
+
+</style>
+<!-- Fixed Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'attendance_dashboard' %}" class="breadcrumb-link">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Attendance</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-list"></i>
+                    <span>Attendance Records</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-list"></i> Attendance Records</h3>
+            <a href="{% url 'bulk_mark_attendance' %}" class="add-item-button">
+                <span class="add-event"><i class="fas fa-plus"></i></span>
+                <span style="margin-left: 10px;">Mark Attendance</span>
+            </a>
+        </div>
+
+        <div class="card-content">
+            <!-- Filters -->
+            <form method="get" style="background: #f3f4f6; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--e-global-color-text);">Month</label>
+                        <select name="month" class="form-input">
+                            {% for i in "123456789ABC" %}
+                                {% if forloop.counter <= 12 %}
+                                    <option value="{{ forloop.counter }}" {% if forloop.counter == current_month %}selected{% endif %}>
+                                        {% if forloop.counter == 1 %}January{% elif forloop.counter == 2 %}February{% elif forloop.counter == 3 %}March{% elif forloop.counter == 4 %}April{% elif forloop.counter == 5 %}May{% elif forloop.counter == 6 %}June{% elif forloop.counter == 7 %}July{% elif forloop.counter == 8 %}August{% elif forloop.counter == 9 %}September{% elif forloop.counter == 10 %}October{% elif forloop.counter == 11 %}November{% else %}December{% endif %}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--e-global-color-text);">Year</label>
+                        <input type="number" name="year" value="{{ current_year }}" class="form-input" min="2020" max="2050">
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--e-global-color-text);">Staff Member</label>
+                        <select name="teacher" class="form-input">
+                            <option value="">All Staff</option>
+                            {% for teacher in teachers %}
+                                <option value="{{ teacher.id }}" {% if teacher.id|stringformat:"s" == selected_teacher %}selected{% endif %}>
+                                    {{ teacher.full_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--e-global-color-text);">Status</label>
+                        <select name="status" class="form-input">
+                            <option value="">All Status</option>
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1rem; text-align: right;">
+                    <button type="submit" class="add-item-button">
+                        <i class="fas fa-filter"></i>
+                        <span style="margin-left: 10px;">Apply Filters</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Attendance Table -->
+            <div class="table-responsive-1">
+                <table id="attendanceTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Staff Member</th>
+                            <th>Position</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                            <th>Marked By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attendance in attendances %}
+                        <tr>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ attendance.date|date:"M d, Y (D)" }}
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div class="avatar">
+                                        {{ attendance.teacher.first_name|first }}{{ attendance.teacher.last_name|first }}
+                                    </div>
+                                    <div>
+                                        <strong style="color: var(--e-global-color-text); font-size: 12px;">{{ attendance.teacher.full_name }}</strong>
+                                        <br>
+                                        <small style="color: var(--e-global-color-text); opacity: 0.7; font-size: 10px;">{{ attendance.teacher.teacher_id }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ attendance.teacher.get_position_display }}
+                            </td>
+                            <td>
+                                {% if attendance.status == 'present' %}
+                                    <span class="status-badge" style="background: #d1fae5; color: #065f46;">Present</span>
+                                {% elif attendance.status == 'absent' %}
+                                    <span class="status-badge" style="background: #fee2e2; color: #991b1b;">Absent</span>
+                                {% elif attendance.status == 'half_day' %}
+                                    <span class="status-badge" style="background: #fef3c7; color: #92400e;">Half Day</span>
+                                {% else %}
+                                    <span class="status-badge" style="background: #e0e7ff; color: #3730a3;">Sunday</span>
+                                {% endif %}
+                            </td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ attendance.remarks|default:"-" }}
+                            </td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">
+                                {{ attendance.marked_by|default:"System" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px 20px;">
+                                <div style="opacity: 0.6;">
+                                    <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 15px; color: var(--e-global-color-primary);"></i>
+                                    <br>
+                                    <h4 style="margin: 0; font-weight: 600; color: var(--e-global-color-text); font-size: 16px;">No attendance records found</h4>
+                                    <p style="margin: 8px 0 0 0; font-size: 12px;">Try adjusting your filters</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DataTables -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+
+<script>
+$(document).ready(function() {
+    if ($.fn.DataTable) {
+        $('#attendanceTable').DataTable({
+            order: [[0, 'desc']]
+        });
+    }
+});
+</script>
+
+{% endblock %}

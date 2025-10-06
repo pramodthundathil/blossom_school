@@ -1,0 +1,356 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-blue: #214888;
+        --secondary-pink: #D54395;
+        --accent-purple: #8B5FBF;
+        --light-purple: #F3EBFF;
+        --white: #FFFFFF;
+        --text-dark: #453F4E;
+        --success: #10B981;
+        --error: #EF4444;
+        --border-color: #E5E7EB;
+        --border-radius: 12px;
+    }
+
+    .calculate-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .info-card {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .info-card h3 {
+        margin: 0 0 1rem 0;
+        font-size: 1.5rem;
+    }
+
+    .info-card p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.95rem;
+    }
+
+    .warning-box {
+        background: rgba(245, 158, 11, 0.1);
+        border: 2px solid #f59e0b;
+        color: #92400e;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .warning-box i {
+        font-size: 1.5rem;
+        color: #f59e0b;
+    }
+
+    .warning-box div h4 {
+        margin: 0 0 0.5rem 0;
+        color: #92400e;
+        font-size: 1rem;
+    }
+
+    .warning-box div p {
+        margin: 0;
+        font-size: 0.875rem;
+    }
+
+    .form-section {
+        background: var(--light-purple);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary-blue);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-dark);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .required-field::after {
+        content: '*';
+        color: var(--error);
+        margin-left: 0.25rem;
+    }
+
+    .form-input, .form-select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: var(--white);
+        box-sizing: border-box;
+    }
+
+    .form-input:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+    }
+
+    .calculation-info {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: 2px solid var(--primary-blue);
+        margin-top: 1.5rem;
+    }
+
+    .calculation-info h5 {
+        margin: 0 0 1rem 0;
+        color: var(--primary-blue);
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .calculation-info ul {
+        margin: 0;
+        padding-left: 1.5rem;
+        color: var(--text-dark);
+    }
+
+    .calculation-info li {
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .submit-section {
+        background: var(--light-purple);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        text-align: center;
+    }
+
+    .submit-button {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        border: none;
+        padding: 1rem 3rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(33, 72, 136, 0.3);
+    }
+
+    .submit-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    @media (max-width: 768px) {
+        .calculate-container {
+            padding: 0 1rem;
+        }
+
+        .form-section, .submit-section {
+            padding: 1.5rem;
+        }
+    }
+</style>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'salary_dashboard' %}" class="breadcrumb-link">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Salary</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-calculator"></i>
+                    <span>Calculate Salary</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-calculator"></i> Calculate Monthly Salary</h3>
+            <a href="{% url 'salary_list' %}" class="add-item-button">
+                <span class="add-event"><i class="fas fa-list"></i></span>
+                <span style="margin-left: 10px;">View Salaries</span>
+            </a>
+        </div>
+
+        <div class="card-content">
+            <div class="calculate-container">
+                <!-- Info Card -->
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> Salary Calculation</h3>
+                    <p>Calculate monthly salaries for all active staff members based on their attendance records.</p>
+                </div>
+
+                <!-- Warning Box -->
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <h4>Important Notice</h4>
+                        <p>This action will calculate salaries for ALL active staff members for the selected month. If salaries have already been calculated, they will be recalculated based on current attendance data.</p>
+                    </div>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div style="padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px; background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success);">
+                            <i class="fas fa-check-circle"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" id="calculateForm">
+                    {% csrf_token %}
+                    
+                    <div class="form-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            Select Period
+                        </h4>
+
+                        <div class="form-group">
+                            <label for="month" class="form-label required-field">Month</label>
+                            <select name="month" id="month" class="form-select" required>
+                                <option value="">-- Select Month --</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="year" class="form-label required-field">Year</label>
+                            <select name="year" id="year" class="form-select" required>
+                                <option value="">-- Select Year --</option>
+                                <option value="2024">2024</option>
+                                <option value="2025" selected>2025</option>
+                                <option value="2026">2026</option>
+                                <option value="2027">2027</option>
+                            </select>
+                        </div>
+
+                        <div class="calculation-info">
+                            <h5><i class="fas fa-clipboard-list"></i> Calculation Details</h5>
+                            <ul>
+                                <li><strong>Gross Salary:</strong> Basic Salary + Accommodation Allowance + Transportation Allowance</li>
+                                <li><strong>Working Days:</strong> Total days in month minus Sundays</li>
+                                <li><strong>Per Day Salary:</strong> Gross Salary ÷ Working Days</li>
+                                <li><strong>Deductions:</strong> Full day absent = 1 day salary, Half day = 0.5 day salary</li>
+                                <li><strong>Net Salary:</strong> Gross Salary - Total Deductions + Additions</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="submit-section">
+                        <button type="submit" class="submit-button" id="submitBtn">
+                            <i class="fas fa-calculator"></i>
+                            <span>Calculate Salaries</span>
+                        </button>
+                        <p style="margin-top: 1rem; color: var(--text-dark); opacity: 0.7; font-size: 0.875rem;">
+                            This process may take a few moments depending on the number of staff members.
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('calculateForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    const month = document.getElementById('month').value;
+    const year = document.getElementById('year').value;
+    
+    if (!month || !year) {
+        e.preventDefault();
+        alert('Please select both month and year');
+        return;
+    }
+    
+    const confirmMsg = `Are you sure you want to calculate salaries for ${document.querySelector('#month option:checked').text} ${year}?\n\nThis will process all active staff members.`;
+    
+    if (!confirm(confirmMsg)) {
+        e.preventDefault();
+        return;
+    }
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Calculating...</span>';
+});
+
+// Set current month as default
+document.addEventListener('DOMContentLoaded', function() {
+    const currentMonth = new Date().getMonth() + 1;
+    document.getElementById('month').value = currentMonth;
+});
+</script>
+
+{% endblock %}

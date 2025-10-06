@@ -1,0 +1,717 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-blue: #214888;
+        --secondary-pink: #D54395;
+        --accent-purple: #8B5FBF;
+        --light-purple: #F3EBFF;
+        --soft-yellow: #FFD700;
+        --coral: #FF6B6B;
+        --light-bg: #F8F6FF;
+        --white: #FFFFFF;
+        --text-dark: #453F4E;
+        --text-light: #6B7280;
+        --success: #10B981;
+        --error: #EF4444;
+        --border-color: #E5E7EB;
+        --border-radius: 12px;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-content {
+        padding: 2rem;
+    }
+
+    .form-container {
+        position: relative;
+    }
+
+    .form-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .form-section {
+        background: var(--light-bg);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary-blue);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1rem;
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-dark);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .required-field::after {
+        content: '*';
+        color: var(--error);
+        margin-left: 0.25rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: var(--white);
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-input.error {
+        border-color: var(--error);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        background-color: rgba(239, 68, 68, 0.05);
+    }
+
+    .form-input.success {
+        border-color: var(--success);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    select.form-input {
+        cursor: pointer;
+    }
+
+    .error-message {
+        color: var(--error);
+        font-size: 0.75rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        background: rgba(239, 68, 68, 0.1);
+        padding: 0.5rem;
+        border-radius: 4px;
+        border-left: 3px solid var(--error);
+    }
+
+    .error-message:empty {
+        display: none;
+    }
+
+    .submit-section {
+        background: var(--light-bg);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .submit-button {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        border: none;
+        padding: 1rem 2.5rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        min-width: 200px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .submit-button::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.6s ease;
+        transform: translate(-50%, -50%);
+    }
+
+    .submit-button:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(33, 72, 136, 0.3);
+    }
+
+    .submit-button:active {
+        transform: translateY(0);
+    }
+
+    .submit-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .submit-button span {
+        position: relative;
+        z-index: 2;
+    }
+
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--white);
+        animation: spin 1s ease-in-out infinite;
+        display: none;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .info-card {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+    }
+
+    .info-card h4 {
+        margin: 0 0 0.5rem;
+        font-size: 1.125rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-card p {
+        margin: 0.25rem 0;
+        opacity: 0.95;
+    }
+
+    .calculation-card {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: 2px solid var(--border-color);
+        margin-top: 1rem;
+    }
+
+    .calculation-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .calculation-row:last-child {
+        border-bottom: none;
+        font-weight: 600;
+        font-size: 1.125rem;
+        color: var(--primary-blue);
+        padding-top: 1rem;
+        margin-top: 0.5rem;
+        border-top: 2px solid var(--primary-blue);
+    }
+
+    .fee-list {
+        background: var(--white);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .fee-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .fee-item:last-child {
+        border-bottom: none;
+    }
+
+    .fee-name {
+        color: var(--text-dark);
+        font-weight: 500;
+    }
+
+    .fee-amount {
+        color: var(--primary-blue);
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .card-content {
+            padding: 1.5rem;
+        }
+        
+        .form-section {
+            padding: 1rem;
+        }
+        
+        .submit-section {
+            padding: 1.5rem;
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 1rem;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'students' %}" class="breadcrumb-link">
+                        <i class="fas fa-users"></i>
+                        <span>Students</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'student_payment_details' student.id %}" class="breadcrumb-link">
+                        <i class="fas fa-user"></i>
+                        <span>{{ student.get_full_name }}</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Create Payment Plan</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <div class="dashboard-card-1 fade-in">
+        <div class="card-header">
+            <h3><i class="fas fa-calendar-alt"></i> Create Payment Plan</h3>
+        </div>
+
+        <div class="card-content">
+            <!-- Student Information Card -->
+            <div class="info-card">
+                <h4><i class="fas fa-user"></i> Student Information</h4>
+                <p><strong>Name:</strong> {{ student.get_full_name }}</p>
+                <p><strong>Class:</strong> {{ student.class_room|default:"Not Assigned" }}</p>
+                <p><strong>Current Academic Year:</strong> {{ student.year_of_admission }}</p>
+            </div>
+
+           
+            <!-- Alert Messages -->
+            <div id="alertContainer"></div>
+
+            <form id="paymentPlanForm" method="post" novalidate>
+                {% csrf_token %}
+                
+                <div class="form-sections">
+                    <!-- Payment Plan Details -->
+                    <div class="form-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-credit-card"></i>
+                            Payment Plan Details
+                        </h4>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="plan_type" class="form-label required-field">Plan Type</label>
+                                <select id="plan_type" name="plan_type" class="form-input" required>
+                                    <option value="">Select Plan Type</option>
+                                    {% for value, label in plan_types %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="error-message" id="error_plan_type"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="academic_year" class="form-label required-field">Academic Year</label>
+                                <input type="number" id="academic_year" name="academic_year" 
+                                       class="form-input" value="{{ student.year_of_admission }}" 
+                                       min="2024" max="2030" required>
+                                <div class="error-message" id="error_academic_year"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="total_amount" class="form-label required-field">Total Amount (AED)</label>
+                                <input type="number" id="total_amount" name="total_amount" 
+                                       class="form-input" value="{{ total_annual_fees }}" 
+                                       step="0.01" min="0" required>
+                                <div class="error-message" id="error_total_amount"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="number_of_installments" class="form-label required-field">Number of Installments</label>
+                                <input type="number" id="number_of_installments" name="number_of_installments" 
+                                       class="form-input" value="1" min="1" max="12" required>
+                                <div class="error-message" id="error_number_of_installments"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="start_date" class="form-label required-field">Start Date</label>
+                                <input type="date" id="start_date" name="start_date" 
+                                       class="form-input" required>
+                                <div class="error-message" id="error_start_date"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Calculation Preview -->
+                    <div class="form-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-calculator"></i>
+                            Payment Calculation Preview
+                        </h4>
+                        
+                        <div class="calculation-card">
+                            <div class="calculation-row">
+                                <span>Total Amount:</span>
+                                <span id="preview_total">AED {{ total_annual_fees }}</span>
+                            </div>
+                            <div class="calculation-row">
+                                <span>Number of Installments:</span>
+                                <span id="preview_installments">1</span>
+                            </div>
+                            <div class="calculation-row">
+                                <span>Installment Amount:</span>
+                                <span id="preview_amount">AED {{ total_annual_fees }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-button" id="submitBtn" 
+                            >
+                        <div class="loading-spinner" id="loadingSpinner"></div>
+                        <span id="submitText">
+                            <i class="fas fa-check-circle"></i>
+                            Create Payment Plan
+                        </span>
+                    </button>
+                    <p style="margin-top: 1rem; color: var(--text-light); font-size: 0.875rem;">
+                        {% if fee_assignments %}
+                            Please review all details before creating the payment plan.
+                        {% else %}
+                            Please assign fees to this student before creating a payment plan.
+                        {% endif %}
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('paymentPlanForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const alertContainer = document.getElementById('alertContainer');
+    
+    const planTypeSelect = document.getElementById('plan_type');
+    const totalAmountInput = document.getElementById('total_amount');
+    const installmentsInput = document.getElementById('number_of_installments');
+    const startDateInput = document.getElementById('start_date');
+    
+    // Set default start date to today
+    const today = new Date().toISOString().split('T')[0];
+    startDateInput.value = today;
+    startDateInput.min = today;
+    
+    // Update installment suggestions based on plan type
+    planTypeSelect.addEventListener('change', function() {
+        const planType = this.value;
+        let suggestedInstallments = 1;
+        
+        switch(planType) {
+            case 'full':
+                suggestedInstallments = 1;
+                break;
+            case 'monthly':
+                suggestedInstallments = 12;
+                break;
+            case 'quarterly':
+                suggestedInstallments = 4;
+                break;
+            case 'custom':
+                suggestedInstallments = parseInt(installmentsInput.value) || 1;
+                break;
+        }
+        
+        installmentsInput.value = suggestedInstallments;
+        updatePreview();
+    });
+    
+    // Real-time calculation preview
+    function updatePreview() {
+        const totalAmount = parseFloat(totalAmountInput.value) || 0;
+        const installments = parseInt(installmentsInput.value) || 1;
+        const installmentAmount = totalAmount / installments;
+        
+        document.getElementById('preview_total').textContent = `AED ${totalAmount.toFixed(2)}`;
+        document.getElementById('preview_installments').textContent = installments;
+        document.getElementById('preview_amount').textContent = `AED ${installmentAmount.toFixed(2)}`;
+    }
+    
+    totalAmountInput.addEventListener('input', updatePreview);
+    installmentsInput.addEventListener('input', updatePreview);
+    
+    // Validation function
+    function validateField(fieldId, value) {
+        const field = document.getElementById(fieldId);
+        const errorElement = document.getElementById(`error_${fieldId}`);
+        
+        field.classList.remove('error', 'success');
+        errorElement.textContent = '';
+        errorElement.style.display = 'none';
+        
+        let isValid = true;
+        let errorMessage = '';
+        
+        if (!value || value.toString().trim() === '') {
+            isValid = false;
+            errorMessage = 'This field is required';
+        } else {
+            switch(fieldId) {
+                case 'total_amount':
+                    const amount = parseFloat(value);
+                    if (isNaN(amount) || amount <= 0) {
+                        isValid = false;
+                        errorMessage = 'Amount must be greater than 0';
+                    }
+                    break;
+                    
+                case 'number_of_installments':
+                    const installments = parseInt(value);
+                    if (isNaN(installments) || installments < 1 || installments > 12) {
+                        isValid = false;
+                        errorMessage = 'Installments must be between 1 and 12';
+                    }
+                    break;
+                    
+                case 'academic_year':
+                    const year = parseInt(value);
+                    const currentYear = new Date().getFullYear();
+                    if (isNaN(year) || year < currentYear - 1 || year > currentYear + 2) {
+                        isValid = false;
+                        errorMessage = `Year must be between ${currentYear - 1} and ${currentYear + 2}`;
+                    }
+                    break;
+                    
+                case 'start_date':
+                    const selectedDate = new Date(value);
+                    const todayDate = new Date(today);
+                    if (selectedDate < todayDate) {
+                        isValid = false;
+                        errorMessage = 'Start date cannot be in the past';
+                    }
+                    break;
+            }
+        }
+        
+        if (!isValid) {
+            field.classList.add('error');
+            errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
+            errorElement.style.display = 'flex';
+        } else {
+            field.classList.add('success');
+        }
+        
+        return isValid;
+    }
+    
+    // Add validation listeners
+    const fieldsToValidate = ['plan_type', 'academic_year', 'total_amount', 'number_of_installments', 'start_date'];
+    fieldsToValidate.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        field.addEventListener('blur', () => {
+            validateField(fieldId, field.value);
+        });
+        field.addEventListener('change', () => {
+            validateField(fieldId, field.value);
+        });
+    });
+    
+    // Show alert message
+    function showAlert(message, type = 'error') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type}`;
+        alert.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            ${message}
+        `;
+        
+        alertContainer.innerHTML = '';
+        alertContainer.appendChild(alert);
+        
+        if (type === 'success') {
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+        
+        alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        submitBtn.disabled = true;
+        loadingSpinner.style.display = 'block';
+        submitText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Plan...';
+        
+        alertContainer.innerHTML = '';
+        
+        // Validate all fields
+        let isFormValid = true;
+        fieldsToValidate.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (!validateField(fieldId, field.value)) {
+                isFormValid = false;
+            }
+        });
+        
+        if (!isFormValid) {
+            showAlert('Please fix all errors before submitting.', 'error');
+            resetSubmitButton();
+            return;
+        }
+        
+        // Submit form
+        const formData = new FormData(form);
+        
+        fetch(form.action || window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('Payment plan created successfully! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = data.redirect_url || '{% url "student_payment_details" student.id %}';
+                }, 2000);
+            } else {
+                showAlert(data.message || 'An error occurred while creating the payment plan.', 'error');
+                resetSubmitButton();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('An unexpected error occurred. Please try again.', 'error');
+            resetSubmitButton();
+        });
+    });
+    
+    function resetSubmitButton() {
+        submitBtn.disabled = false;
+        loadingSpinner.style.display = 'none';
+        submitText.innerHTML = '<i class="fas fa-check-circle"></i> Create Payment Plan';
+    }
+    
+    // Initial preview update
+    updatePreview();
+});
+</script>
+
+{% endblock %}

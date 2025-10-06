@@ -1,0 +1,885 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-blue: #214888;
+        --secondary-pink: #D54395;
+        --accent-purple: #8B5FBF;
+        --light-purple: #F3EBFF;
+        --white: #FFFFFF;
+        --text-dark: #453F4E;
+        --success: #10B981;
+        --error: #EF4444;
+        --border-color: #E5E7EB;
+    }
+
+    .detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .info-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .info-header h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.75rem;
+    }
+
+    .info-header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .section-card {
+        background: var(--white);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--light-purple);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .detail-item {
+        padding: 0.75rem 0;
+    }
+
+    .detail-label {
+        font-size: 0.875rem;
+        color: var(--text-dark);
+        opacity: 0.7;
+        margin-bottom: 0.25rem;
+    }
+
+    .detail-value {
+        font-size: 1rem;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .salary-breakdown {
+        background: var(--light-purple);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .breakdown-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(33, 72, 136, 0.1);
+    }
+
+    .breakdown-row:last-child {
+        border-bottom: none;
+        font-weight: 700;
+        font-size: 1.125rem;
+        color: var(--primary-blue);
+        padding-top: 1rem;
+        border-top: 2px solid var(--primary-blue);
+    }
+
+    .breakdown-label {
+        color: var(--text-dark);
+    }
+
+    .breakdown-value {
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .breakdown-value.negative {
+        color: var(--error);
+    }
+
+    .breakdown-value.positive {
+        color: var(--success);
+    }
+
+    .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .attendance-table th {
+        background: var(--light-purple);
+        color: var(--primary-blue);
+        padding: 0.75rem;
+        text-align: left;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .attendance-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.875rem;
+    }
+
+    .attendance-table tbody tr:hover {
+        background: rgba(139, 95, 191, 0.05);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-present {
+        background: rgba(16, 185, 129, 0.1);
+        color: #065f46;
+    }
+
+    .status-absent {
+        background: rgba(239, 68, 68, 0.1);
+        color: #991b1b;
+    }
+
+    .status-half_day {
+        background: rgba(245, 158, 11, 0.1);
+        color: #92400e;
+    }
+
+    .status-sunday {
+        background: rgba(107, 114, 128, 0.1);
+        color: #374151;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+
+    .btn-action {
+        padding: 0.875rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+    }
+
+    .btn-secondary {
+        background: var(--white);
+        color: var(--text-dark);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    @media (max-width: 768px) {
+        .info-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+<style>
+.btn-outline-primary {
+        border: #214888 .5px solid !important;
+        color: #214888 !important;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #214888 !important;
+        color: white !important;
+    }
+
+    .custom-modal .modal-content {
+        border: none;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-heavy);
+        background-color: var(--e-global-color-aa4a27d);
+        font-family: var(--e-global-typography-primary-font-family);
+    }
+
+    .custom-modal .modal-header {
+        background: linear-gradient(135deg, var(--e-global-color-primary) 0%, #1e3a6f 100%);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        padding: 20px 24px;
+    }
+
+    .custom-modal .modal-title {
+        font-weight: 600;
+        font-size: 1.25rem;
+        margin: 0;
+        color: white;
+    }
+
+    .custom-modal .btn-close {
+        background: none;
+        border: none;
+        color: white;
+        opacity: 0.8;
+        font-size: 1.2rem;
+        filter: invert(1);
+        transition: all 0.3s ease;
+    }
+
+    .custom-modal .btn-close:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    .custom-modal .modal-body {
+        padding: 24px;
+        color: var(--e-global-color-text);
+        line-height: 1.6;
+        background-color: var(--e-global-color-aa4a27d);
+    }
+
+    .custom-modal .modal-footer {
+        padding: 16px 24px 24px;
+        border: none;
+        background-color: var(--e-global-color-aa4a27d);
+        gap: 12px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .custom-modal .btn-custom-secondary {
+        background-color: var(--e-global-color-5d90ead);
+        border: 2px solid var(--e-global-color-5d90ead);
+        color: var(--e-global-color-text);
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        transition: all 0.3s ease;
+        font-family: var(--e-global-typography-primary-font-family);
+    }
+
+    .custom-modal .btn-custom-secondary:hover {
+        background-color: var(--e-global-color-eecedb7);
+        border-color: var(--e-global-color-eecedb7);
+        color: var(--e-global-color-primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .custom-modal .btn-custom-primary {
+        background: linear-gradient(135deg, var(--e-global-color-secondary) 0%, #b93875 100%);
+        border: 2px solid var(--e-global-color-secondary);
+        color: white;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        transition: all 0.3s ease;
+        font-family: var(--e-global-typography-primary-font-family);
+        box-shadow: var(--shadow-light);
+    }
+
+    .custom-modal .btn-custom-primary:hover {
+        background: linear-gradient(135deg, #b93875 0%, var(--e-global-color-secondary) 100%);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        border-color: #b93875;
+    }
+
+    .custom-modal .btn-custom-primary:active {
+        transform: translateY(0);
+    }
+
+    /* Modal backdrop */
+    .custom-modal .modal-backdrop {
+        background-color: rgba(33, 72, 136, 0.4);
+        backdrop-filter: blur(4px);
+    }
+
+    /* Animation */
+    .custom-modal.fade .modal-dialog {
+        transition: transform 0.4s ease-out;
+        transform: translate(0, -50px) scale(0.9);
+    }
+
+    .custom-modal.show .modal-dialog {
+        transform: translate(0, 0) scale(1);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: var(--white);
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-input.error {
+        border-color: var(--error);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        background-color: rgba(239, 68, 68, 0.05);
+    }
+
+    .form-input.success {
+        border-color: var(--success);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    textarea.form-input {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    select.form-input {
+        cursor: pointer;
+    }
+
+    input[type="file"].form-input {
+        padding: 0.5rem;
+        border-style: dashed;
+    }
+
+    /* Action buttons styling */
+    .action-buttons {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .action-buttons a {
+        text-decoration: none;
+        padding: 5px 8px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .action-buttons a:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .text-primary {
+        color: #007bff !important;
+    }
+
+    .text-info {
+        color: #17a2b8 !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    /* Custom table styles for better responsiveness */
+    .custom-table-container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        margin-top: 15px;
+    }
+
+    /* DataTable custom styles */
+    .dataTables_wrapper {
+        width: 100%;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        margin-bottom: 15px;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px;
+        margin-left: 8px;
+    }
+
+    .dataTables_wrapper .dataTables_length select {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        margin: 0 8px;
+    }
+
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 15px;
+    }
+
+    /* Ensure table is responsive */
+    table.dataTable {
+        width: 100% !important;
+        border-collapse: collapse;
+    }
+
+    table.dataTable th,
+    table.dataTable td {
+        padding: 12px 8px;
+        border-bottom: 1px solid #ddd;
+        white-space: nowrap;
+    }
+
+    table.dataTable th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-bottom: 2px solid #ddd;
+    }
+
+    table.dataTable tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    /* Button group responsive styles */
+    .btn-group .btn {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        margin: 0 1px;
+    }
+
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+        .btn-group {
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .btn-group .btn {
+            width: 100%;
+            font-size: 0.75rem;
+        }
+        
+        table.dataTable th,
+        table.dataTable td {
+            padding: 8px 4px;
+            font-size: 0.85rem;
+        }
+    }
+</style>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'salary_dashboard' %}" class="breadcrumb-link">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Salary</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'salary_list' %}" class="breadcrumb-link">
+                        <i class="fas fa-list"></i>
+                        <span>Salary List</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Salary Detail</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-file-invoice-dollar"></i> Salary Details</h3>
+            <a href="{% url 'salary_list' %}" class="add-item-button">
+                <span class="add-event"><i class="fas fa-arrow-left"></i></span>
+                <span style="margin-left: 10px;">Back to List</span>
+            </a>
+        </div>
+
+        <div class="card-content">
+            <div class="detail-container">
+                <!-- Header Info -->
+                <div class="info-header">
+                    <div>
+                        <h2>{{ salary.teacher.full_name }}</h2>
+                        <p>{{ salary.teacher.teacher_id }} | {{ salary.teacher.get_position_display }}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <h2>{{ salary.get_month_name }} {{ salary.year }}</h2>
+                        <p>Net Salary: AED {{ salary.net_salary|floatformat:2 }}</p>
+                    </div>
+                </div>
+
+                <!-- Teacher Information -->
+                <div class="section-card">
+                    <h4 class="section-title">
+                        <i class="fas fa-user"></i>
+                        Teacher Information
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value">{{ salary.teacher.email }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Phone</div>
+                            <div class="detail-value">{{ salary.teacher.phone_number }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Position</div>
+                            <div class="detail-value">{{ salary.teacher.get_position_display }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Employment Status</div>
+                            <div class="detail-value">{{ salary.teacher.get_status_display }}</div>
+                        </div>
+                    </div>
+                    <div class="button-groups">
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal"
+                            data-bs-target="#makeDeductionsModal">Make Deductions</button>
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#makeExtraPaymentModal">Make Extra Payment</button>
+                    </div>
+                </div>
+
+                <!-- Salary Breakdown -->
+                <div class="section-card">
+                    <h4 class="section-title">
+                        <i class="fas fa-calculator"></i>
+                        Salary Breakdown
+                    </h4>
+
+                    <div class="salary-breakdown">
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Basic Salary</span>
+                            <span class="breakdown-value">AED {{ salary.basic_salary|floatformat:2 }}</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Accommodation Allowance</span>
+                            <span class="breakdown-value">AED {{ salary.accommodation_allowance|floatformat:2 }}</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Transportation Allowance</span>
+                            <span class="breakdown-value">AED {{ salary.transportation_allowance|floatformat:2 }}</span>
+                        </div>
+                        <div class="breakdown-row" style="font-weight: 600; color: var(--primary-blue);">
+                            <span class="breakdown-label">Gross Salary</span>
+                            <span class="breakdown-value">AED {{ salary.gross_salary|floatformat:2 }}</span>
+                        </div>
+
+                        {% if salary.bonus > 0 or salary.overtime_pay > 0 or salary.other_additions > 0 %}
+                        <!-- <div class="breakdown-row">
+                            <span class="breakdown-label">Bonus</span>
+                            <span class="breakdown-value positive">+ AED {{ salary.bonus|floatformat:2 }}</span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Overtime Pay</span>
+                            <span class="breakdown-value positive">+ AED {{ salary.overtime_pay|floatformat:2 }}</span>
+                        </div> -->
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Other Additions <span style="font-size: x-small;">({{salary.other_additions_remarks}})</span></span>
+                            <span class="breakdown-value positive">+ AED {{ salary.other_additions|floatformat:2 }}</span>
+                                
+                        </div>
+                        {% endif %}
+
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Absence Deduction</span>
+                            <span class="breakdown-value negative">- AED {{ salary.absence_deduction|floatformat:2 }}</span>
+                        </div>
+                        {% if salary.other_deductions > 0 %}
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Other Deductions <span style="font-size: x-small;;">{{ salary.other_deductions_remarks }}</span></span>
+                            <span class="breakdown-value negative">- AED {{ salary.other_deductions|floatformat:2 }}</span>
+                                
+                        </div>
+                        {% endif %}
+
+                        <div class="breakdown-row">
+                            <span class="breakdown-label">Net Salary</span>
+                            <span class="breakdown-value">AED {{ salary.net_salary|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Summary -->
+                <div class="section-card">
+                    <h4 class="section-title">
+                        <i class="fas fa-calendar-check"></i>
+                        Attendance Summary
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Total Working Days</div>
+                            <div class="detail-value">{{ salary.total_working_days }} days</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Days Present</div>
+                            <div class="detail-value" style="color: var(--success);">{{ salary.days_present }} days
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Days Absent</div>
+                            <div class="detail-value" style="color: var(--error);">{{ salary.days_absent }} days</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Half Days</div>
+                            <div class="detail-value" style="color: var(--warning);">{{ salary.half_days }} days</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Attendance -->
+                <div class="section-card">
+                    <h4 class="section-title">
+                        <i class="fas fa-clipboard-list"></i>
+                        Daily Attendance Records
+                    </h4>
+
+                    {% if attendances %}
+                    <div style="overflow-x: auto;">
+                        <table class="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Day</th>
+                                    <th>Status</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attendance in attendances %}
+                                <tr>
+                                    <td><strong>{{ attendance.date|date:"d M Y" }}</strong></td>
+                                    <td>{{ attendance.date|date:"l" }}</td>
+                                    <td>
+                                        <span class="status-badge status-{{ attendance.status }}">
+                                            {{ attendance.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ attendance.remarks|default:"—" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p style="text-align: center; color: var(--text-dark); opacity: 0.6; padding: 2rem;">
+                        No attendance records found for this period.
+                    </p>
+                    {% endif %}
+                </div>
+
+                <!-- Payment Information -->
+                <div class="section-card">
+                    <h4 class="section-title">
+                        <i class="fas fa-credit-card"></i>
+                        Payment Information
+                    </h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Payment Status</div>
+                            <div class="detail-value">
+                                <span class="status-badge status-{{ salary.payment_status }}">
+                                    {{ salary.get_payment_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Payment Date</div>
+                            <div class="detail-value">{{ salary.payment_date|date:"d M Y"|default:"Not paid yet" }}
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Payment Method</div>
+                            <div class="detail-value">{{ salary.payment_method|default:"—" }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Payment Reference</div>
+                            <div class="detail-value">{{ salary.payment_reference|default:"—" }}</div>
+                        </div>
+                    </div>
+
+                    {% if salary.remarks %}
+                    <div style="margin-top: 1rem; padding: 1rem; background: var(--light-purple); border-radius: 8px;">
+                        <div class="detail-label">Remarks</div>
+                        <div class="detail-value">{{ salary.remarks }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <a href="{% url 'salary_list' %}" class="btn-action btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                    <a href="{% url 'update_salary_payment' salary.id %}" class="btn-action btn-primary">
+                        <i class="fas fa-edit"></i> Update Payment
+                    </a>
+                    <button onclick="window.print()" class="btn-action btn-primary">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style media="print">
+    .breadcrumb-container,
+    .card-header,
+    .action-buttons,
+    .sidebar,
+    .navbar {
+        display: none !important;
+    }
+
+    .section-card {
+        page-break-inside: avoid;
+    }
+</style>
+
+
+
+<!-- modal for make deductions  -->
+
+<div class="modal fade custom-modal" id="makeDeductionsModal" tabindex="-1" aria-labelledby="makeDeductionsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="makeDeductionsModalLabel">Make Deductions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <form method="post" action="{% url 'make_deductions' salary.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="deductionAmount" class="form-label">Deduction Amount</label>
+                                <input type="number" id="deductionAmount" name="deduction_amount" class="form-input"
+                                    placeholder="Enter deduction amount" required>
+                                <label for="deductionRemarks" class="form-label">Remarks For Deduction</label>
+                                <textarea id="deductionRemarks" name="deduction_remarks" class="form-input"
+                                    placeholder="Enter remarks for deduction" required></textarea>
+                            </div>
+                        </div>
+                        <br>
+                        <button type="submit" class="btn btn-custom-primary">Make Deduction</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- modal for make Extra Payment -->
+
+<div class="modal fade custom-modal" id="makeExtraPaymentModal" tabindex="-1" aria-labelledby="makeExtraPaymentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="makeExtraPaymentModalLabel">Make Extra Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <form method="post" action="{% url 'make_extra_payment' salary.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="extraPaymentAmount" class="form-label">Extra Payment Amount</label>
+                                <input type="number" id="extraPaymentAmount" name="extra_payment_amount" class="form-input"
+                                    placeholder="Enter extra payment amount" required>
+                                <label for="extraPaymentRemarks" class="form-label">Remarks For Extra Payment</label>
+                                <textarea id="extraPaymentRemarks" name="extra_payment_remarks" class="form-input"
+                                    placeholder="Enter remarks for extra payment" required></textarea>
+                            </div>
+                        </div>
+                        <br>
+                        <button type="submit" class="btn btn-custom-primary">Make Extra Payment</button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

@@ -205,33 +205,39 @@
                         Payments
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'payment_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Payment Dashboard</a>
+                        </li>
+                        <li><a class="dropdown-item" href="{% url 'create_payment' %}">
                             <i class="fas fa-dollar-sign"></i> Fee Collection
                         </a></li>
-                        <li><a class="dropdown-item" href="#">
+                        <!-- <li><a class="dropdown-item" href="#">
                             <i class="fas fa-receipt"></i> Generate Receipt
                         </a></li>
                         <li><a class="dropdown-item" href="#">
                             <i class="fas fa-exclamation-triangle"></i> Outstanding Fees
-                        </a></li>
+                        </a></li> -->
                     </ul>
                 </li>
 
                 <!-- Reports -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-chart-bar"></i>
-                        Reports
+                        <i class="fas fa-briefcase"></i> Finance 
+
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-file-pdf"></i> Financial Reports
+                        <li><a class="dropdown-item" href="{%url 'income'%}">
+                            <i class="fas fa-hand-holding-usd"></i> Income
+
                         </a></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-users"></i> Student Reports
+                        <li><a class="dropdown-item" href="{%url 'expense' %}">
+                           <i class="fas fa-money-bill-wave"></i> Expense
+
                         </a></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-bus"></i> Transport Reports
+                        <li><a class="dropdown-item" href="{%url 'balance_sheet' %}">
+                           <i class="fas fa-chart-line"></i> Balance Sheet
+
                         </a></li>
                     </ul>
                 </li>
@@ -240,18 +246,23 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-cog"></i>
-                        Settings
+                        Utilities
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-user-cog"></i> User Management
+                        <li><a class="dropdown-item" href="{% url 'teacher_list' %}">
+                            <i class="fas fa-user-cog"></i> Staff Management
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'attendance_dashboard' %}">
+                            <i class="fas fa-calendar"></i> Attendance Management
+                        </a></li>
+                         <li><a class="dropdown-item" href="{% url 'salary_dashboard' %}">
+                            <i class="fas fa-money-bill-wave"></i> Salary Management
                         </a></li>
                         <li><a class="dropdown-item" href="{% url 'site_setting' %}">
                             <i class="fas fa-school"></i> School Settings
                         </a></li>
-                        <li><a class="dropdown-item" href="#">
-                            <i class="fas fa-backup"></i> Backup & Restore
-                        </a></li>
+                        
+                       
                     </ul>
                 </li>
             </ul>
@@ -283,6 +294,9 @@
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{% url 'signout' %}">
                             <i class="fas fa-sign-out-alt"></i> Logout
+                        </a></li>
+                         <li><a class="dropdown-item" href="#">
+                            <i class="fas fa-cloud-upload-alt"></i> Backup & Restore
                         </a></li>
                     </ul>
                 </li>

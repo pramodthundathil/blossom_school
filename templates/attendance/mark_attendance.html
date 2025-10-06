@@ -1,0 +1,329 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-blue: #214888;
+        --secondary-pink: #D54395;
+        --accent-purple: #8B5FBF;
+        --light-purple: #F3EBFF;
+        --white: #FFFFFF;
+        --text-dark: #453F4E;
+        --success: #10B981;
+        --error: #EF4444;
+        --border-color: #E5E7EB;
+        --border-radius: 12px;
+    }
+
+    .attendance-form-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: var(--light-purple);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--primary-blue);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        color: var(--text-dark);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .required-field::after {
+        content: '*';
+        color: var(--error);
+        margin-left: 0.25rem;
+    }
+
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-family: inherit;
+        transition: all 0.3s ease;
+        background: var(--white);
+        box-sizing: border-box;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .status-radio-group {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .radio-option {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .radio-option input[type="radio"] {
+        display: none;
+    }
+
+    .radio-label {
+        display: block;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--white);
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-label {
+        border-color: var(--primary-blue);
+        background: rgba(33, 72, 136, 0.1);
+        font-weight: 600;
+    }
+
+    .radio-label:hover {
+        border-color: var(--primary-blue);
+        transform: translateY(-2px);
+    }
+
+    .submit-button {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+        color: var(--white);
+        border: none;
+        padding: 1rem 2.5rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(33, 72, 136, 0.3);
+    }
+
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .today-info {
+        background: var(--white);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        border: 2px solid var(--primary-blue);
+    }
+
+    .today-info h4 {
+        color: var(--primary-blue);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .today-info p {
+        margin: 0;
+        color: var(--text-dark);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+</style>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'attendance_dashboard' %}" class="breadcrumb-link">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Attendance</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-user-check"></i>
+                    <span>Mark Attendance</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<div class="students-container">
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3><i class="fas fa-user-check"></i> Mark Attendance</h3>
+            <a href="{% url 'bulk_mark_attendance' %}" class="add-item-button">
+                <span class="add-event"><i class="fas fa-users"></i></span>
+                <span style="margin-left: 10px;">Bulk Mark</span>
+            </a>
+        </div>
+
+        <div class="card-content">
+            <div class="attendance-form-container">
+                <!-- Today's Date Info -->
+                <div class="today-info">
+                    <h4><i class="fas fa-calendar-day"></i> Today's Date</h4>
+                    <p>{{ today|date:"l, F d, Y" }}</p>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            <i class="fas fa-check-circle"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" id="attendanceForm">
+                    {% csrf_token %}
+                    
+                    <div class="form-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-user"></i>
+                            Teacher Information
+                        </h4>
+
+                        <div class="form-group">
+                            <label for="teacher" class="form-label required-field">Select Teacher</label>
+                            <select name="teacher" id="teacher" class="form-select" required {% if teacher %}disabled{% endif %}>
+                                <option value="">-- Select Teacher --</option>
+                                {% for t in active_teachers %}
+                                    <option value="{{ t.id }}" {% if teacher and teacher.id == t.id %}selected{% endif %}>
+                                        {{ t.full_name }} ({{ t.teacher_id }}) - {{ t.get_position_display }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date" class="form-label required-field">Date</label>
+                            {{ form.date }}
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-check-circle"></i>
+                            Attendance Status
+                        </h4>
+
+                        <div class="form-group">
+                            <label class="form-label required-field">Status</label>
+                            <div class="status-radio-group">
+                                {% for value, label in form.fields.status.choices %}
+                                    <div class="radio-option">
+                                        <input type="radio" name="status" id="status_{{ value }}" value="{{ value }}" 
+                                               {% if form.status.value == value %}checked{% endif %} required>
+                                        <label for="status_{{ value }}" class="radio-label">
+                                            {% if value == 'present' %}
+                                                <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                                            {% elif value == 'absent' %}
+                                                <i class="fas fa-times-circle" style="color: var(--error);"></i>
+                                            {% elif value == 'half_day' %}
+                                                <i class="fas fa-adjust" style="color: #f59e0b;"></i>
+                                            {% else %}
+                                                <i class="fas fa-calendar-times" style="color: #6b7280;"></i>
+                                            {% endif %}
+                                            <br>
+                                            {{ label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="remarks" class="form-label">Remarks / Reason</label>
+                            {{ form.remarks }}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-button">
+                        <i class="fas fa-save"></i>
+                        Mark Attendance
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const teacherSelect = document.getElementById('teacher');
+    const form = document.getElementById('attendanceForm');
+    
+    // Auto-submit when teacher is selected (for quick marking)
+    teacherSelect.addEventListener('change', function() {
+        if (this.value) {
+            window.location.href = "{% url 'mark_attendance' %}?teacher=" + this.value;
+        }
+    });
+
+    // Add form class to form elements
+    const formInputs = form.querySelectorAll('input[type="date"], input[type="text"], textarea, select');
+    formInputs.forEach(input => {
+        if (input.type === 'date') {
+            input.classList.add('form-input');
+        } else if (input.tagName === 'TEXTAREA') {
+            input.classList.add('form-textarea');
+        } else if (input.tagName === 'SELECT') {
+            input.classList.add('form-select');
+        }
+    });
+});
+</script>
+
+{% endblock %}
