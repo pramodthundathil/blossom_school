@@ -20,7 +20,14 @@ urlpatterns = [
     # Document management
     path('<uuid:pk>/upload-document/', views.upload_document, name='upload_document'),
     path('document/delete/<uuid:pk>', views.delete_document, name='delete_document'),
-    
+
+    #add notes 
+      
+    path('<uuid:pk>/add/notes/', views.add_notes, name='add_notes'),
+    path('notes/delete/<uuid:pk>', views.delete_notes, name='delete_note'),
+
+    #add transportation
+    path("transportation/add/<uuid:student_id>",views.add_transportation,name="add_transportation"),    
     # Bulk actions and exports
     path('bulk-action/', views.bulk_action, name='bulk_action'),
     path('export/', views.export_students, name='export_students'),

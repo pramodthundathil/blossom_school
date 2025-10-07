@@ -115,7 +115,7 @@ def student_create(request):
                             request, 
                             f"Student {student.get_full_name()} (ID: {student.student_id}) created successfully."
                         )
-                        return redirect('student_detail', pk=student.id )
+                        return redirect('create_payment_plan', student_id=student.id )
                         
             except ValidationError as e:
                 logger.warning(f"Validation error during student creation: {e}")
@@ -474,7 +474,10 @@ class EnhancedStudentForm(StudentForm):
 def student_detail(request, pk):
     student = get_object_or_404(Student, pk=pk)
     document_form = DocumentForm()
-    return render(request, 'students/student_detail.html', {'student': student,"document_form":document_form})
+    initial_data = {}
+    initial_data['student'] = student
+    form = TransportationForm(initial=initial_data)
+    return render(request, 'students/student_detail.html', {'student': student,"document_form":document_form,"form":form})
 
 @unauthenticated_user
 def student_update(request, pk):
@@ -568,3 +571,65 @@ def search_students_ajax(request):
 def student_stats_ajax(request):
     # Implement AJAX stats logic here
     return render(request, 'students/student_stats.html')
+
+
+# notes add update 
+@unauthenticated_user 
+def add_notes(request, pk):
+    student = get_object_or_404(Student, id = pk)
+    if request.method == "POST":
+        notes = request.POST['notes']
+        note = StudentNote.objects.create(student = student, note = notes)
+        note.save()
+        messages.success(request,"Note Created........")
+        return redirect("student_detail", pk = pk)
+
+
+@unauthenticated_user
+def delete_notes(request, pk):
+    note = get_object_or_404(StudentNote, id = pk)
+    student = note.student
+    note.delete()
+    messages.success(request,"Note deleted........")
+    return redirect("student_detail", pk = student.id)
+
+
+@unauthenticated_user
+def add_transportation(request, student_id):
+    student = get_object_or_404(Student, id = student_id)
+    transportation_qs = student.transportation.all()
+    transportation = transportation_qs.first() if transportation_qs.exists() else None
+
+    if transportation:
+        # transportation =  student.transportation.objects.all()[0]
+        if request.method == 'POST':
+            form = TransportationForm(request.POST, instance = transportation)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Transportation details Updated successfully.")
+                return redirect("student_detail",pk = student_id)
+
+        else:
+            initial_data = {}
+            if student_id:
+                student = Student.objects.get(pk=student_id)
+                initial_data['student'] = student
+            form = TransportationForm(initial=initial_data)
+    else: 
+        if request.method == 'POST':
+            form = TransportationForm(request.POST)
+            if form.is_valid():
+                trans = form.save(commit=False)
+                trans.student = student
+                trans.save()
+                messages.success(request, "Transportation details added successfully.")
+                return redirect("student_detail",pk = student_id)
+        else:
+            initial_data = {}
+            if student_id:
+                student = Student.objects.get(pk=student_id)
+                initial_data['student'] = student
+            form = TransportationForm(initial=initial_data)
+
+            return redirect("student_detail",pk = student_id)
+

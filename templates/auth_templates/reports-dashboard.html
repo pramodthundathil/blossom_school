@@ -1,0 +1,515 @@
+{% extends 'auth_templates/index.html' %}
+{% block content %}
+
+<style>
+    :root {
+        --e-global-color-primary: #214888;
+        --e-global-color-secondary: #D54395;
+        --e-global-color-text: #453F4E;
+        --e-global-color-accent: #FBF8FF;
+        --e-global-color-3a7e2f2: #FFB804;
+        --e-global-color-e1cf4e4: #DEC8FE;
+        --e-global-color-fe7363b: #F7F1FF;
+        --e-global-color-aa4a27d: #FEFEFE;
+        --e-global-color-eecedb7: #F3EBFF;
+        --e-global-color-d2fd119: #FF854B;
+        --e-global-color-3e3936d: #FFEFC6;
+        --e-global-color-bea3118: #89C0FF;
+        --e-global-color-4e9ef99: #43A574;
+        --e-global-color-7d1e931: #FF9587;
+        --e-global-color-5d90ead: #F0F0F0;
+        --e-global-typography-primary-font-family: "Poppins";
+        
+        --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.15);
+        
+        --border-radius-sm: 6px;
+        --border-radius: 12px;
+        --border-radius-lg: 16px;
+    }
+
+    * {
+        font-family: var(--e-global-typography-primary-font-family), sans-serif;
+    }
+
+    .reports-container {
+        padding: 30px;
+        background: var(--e-global-color-aa4a27d);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, var(--e-global-color-primary) 0%, var(--e-global-color-secondary) 100%);
+        padding: 40px;
+        border-radius: var(--border-radius-lg);
+        margin-bottom: 30px;
+        box-shadow: var(--shadow-medium);
+        color: white;
+    }
+
+    .page-header h1 {
+        font-size: 32px;
+        font-weight: 600;
+        margin: 0 0 10px 0;
+    }
+
+    .page-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 16px;
+    }
+
+    .school-info {
+        background: white;
+        padding: 20px;
+        border-radius: var(--border-radius);
+        margin-bottom: 30px;
+        box-shadow: var(--shadow-light);
+    }
+
+    .school-info h2 {
+        color: var(--e-global-color-primary);
+        font-size: 24px;
+        margin: 0 0 10px 0;
+    }
+
+    .school-info p {
+        color: var(--e-global-color-text);
+        margin: 5px 0;
+    }
+
+    .reports-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+
+    .report-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 30px;
+        box-shadow: var(--shadow-medium);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-heavy);
+    }
+
+    .report-card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .report-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-right: 20px;
+    }
+
+    .icon-daily {
+        background: linear-gradient(135deg, var(--e-global-color-primary) 0%, var(--e-global-color-bea3118) 100%);
+        color: white;
+    }
+
+    .icon-range {
+        background: linear-gradient(135deg, var(--e-global-color-4e9ef99) 0%, var(--e-global-color-bea3118) 100%);
+        color: white;
+    }
+
+    .icon-fee {
+        background: linear-gradient(135deg, var(--e-global-color-secondary) 0%, var(--e-global-color-d2fd119) 100%);
+        color: white;
+    }
+
+    .report-card-title {
+        flex: 1;
+    }
+
+    .report-card-title h3 {
+        color: var(--e-global-color-primary);
+        font-size: 20px;
+        margin: 0 0 5px 0;
+        font-weight: 600;
+    }
+
+    .report-card-title p {
+        color: var(--e-global-color-text);
+        margin: 0;
+        font-size: 14px;
+        opacity: 0.8;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        color: var(--e-global-color-text);
+        font-weight: 500;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--e-global-color-5d90ead);
+        border-radius: var(--border-radius-sm);
+        font-size: 14px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--e-global-color-primary);
+        box-shadow: 0 0 0 3px rgba(33, 72, 136, 0.1);
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 12px 24px;
+        border: none;
+        border-radius: var(--border-radius-sm);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-excel {
+        background: var(--e-global-color-4e9ef99);
+        color: white;
+    }
+
+    .btn-excel:hover {
+        background: #368a5e;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .btn-pdf {
+        background: var(--e-global-color-d2fd119);
+        color: white;
+    }
+
+    .btn-pdf:hover {
+        background: #e67437;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .divider {
+        height: 1px;
+        background: var(--e-global-color-5d90ead);
+        margin: 20px 0;
+    }
+
+    .info-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        background: var(--e-global-color-eecedb7);
+        color: var(--e-global-color-primary);
+        border-radius: var(--border-radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .reports-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header {
+            padding: 30px 20px;
+        }
+
+        .reports-container {
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="reports-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="text-white">Reports</h1>
+        <p class="text-white">Generate comprehensive financial and fee tracking reports</p>
+    </div>
+
+    <!-- School Information -->
+    <!-- <div class="school-info">
+        <h2>Blossom British School</h2>
+        <p>📍 Villa No 2 University Street, Ajman UAE</p>
+        <p>Current Academic Year: {{ current_year }}</p>
+    </div> -->
+
+    <!-- Reports Grid -->
+    <div class="reports-grid">
+        
+        <!-- Daily Report Card -->
+        <div class="report-card">
+            <div class="report-card-header">
+                <div class="report-icon icon-daily">
+                    📅
+                </div>
+                <div class="report-card-title">
+                    <h3>Daily Report</h3>
+                    <p>Generate financial report for a specific day</p>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <form method="post" action="{% url 'generate_daily_report' %}" id="dailyForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="daily_date">Select Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           id="daily_date" 
+                           name="report_date" 
+                           required
+                           max="{{ current_date|date:'Y-m-d' }}"
+                           value="{{ current_date|date:'Y-m-d' }}">
+                </div>
+                
+                <div class="info-badge">
+                    Includes: Fee Payments • Income • Expenses • Daily Summary
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" name="format" value="excel" class="btn btn-excel">
+                        📊 Generate Excel
+                    </button>
+                    <button type="submit" name="format" value="pdf" class="btn btn-pdf">
+                        📄 Generate PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Date Range Report Card -->
+        <div class="report-card">
+            <div class="report-card-header">
+                <div class="report-icon icon-range">
+                    📆
+                </div>
+                <div class="report-card-title">
+                    <h3>Date Range Report</h3>
+                    <p>Generate report for a custom date range</p>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <form method="post" action="{% url 'generate_date_range_report' %}" id="rangeForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           id="start_date" 
+                           name="start_date" 
+                           required
+                           max="{{ current_date|date:'Y-m-d' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="end_date">End Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           id="end_date" 
+                           name="end_date" 
+                           required
+                           max="{{ current_date|date:'Y-m-d' }}">
+                </div>
+                
+                <div class="info-badge">
+                    Consolidated financial report with period totals
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" name="format" value="excel" class="btn btn-excel">
+                        📊 Generate Excel
+                    </button>
+                    <button type="submit" name="format" value="pdf" class="btn btn-pdf">
+                        📄 Generate PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Fee Tracking Report Card -->
+        <div class="report-card">
+            <div class="report-card-header">
+                <div class="report-icon icon-fee">
+                    💰
+                </div>
+                <div class="report-card-title">
+                    <h3>Fee Tracking Report</h3>
+                    <p>Track payments by fee category</p>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <form method="post" action="{% url 'generate_fee_tracking_report' %}" id="feeForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="fee_category">Fee Category</label>
+                    <select class="form-control" id="fee_category" name="fee_category" required>
+                        <option value="">-- Select Fee Category --</option>
+                        {% for category in fee_categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fee_start_date">Start Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           id="fee_start_date" 
+                           name="start_date" 
+                           required
+                           max="{{ current_date|date:'Y-m-d' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="fee_end_date">End Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           id="fee_end_date" 
+                           name="end_date" 
+                           required
+                           max="{{ current_date|date:'Y-m-d' }}">
+                </div>
+                
+                <div class="info-badge">
+                    Student-wise payment status and outstanding balance
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" name="format" value="excel" class="btn btn-excel">
+                        📊 Generate Excel
+                    </button>
+                    <button type="submit" name="format" value="pdf" class="btn btn-pdf">
+                        📄 Generate PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Student Report Card -->
+        <div class="report-card">
+            <div class="report-card-header">
+                <div class="report-icon" style="background: linear-gradient(135deg, var(--e-global-color-3a7e2f2) 0%, var(--e-global-color-d2fd119) 100%); color: white;">
+                    👨‍🎓
+                </div>
+                <div class="report-card-title">
+                    <h3>Student Report</h3>
+                    <p>Comprehensive report for individual student</p>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <form method="post" action="{% url 'generate_student_report' %}" id="studentForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="student_id">Select Student</label>
+                    <select class="form-control" id="student_id" name="student_id" required>
+                        <option value="">-- Select Student --</option>
+                        {% for student in students %}
+                        <option value="{{ student.id }}">{{ student.student_id }} - {{ student.get_full_name }} ({{ student.class_room.class_name|default:"No Class" }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="info-badge">
+                    Profile • Fee Structure • Payment History • Financial Summary
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" name="format" value="excel" class="btn btn-excel">
+                        📊 Generate Excel
+                    </button>
+                    <button type="submit" name="format" value="pdf" class="btn btn-pdf">
+                        📄 Generate PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Set default dates
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+        
+        // Set default for date range report
+        if (document.getElementById('start_date').value === '') {
+            document.getElementById('start_date').value = firstDayOfMonth;
+        }
+        if (document.getElementById('end_date').value === '') {
+            document.getElementById('end_date').value = today;
+        }
+        
+        // Set default for fee tracking
+        if (document.getElementById('fee_start_date').value === '') {
+            document.getElementById('fee_start_date').value = firstDayOfMonth;
+        }
+        if (document.getElementById('fee_end_date').value === '') {
+            document.getElementById('fee_end_date').value = today;
+        }
+    });
+
+    // Validate date range
+    document.getElementById('rangeForm').addEventListener('submit', function(e) {
+        const startDate = new Date(document.getElementById('start_date').value);
+        const endDate = new Date(document.getElementById('end_date').value);
+        
+        if (startDate > endDate) {
+            e.preventDefault();
+            alert('Start date must be before end date!');
+        }
+    });
+
+    document.getElementById('feeForm').addEventListener('submit', function(e) {
+        const startDate = new Date(document.getElementById('fee_start_date').value);
+        const endDate = new Date(document.getElementById('fee_end_date').value);
+        
+        if (startDate > endDate) {
+            e.preventDefault();
+            alert('Start date must be before end date!');
+        }
+    });
+</script>
+
+{% endblock %}

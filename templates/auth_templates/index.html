@@ -262,8 +262,18 @@
                             <i class="fas fa-school"></i> School Settings
                         </a></li>
                         
+
+                        
                        
                     </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'reports_dashboard' %}">
+                        <i class="fas fa-chart-bar"></i> Reports
+
+                        
+                    </a>
                 </li>
             </ul>
 
@@ -306,285 +316,519 @@
 </nav>
 
     <!-- Main Content -->
-    <main class="main-content">
-        <div class="dashboard-container">
-
-            {% block content %}
-            <!-- Page Header -->
-            <div class="page-header">
-                <h1>Dashboard Overview</h1>
-                <p>Welcome back! Here's what's happening at your nursery today.</p>
-            </div>
-
-            <!-- Statistics Cards -->
-            <div class="stats-grid">
-                <div class="stat-card primary">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>245</h3>
-                        <p>Total Students</p>
-                        <span class="stat-change positive">+12 this month</span>
-                    </div>
-                </div>
-                <div class="stat-card secondary">
-                    <div class="stat-icon">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>18</h3>
-                        <p>New Admissions</p>
-                        <span class="stat-change positive">+5 this week</span>
-                    </div>
-                </div>
-                <div class="stat-card accent">
-                    <div class="stat-icon">
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>₹85,400</h3>
-                        <p>Fees Collected</p>
-                        <span class="stat-change positive">+15% vs last month</span>
-                    </div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3>12</h3>
-                        <p>Outstanding Payments</p>
-                        <span class="stat-change negative">-3 from last week</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts and Recent Activity -->
-            <div class="dashboard-grid">
-                <!-- Revenue Chart -->
-                <div class="dashboard-card large">
-                    <div class="card-header">
-                        <h3>Monthly Revenue Overview</h3>
-                        <div class="card-actions">
-                            <select class="form-select">
-                                <option>Last 6 Months</option>
-                                <option>Last Year</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="card-content">
-                        <div class="chart-container">
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activities -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3>Recent Activities</h3>
-                        <a href="#" class="view-all">View All</a>
-                    </div>
-                    <div class="card-content">
-                        <div class="activity-list">
-                            <div class="activity-item">
-                                <div class="activity-icon new">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <p><strong>Sarah Johnson</strong> admitted to Nursery A</p>
-                                    <span class="activity-time">2 hours ago</span>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon payment">
-                                    <i class="fas fa-credit-card"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <p><strong>Mike Wilson</strong> paid monthly fees</p>
-                                    <span class="activity-time">4 hours ago</span>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon warning">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <p>Fee reminder sent to <strong>Emma Davis</strong></p>
-                                    <span class="activity-time">1 day ago</span>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-icon transport">
-                                    <i class="fas fa-bus"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <p><strong>Alex Brown</strong> registered for transport</p>
-                                    <span class="activity-time">2 days ago</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3>Quick Actions</h3>
-                    </div>
-                    <div class="card-content">
-                        <div class="quick-actions">
-                            <a href="#" class="action-btn primary">
-                                <i class="fas fa-user-plus"></i>
-                                <span>Add New Student</span>
-                            </a>
-                            <a href="#" class="action-btn secondary">
-                                <i class="fas fa-credit-card"></i>
-                                <span>Collect Payment</span>
-                            </a>
-                            <a href="#" class="action-btn accent">
-                                <i class="fas fa-file-pdf"></i>
-                                <span>Generate Report</span>
-                            </a>
-                            <a href="#" class="action-btn warning">
-                                <i class="fas fa-bell"></i>
-                                <span>Send Reminders</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fee Collection Summary -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3>Fee Collection Summary</h3>
-                        <span class="period-badge">This Month</span>
-                    </div>
-                    <div class="card-content">
-                        <div class="fee-summary">
-                            <div class="fee-item">
-                                <div class="fee-label">
-                                    <span class="fee-dot collected"></span>
-                                    Collected
-                                </div>
-                                <div class="fee-amount">AED 85,400</div>
-                                <div class="fee-percentage">68%</div>
-                            </div>
-                            <div class="fee-item">
-                                <div class="fee-label">
-                                    <span class="fee-dot pending"></span>
-                                    Pending
-                                </div>
-                                <div class="fee-amount">AED 40,200</div>
-                                <div class="fee-percentage">32%</div>
-                            </div>
-                            <div class="fee-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: 68%"></div>
-                                </div>
-                            </div>
-                            <p class="fee-target">Target: AED 125,600</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Upcoming Events & Calendar -->
-            <div class="dashboard-grid-bottom">
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3>Upcoming Events</h3>
-                        <a href="#" class="add-event">
-                            <i class="fas fa-plus"></i>
-                        </a>
-                    </div>
-                    <div class="card-content">
-                        <div class="events-list">
-                            <div class="event-item">
-                                <div class="event-date">
-                                    <span class="day">25</span>
-                                    <span class="month">Nov</span>
-                                </div>
-                                <div class="event-details">
-                                    <h4>Parent-Teacher Meeting</h4>
-                                    <p>Annual PTM for all classes</p>
-                                    <span class="event-time">2:00 PM - 5:00 PM</span>
-                                </div>
-                            </div>
-                            <div class="event-item">
-                                <div class="event-date">
-                                    <span class="day">30</span>
-                                    <span class="month">Nov</span>
-                                </div>
-                                <div class="event-details">
-                                    <h4>Monthly Fee Due</h4>
-                                    <p>December fee collection starts</p>
-                                    <span class="event-time">All Day</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <h3>Class Distribution</h3>
-                    </div>
-                    <div class="card-content">
-                        <div class="class-distribution">
-                            <div class="class-item">
-                                <div class="class-info">
-                                    <span class="class-name">Nursery A</span>
-                                    <span class="class-count">45 students</span>
-                                </div>
-                                <div class="class-progress">
-                                    <div class="progress-bar small">
-                                        <div class="progress-fill primary" style="width: 90%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="class-item">
-                                <div class="class-info">
-                                    <span class="class-name">Nursery B</span>
-                                    <span class="class-count">42 students</span>
-                                </div>
-                                <div class="class-progress">
-                                    <div class="progress-bar small">
-                                        <div class="progress-fill secondary" style="width: 84%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="class-item">
-                                <div class="class-info">
-                                    <span class="class-name">Pre-KG</span>
-                                    <span class="class-count">38 students</span>
-                                </div>
-                                <div class="class-progress">
-                                    <div class="progress-bar small">
-                                        <div class="progress-fill accent" style="width: 76%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <script>
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', function () {
-                        console.log('Nursery ERP Dashboard initialized successfully!');
-                        showToast('Dashboard loaded successfully!', 'success');
-                    });
-                } else {
-                    console.log('Nursery ERP Dashboard initialized successfully!');
-                }
-            </script>
-            {% endblock %}
-
+<main class="main-content">
+    <div class="dashboard-container">
+        {% block content %} <!-- Page Header -->
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Dashboard Overview</h1>
+            <p>Welcome back! Here's what's happening at Blossom British Kids Center today.</p>
         </div>
-    </main>
 
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalStudents">{{students_count}}</h3>
+                    <p>Total Students</p>
+                    <span class="stat-change positive" id="studentChange">Loading...</span>
+                </div>
+            </div>
+            <div class="stat-card secondary">
+                <div class="stat-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalTeachers">{{staff_count}}</h3>
+                    <p>Active Staffs</p>
+                    <span class="stat-change positive" id="teacherChange">Loading...</span>
+                </div>
+            </div>
+            <div class="stat-card accent">
+                <div class="stat-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalRevenue">AED {{total_revenue}}</h3>
+                    <p>Total Revenue (This Month)</p>
+                    <span class="stat-change positive" id="revenueChange">Loading...</span>
+                </div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="pendingPayments">{{pending_installments}}</h3>
+                    <p>Pending Installments</p>
+                    <span class="stat-change negative" id="overdueCount">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="dashboard-grid">
+            <!-- Revenue & Expense Overview -->
+            <div class="dashboard-card large">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-line"></i> Revenue & Expense Trend</h3>
+                    <div class="card-actions">
+                        <select class="form-select" id="revenuePeriod">
+                            <option value="6">Last 6 Months</option>
+                            <option value="12">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="revenueExpenseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Status Distribution -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-pie"></i> Student Status</h3>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="studentStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="dashboard-grid">
+            <!-- Income Forecasting (MANDATORY) -->
+            <div class="dashboard-card large">
+                <div class="card-header">
+                    <h3><i class="fas fa-chart-area"></i> Next Month Income Forecast</h3>
+                    <span class="period-badge" id="forecastMonth">Based on Payment Installments</span>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                    <div style="margin-top: 20px; padding: 15px; background: var(--e-global-color-eecedb7); border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <p style="font-size: 14px; opacity: 0.8; margin-bottom: 5px;">Expected Income Next Month</p>
+                                <h2 style="color: var(--e-global-color-primary); margin: 0;" id="forecastAmount">AED 0</h2>
+                            </div>
+                            <div>
+                                <p style="font-size: 14px; opacity: 0.8; margin-bottom: 5px;">Expected Installments</p>
+                                <h2 style="color: var(--e-global-color-4e9ef99); margin: 0;" id="forecastCount">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Payments -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-receipt"></i> Recent Payments</h3>
+                    <a href="#" class="view-all">View All</a>
+                </div>
+                <div class="card-content">
+                    <div class="activity-list" id="recentPaymentsList">
+                        <p style="text-align: center; opacity: 0.6;">Loading payments...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Analytics Row -->
+        <div class="dashboard-grid-bottom">
+            <!-- Class Distribution -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-door-open"></i> Class Distribution</h3>
+                </div>
+                <div class="card-content">
+                    <div class="class-distribution" id="classDistribution">
+                        <p style="text-align: center; opacity: 0.6;">Loading classes...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fee Collection Summary -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-money-bill-wave"></i> Fee Collection Summary</h3>
+                    <span class="period-badge">This Month</span>
+                </div>
+                <div class="card-content">
+                    <div class="fee-summary">
+                        <div class="fee-item">
+                            <div class="fee-label">
+                                <span class="fee-dot collected"></span>
+                                Collected
+                            </div>
+                            <div class="fee-amount" id="collectedAmount">AED 0</div>
+                            <div class="fee-percentage" id="collectedPercentage">0%</div>
+                        </div>
+                        <div class="fee-item">
+                            <div class="fee-label">
+                                <span class="fee-dot pending"></span>
+                                Pending
+                            </div>
+                            <div class="fee-amount" id="pendingAmount">AED 0</div>
+                            <div class="fee-percentage" id="pendingPercentage">0%</div>
+                        </div>
+                        <div class="fee-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="collectionProgress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <p class="fee-target" id="targetAmount">Target: AED 0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teacher Attendance Summary -->
+        <div class="dashboard-grid-bottom">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-user-check"></i> Teacher Attendance Today</h3>
+                </div>
+                <div class="card-content">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div style="text-align: center; padding: 15px; background: rgba(67, 165, 116, 0.1); border-radius: 8px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--e-global-color-4e9ef99);" id="teachersPresent">0</div>
+                            <div style="font-size: 12px; opacity: 0.8;">Present</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(255, 149, 135, 0.1); border-radius: 8px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--e-global-color-7d1e931);" id="teachersAbsent">0</div>
+                            <div style="font-size: 12px; opacity: 0.8;">Absent</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(255, 184, 4, 0.1); border-radius: 8px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--e-global-color-3a7e2f2);" id="teachersHalfDay">0</div>
+                            <div style="font-size: 12px; opacity: 0.8;">Half Day</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                </div>
+                <div class="card-content">
+                    <div class="quick-actions">
+                        <a href="{%url 'student_create'%}" class="action-btn primary">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Add New Student</span>
+                        </a>
+                        <a href="{%url 'create_payment'%}" class="action-btn secondary">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Record Payment</span>
+                        </a>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+    
+    </div>
+</main>
+
+<script>
+// Initialize Charts
+let revenueChart, studentStatusChart, forecastChart;
+
+// Fetch Real Dashboard Data from Django API
+async function fetchDashboardData() {
+    try {
+        const response = await fetch('/api/dashboard-data/');
+        const data = await response.json();
+        
+        // Update Student Stats
+        document.getElementById('totalStudents').textContent = data.students.total || 0;
+        document.getElementById('studentChange').textContent = `${data.students.this_month || 0} this month`;
+        
+        // Update Teacher Stats
+        document.getElementById('totalTeachers').textContent = data.teachers.active || 0;
+        document.getElementById('teacherChange').textContent = `${data.teachers.total || 0} total staffs`;
+        
+        // Update Revenue Stats
+        const revenue = data.payments.total_revenue || 0;
+        document.getElementById('totalRevenue').textContent = `AED ${revenue.toLocaleString()}`;
+        const changeSymbol = data.payments.revenue_change >= 0 ? '+' : '';
+        document.getElementById('revenueChange').textContent = `${changeSymbol}${data.payments.revenue_change.toFixed(1)}% vs last month`;
+        
+        // Update Pending Payments
+        document.getElementById('pendingPayments').textContent = data.payments.pending_installments || 0;
+        document.getElementById('overdueCount').textContent = `${data.payments.overdue_installments || 0} overdue`;
+        
+        // Update Teacher Attendance
+        document.getElementById('teachersPresent').textContent = data.teachers.attendance_today.present;
+        document.getElementById('teachersAbsent').textContent = data.teachers.attendance_today.absent;
+        document.getElementById('teachersHalfDay').textContent = data.teachers.attendance_today.half_day;
+        
+        // Update Fee Collection Summary
+        updateFeeCollectionSummary(data.fee_collection);
+        
+        // Update Forecast
+        updateForecast(data.forecast);
+        
+        // Update Recent Payments
+        updateRecentPayments(data.payments.recent_payments);
+        
+        // Initialize Charts with real data
+        initializeCharts(data);
+        
+        // Fetch and update class distribution
+        fetchClassDistribution();
+        
+    } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+    }
+}
+
+// Initialize All Charts with Real Data
+function initializeCharts(data) {
+    // Revenue & Expense Chart
+    const revenueCtx = document.getElementById('revenueExpenseChart');
+    if (revenueCtx) {
+        if (revenueChart) revenueChart.destroy();
+        
+        revenueChart = new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: data.trends.labels,
+                datasets: [
+                    {
+                        label: 'Revenue',
+                        data: data.trends.revenue,
+                        borderColor: '#43A574',
+                        backgroundColor: 'rgba(67, 165, 116, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Expenses',
+                        data: data.trends.expenses,
+                        borderColor: '#FF9587',
+                        backgroundColor: 'rgba(255, 149, 135, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'AED ' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Student Status Chart
+    const statusCtx = document.getElementById('studentStatusChart');
+    if (statusCtx && data.students.by_status) {
+        if (studentStatusChart) studentStatusChart.destroy();
+        
+        const labels = data.students.by_status.map(s => s.status.replace('_', ' ').toUpperCase());
+        const chartData = data.students.by_status.map(s => s.count);
+        const colors = ['#214888', '#FFB804', '#43A574', '#FF9587', '#89C0FF'];
+        
+        studentStatusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: chartData,
+                    backgroundColor: colors.slice(0, chartData.length),
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    }
+
+    // Forecast Chart (MANDATORY)
+    const forecastCtx = document.getElementById('forecastChart');
+    if (forecastCtx && data.forecast.by_week) {
+        if (forecastChart) forecastChart.destroy();
+        
+        const weekLabels = data.forecast.by_week.map(w => w.week);
+        const weekData = data.forecast.by_week.map(w => w.amount);
+        
+        forecastChart = new Chart(forecastCtx, {
+            type: 'bar',
+            data: {
+                labels: weekLabels,
+                datasets: [{
+                    label: 'Expected Collections',
+                    data: weekData,
+                    backgroundColor: '#214888',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'AED ' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Update Fee Collection Summary
+function updateFeeCollectionSummary(feeData) {
+    const collected = feeData.collected;
+    const pending = feeData.pending;
+    const total = feeData.total_target;
+    const percentage = feeData.percentage;
+    
+    document.getElementById('collectedAmount').textContent = `AED ${collected.toLocaleString()}`;
+    document.getElementById('pendingAmount').textContent = `AED ${pending.toLocaleString()}`;
+    document.getElementById('collectedPercentage').textContent = `${Math.round(percentage)}%`;
+    document.getElementById('pendingPercentage').textContent = `${Math.round(100 - percentage)}%`;
+    document.getElementById('collectionProgress').style.width = `${percentage}%`;
+    document.getElementById('targetAmount').textContent = `Target: AED ${total.toLocaleString()}`;
+}
+
+// Update Forecast
+function updateForecast(forecastData) {
+    document.getElementById('forecastAmount').textContent = `AED ${forecastData.next_month_total.toLocaleString()}`;
+    document.getElementById('forecastCount').textContent = forecastData.installment_count;
+    document.getElementById('forecastMonth').textContent = forecastData.month_name;
+}
+
+// Update Recent Payments
+function updateRecentPayments(payments) {
+    if (!payments || payments.length === 0) {
+        document.getElementById('recentPaymentsList').innerHTML = '<p style="text-align: center; opacity: 0.6;">No recent payments</p>';
+        return;
+    }
+    
+    const html = payments.map(payment => {
+        const date = new Date(payment.payment_date);
+        const timeAgo = getTimeAgo(date);
+        
+        return `
+            <div class="activity-item">
+                <div class="activity-icon payment">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="activity-content">
+                    <p><strong>${payment.student_name}</strong> paid AED ${payment.amount.toLocaleString()}</p>
+                    <span class="activity-time">${timeAgo} • ${payment.payment_method}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    document.getElementById('recentPaymentsList').innerHTML = html;
+}
+
+// Fetch Class Distribution
+async function fetchClassDistribution() {
+    try {
+        const response = await fetch('/api/class-distribution/');
+        const data = await response.json();
+        
+        if (!data.classes || data.classes.length === 0) {
+            document.getElementById('classDistribution').innerHTML = '<p style="text-align: center; opacity: 0.6;">No classes found</p>';
+            return;
+        }
+        
+        const html = data.classes.map(cls => `
+            <div class="class-item">
+                <div class="class-info">
+                    <span class="class-name">${cls.name}</span>
+                    <span class="class-count">${cls.students}/${cls.capacity} students</span>
+                </div>
+                <div class="class-progress">
+                    <div class="progress-bar small">
+                        <div class="progress-fill primary" style="width: ${cls.percentage}%"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        document.getElementById('classDistribution').innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error fetching class distribution:', error);
+        document.getElementById('classDistribution').innerHTML = '<p style="text-align: center; opacity: 0.6;">Error loading classes</p>';
+    }
+}
+
+// Helper function to calculate time ago
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 60) {
+        return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    } else if (diffHours < 24) {
+        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    } else if (diffDays < 30) {
+        return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    } else {
+        return date.toLocaleDateString();
+    }
+}
+
+// Initialize Dashboard on Load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Nursery ERP Dashboard initialized successfully!');
+    fetchDashboardData();
+});
+
+// Refresh data every 5 minutes
+setInterval(fetchDashboardData, 300000);
+</script>
 
 
     <!-- scripts  -->

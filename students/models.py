@@ -209,3 +209,14 @@ class StudentNote(models.Model):
     
     def __str__(self):
         return f"Note for {self.student.get_full_name()}"
+    
+
+class Transportation(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='transportation')
+    destination = models.TextField()
+    school = models.TextField(default='Blossom British School Ajman UAE')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Transpiration for {self.student.get_full_name()}"

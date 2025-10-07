@@ -587,21 +587,16 @@
 <div class="payment-summary-container">
     <!-- Page Header -->
     <div class="page-header">
-        <h1 class="page-title">
+        <h4 class="page-title">
             <i class="fas fa-chart-bar"></i>
             Payment Summary Report
-        </h1>
-        <div class="header-actions">
-            <a href="{% url 'payment_dashboard' %}" class="action-btn btn-primary">
+        </h4>
+
+            <a href="{% url 'payment_dashboard' %}" class=" btn btn-primary">
                 <i class="fas fa-arrow-left"></i>Back to Dashboard
             </a>
-            <button class="action-btn btn-success" onclick="exportReport()">
-                <i class="fas fa-download"></i>Export Report
-            </button>
-            <button class="action-btn btn-secondary" onclick="window.print()">
-                <i class="fas fa-print"></i>Print
-            </button>
-        </div>
+            
+        
     </div>
 
     <!-- Date Filter Section -->
@@ -762,7 +757,7 @@
                             {% elif method.payment_method == 'bank_transfer' %}method-transfer
                             {% elif method.payment_method == 'credit_card' %}method-card
                             {% else %}method-online{% endif %}">
-                            {{ method.get_payment_method_display }}
+                            {{ method.payment_method }}
                         </span>
                     </td>
                     <td>{{ method.count }}</td>

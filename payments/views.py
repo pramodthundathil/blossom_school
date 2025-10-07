@@ -11,7 +11,9 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 import json
 from django.db import models
+from home.decorators import unauthenticated_user
 
+from Finance.models import Income, Expense
 from .models import (
     Student, Payment, PaymentItem, FeeCategory, FeeStructure,
     StudentFeeAssignment, PaymentPlan, PaymentInstallment, StudentLedger, PaymentReminder
@@ -63,7 +65,7 @@ class PaymentDashboardView(LoginRequiredMixin, ListView):
         return context
 
 
-# @login_required
+# @unauthenticated_user
 # def create_payment(request):
 #     """Create a new payment with multiple fee categories"""
 #     if request.method == 'POST':
@@ -241,7 +243,7 @@ class PaymentDashboardView(LoginRequiredMixin, ListView):
 #     return render(request, 'payments/create_payment.html', context)
 
 
-@login_required
+@unauthenticated_user
 def create_payment(request):
     """Create a new payment with multiple fee categories"""
     if request.method == 'POST':
@@ -357,6 +359,11 @@ def create_payment(request):
                     updated_at=timezone.now()
                 )
                 
+                #income saving to db
+                income = Income.objects.create(perticulers = f"Fee payment of  {str(student.get_full_name())} against {remarks} by {payment_method}", amount = net_amount,bill_number = payment.payment_id  )
+                income.save()
+
+                
                 # Create payment items and update installments
                 for item in valid_items:
                     PaymentItem.objects.create(
@@ -439,7 +446,7 @@ def create_payment(request):
     return render(request, 'payments/create_payment.html', context)
 
 # Additional helper view for outstanding fees AJAX
-@login_required
+@unauthenticated_user
 def get_student_outstanding_fees(request, student_id):
     """Get outstanding fees for a specific student via AJAX"""
     try:
@@ -492,7 +499,7 @@ def get_student_outstanding_fees(request, student_id):
         }, status=400)
     
 
-@login_required
+@unauthenticated_user
 def payment_receipt(request, payment_id):
     """Generate payment receipt"""
     payment = get_object_or_404(
@@ -554,7 +561,7 @@ class PaymentListView(LoginRequiredMixin, ListView):
         return context
 
 
-@login_required
+@unauthenticated_user
 def create_payment_plan(request, student_id):
     """Create payment plan for a student"""
     student = get_object_or_404(Student, id=student_id)
@@ -627,7 +634,7 @@ def create_payment_plan(request, student_id):
     return render(request, 'payments/create_payment_plan.html', context)
 
 
-@login_required
+@unauthenticated_user
 def student_payment_details(request, student_id):
     """Show detailed payment information for a student"""
     student = get_object_or_404(Student, id=student_id)
@@ -663,7 +670,7 @@ def student_payment_details(request, student_id):
     return render(request, 'payments/student_payment_details.html', context)
 
 
-@login_required
+@unauthenticated_user
 def overdue_payments_report(request):
     """Generate overdue payments report"""
     overdue_installments = PaymentInstallment.objects.filter(
@@ -690,7 +697,7 @@ def overdue_payments_report(request):
     return render(request, 'payments/overdue_report.html', context)
 
 
-@login_required
+@unauthenticated_user
 def payment_summary_report(request):
     """Generate payment summary report"""
     # Date filters
@@ -737,7 +744,7 @@ def payment_summary_report(request):
     return render(request, 'payments/payment_summary_report.html', context)
 
 
-@login_required
+@unauthenticated_user
 def defaulter_report(request):
     """Generate defaulter report"""
     # Get students with overdue payments
@@ -765,7 +772,7 @@ def defaulter_report(request):
     return render(request, 'payments/defaulter_report.html', context)
 
 
-@login_required
+@unauthenticated_user
 def export_payment_data(request):
     """Export payment data to Excel"""
     import xlsxwriter
@@ -847,7 +854,7 @@ def export_payment_data(request):
 
 
 # Utility functions
-
+@unauthenticated_user
 def calculate_student_balance(student):
     """Calculate current balance for a student"""
     # Get all completed payments
@@ -872,7 +879,7 @@ def calculate_student_balance(student):
         'balance': total_outstanding - total_paid
     }
 
-
+@unauthenticated_user
 def update_overdue_installments():
     """Update overdue installments and calculate late fees"""
     today = timezone.now().date()
@@ -897,7 +904,7 @@ def update_overdue_installments():
         installment.save()
 
 
-@login_required
+@unauthenticated_user
 def bulk_payment_reminder(request):
     """Send bulk payment reminders"""
     if request.method == 'POST':
@@ -936,7 +943,7 @@ def bulk_payment_reminder(request):
 
 # AJAX endpoints
 
-@login_required
+@unauthenticated_user
 def get_fee_structure_amount(request):
     """Get fee structure amount for a category and year"""
     fee_category_id = request.GET.get('fee_category_id')
@@ -957,7 +964,7 @@ def get_fee_structure_amount(request):
         return JsonResponse({'error': 'Fee structure not found'}, status=404)
 
 
-@login_required
+@unauthenticated_user
 def validate_payment_amount(request):
     """Validate payment amount against outstanding balance"""
     student_id = request.GET.get('student_id')
@@ -973,3 +980,12 @@ def validate_payment_amount(request):
         })
     
     return JsonResponse({'valid': True})
+
+@unauthenticated_user
+def mark_as_paid(request, pk):
+    installment = get_object_or_404( PaymentInstallment, id= pk )
+    installment.paid_amount = installment.amount
+    installment.status = 'paid'
+    installment.save()
+    messages.success(request, 'Installment marked as Paid')
+    return redirect("student_payment_details", installment.payment_plan.student.id)

@@ -41,8 +41,8 @@
     <!-- Payments Table -->
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" id="paymentsTable">
+            <div class="table-responsive-1 ">
+                <table class="display mb-0" id="paymentsTable">
                     <thead class="table-light">
                         <tr>
                             <th>Payment ID</th>
@@ -70,12 +70,12 @@
                             <td>{{ payment.payment_date|date:"M d, Y" }}</td>
                             <td>
                                 <div>
-                                    <strong>${{ payment.net_amount|floatformat:2 }}</strong>
+                                    <strong><span style='font-size:small'>AED </span>{{ payment.net_amount|floatformat:2 }}</strong>
                                     {% if payment.discount_amount > 0 %}
-                                    <br><small class="text-success">Discount: ${{ payment.discount_amount|floatformat:2 }}</small>
+                                    <br><small class="text-success">Discount: <span style='font-size:small'>AED </span>{{ payment.discount_amount|floatformat:2 }}</small>
                                     {% endif %}
                                     {% if payment.late_fee_amount > 0 %}
-                                    <br><small class="text-warning">Late Fee: ${{ payment.late_fee_amount|floatformat:2 }}</small>
+                                    <br><small class="text-warning">Late Fee: <span style='font-size:small'>AED </span>{{ payment.late_fee_amount|floatformat:2 }}</small>
                                     {% endif %}
                                 </div>
                             </td>
@@ -191,7 +191,21 @@
         {% endif %}
     </div>
 </div>
+<!-- DataTables CSS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
 
+<!-- <script>
+$(document).ready(function () {
+    if ($.fn.DataTable) {
+        console.log("DataTable is loaded.");
+        $('#teachersTable').DataTable();
+    } else {
+        console.error("DataTable is not loaded.");
+    }
+});
+</script> -->
 <script>
 $(document).ready(function() {
     // Initialize DataTable if not using Django pagination

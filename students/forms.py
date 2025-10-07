@@ -464,3 +464,23 @@ class DocumentForm(forms.ModelForm):
                 }
             ),
         }
+
+
+
+from .models import Transportation
+
+class TransportationForm(forms.ModelForm):
+    class Meta:
+        model = Transportation
+        fields = ['destination', 'school', 'amount']
+        widgets = {
+            'school': forms.TextInput(attrs={'readonly': 'readonly', 'class': 'form-input'}),
+            'student': forms.Select(attrs={'class': 'form-input'}),
+            'destination': forms.Textarea(attrs={'class': 'form-input', 'rows': 3}),
+            'amount': forms.NumberInput(attrs={'class': 'form-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Prepopulate school field
+        self.fields['school'].initial = 'Blossom British School Ajman UAE'

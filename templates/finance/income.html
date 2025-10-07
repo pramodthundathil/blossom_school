@@ -12,7 +12,7 @@
 <div class="content-page">
     <div class="container-fluid">
         <div class="row">
-         
+
             <div class="col-lg-12">
                 <div class="students-container">
                     <!-- Main Content -->
@@ -35,8 +35,8 @@
                                 </div>
                                 <div class="table-responsive-1 rounded mb-3">
                                     <table class="data-tables table mb-0 tbl-server-info dispaly" id="incomeTable">
-                                        <thead >
-                                            <tr >
+                                        <thead>
+                                            <tr>
                                                 <th>
                                                     <div class="checkbox d-inline-block">
                                                         <input type="checkbox" id="select-all" aria-checked="false"
@@ -47,6 +47,8 @@
                                                 <!-- <th></th> -->
                                                 <th>Date</th>
                                                 <th>Particulars</th>
+                                                <th>Reference Bill Number</th>
+
                                                 <th>amount</th>
                                                 <th>Action</th>
                                             </tr>
@@ -69,37 +71,20 @@
                                                     {{m.date}}</td>
                                                 <!-- <td>{{m.code}}</td> -->
                                                 <td>{{m.perticulers}}</td>
+                                                <td>{{m.bill_number}}</td>
                                                 <td>{{m.amount}}</td>
                                                 <td>
                                                     <div class="d-flex align-items-center list-action">
 
-                                                        <a class="badge bg-success mr-2" data-toggle="tooltip"
-                                                            data-placement="top" title="" data-original-title="Edit"
-                                                            href="{%url 'update_income' m.id %}"><i
-                                                                class="ri-pencil-line mr-0"></i></a>
-                                                        <a class="badge bg-warning mr-2" data-toggle="modal"
-                                                            data-target="#deletemodel{{m.id}}"
-                                                            data-original-title="Delete" href="#"><i
-                                                                class="ri-delete-bin-line mr-0"></i></a>
-                                                        <!-- Delete Modal -->
-                                                        <div class="modal fade" id="deletemodel{{m.id}}" tabindex="-1"
-                                                            role="dialog" aria-labelledby="exampleModalLabel"
-                                                            aria-hidden="true">
-                                                            <div class="modal-dialog" role="document">
-                                                                <div class="modal-content">
+                                                        <a class="badge bg-success mr-2" data-bs-toggle="tooltip"
+                                                            data-bs-placement="top" title="" data-bs-original-title="Edit"
+                                                            href="{%url 'update_income' m.id %}"><i class="fas fa-pencil"></i></a>
+                                                        <a class="badge bg-danger mr-2" data-bs-toggle="modal"
+                                                            data-bs-target="#deletemodel{{m.id}}"
+                                                            data-bs-original-title="Delete" href="#">
+                                                            <i class="fas fa-trash"></i></a>
+                                                                
 
-                                                                    <div class="modal-body">
-                                                                        Are You Sure Do you Want to Delete ?
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <button type="button" class="btn btn-secondary"
-                                                                            data-dismiss="modal">No</button>
-                                                                        <a href="{%url 'delete_income' m.id%}"
-                                                                            class="btn btn-danger">Yes</a>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -153,7 +138,7 @@
                     <div class="popup text-left">
                         <div class="media align-items-top justify-content-between">
                             <h3 class="mb-3">Product</h3>
-                            <div class="btn-cancel p-0" data-dismiss="modal"><i class="las la-times"></i></div>
+                            <div class="btn-cancel p-0" data-bs-dismiss="modal"><i class="las la-times"></i></div>
                         </div>
                         <div class="content edit-notes">
                             <div class="card card-transparent card-block card-stretch event-note mb-0">
@@ -170,8 +155,8 @@
                                 </div>
                                 <div class="card-footer border-0">
                                     <div class="d-flex flex-wrap align-items-ceter justify-content-end">
-                                        <div class="btn btn-primary mr-3" data-dismiss="modal">Cancel</div>
-                                        <div class="btn btn-outline-primary" data-dismiss="modal">Save</div>
+                                        <div class="btn btn-primary mr-3" data-bs-dismiss="modal">Cancel</div>
+                                        <div class="btn btn-outline-primary" data-bs-dismiss="modal">Save</div>
                                     </div>
                                 </div>
                             </div>
@@ -181,6 +166,27 @@
             </div>
         </div>
     </div>
+
+
+    {% for m in income %}
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deletemodel{{m.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    Are You Sure Do you Want to Delete ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <a href="{%url 'delete_income' m.id%}" class="btn btn-danger">Yes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 
 <script>
@@ -212,13 +218,13 @@
 <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
 
 <script>
-$(document).ready(function () {
-    if ($.fn.DataTable) {
-        console.log("DataTable is loaded.");
-        $('#incomeTable').DataTable();
-    } else {
-        console.error("DataTable is not loaded.");
-    }
-});
+    $(document).ready(function () {
+        if ($.fn.DataTable) {
+            console.log("DataTable is loaded.");
+            $('#incomeTable').DataTable();
+        } else {
+            console.error("DataTable is not loaded.");
+        }
+    });
 </script>
 {% endblock %}

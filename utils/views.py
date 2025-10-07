@@ -6,12 +6,14 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Teacher
 from .forms import TeacherForm
+from Finance.models import Expense
+from home.decorators import unauthenticated_user
 
 
 
 # staff functionalities 
 
-@login_required
+@unauthenticated_user
 def teacher_list(request):
     """Display list of all teachers"""
     teachers = Teacher.objects.all()
@@ -33,7 +35,7 @@ def teacher_list(request):
     }
     return render(request, 'teachers/teacher_list.html', context)
 
-@login_required
+@unauthenticated_user
 def teacher_create(request):
     """Create a new teacher"""
     if request.method == 'POST':
@@ -72,7 +74,7 @@ def teacher_create(request):
     }
     return render(request, 'teachers/teacher_form.html', context)
 
-@login_required
+@unauthenticated_user
 def teacher_detail(request, pk):
     """Display teacher details"""
     teacher = get_object_or_404(Teacher, pk=pk)
@@ -81,7 +83,7 @@ def teacher_detail(request, pk):
     }
     return render(request, 'teachers/teacher_detail.html', context)
 
-@login_required
+@unauthenticated_user
 def teacher_update(request, pk):
     """Update teacher information"""
     teacher = get_object_or_404(Teacher, pk=pk)
@@ -122,7 +124,7 @@ def teacher_update(request, pk):
     }
     return render(request, 'teachers/teacher_form.html', context)
 
-@login_required
+@unauthenticated_user
 @require_http_methods(["POST"])
 def teacher_delete(request, pk):
     """Delete a teacher"""
@@ -132,7 +134,7 @@ def teacher_delete(request, pk):
     messages.success(request, f'Teacher {teacher_name} has been deleted.')
     return redirect('teacher_list')
 
-@login_required
+@unauthenticated_user
 def disable_teacher(request, pk):
     """Disable a teacher account"""
     teacher = get_object_or_404(Teacher, pk=pk)
@@ -142,7 +144,7 @@ def disable_teacher(request, pk):
     messages.success(request, f'Teacher {teacher.full_name} has been disabled.')
     return redirect('teacher_list')
 
-@login_required
+@unauthenticated_user
 def enable_teacher(request, pk):
     """Enable a teacher account"""
     teacher = get_object_or_404(Teacher, pk=pk)
@@ -155,7 +157,7 @@ def enable_teacher(request, pk):
     messages.success(request, f'Teacher {teacher.full_name} has been enabled.')
     return redirect('teacher_list')
 
-@login_required
+@unauthenticated_user
 @require_http_methods(["POST"])
 def bulk_action_teachers(request):
     """Handle bulk actions for teachers"""
@@ -207,7 +209,7 @@ from .forms import (
 )
 
 # ==================== ATTENDANCE VIEWS ====================
-
+@unauthenticated_user
 def attendance_dashboard(request):
     """Dashboard showing attendance overview"""
     today = timezone.now().date()
@@ -241,7 +243,7 @@ def attendance_dashboard(request):
     
     return render(request, 'attendance/dashboard.html', context)
 
-
+@unauthenticated_user
 def mark_attendance(request, teacher_id=None):
     """Mark attendance for single teacher"""
     today = timezone.now().date()
@@ -288,7 +290,7 @@ def mark_attendance(request, teacher_id=None):
     
     return render(request, 'attendance/mark_attendance.html', context)
 
-
+@unauthenticated_user
 def bulk_mark_attendance(request):
     """Mark attendance for multiple teachers at once"""
     today = timezone.now().date()
@@ -355,7 +357,7 @@ def bulk_mark_attendance(request):
     
     return render(request, 'attendance/bulk_mark_attendance.html', context)
 
-
+@unauthenticated_user
 def attendance_list(request):
     """List all attendance records with filters"""
     # Get filter parameters
@@ -396,7 +398,7 @@ def attendance_list(request):
     
     return render(request, 'attendance/attendance_list.html', context)
 
-
+@unauthenticated_user
 def teacher_attendance_detail(request, teacher_id):
     """View detailed attendance for a specific teacher"""
     teacher = get_object_or_404(Teacher, pk=teacher_id)
@@ -440,7 +442,7 @@ def teacher_attendance_detail(request, teacher_id):
 
 
 # ==================== SALARY VIEWS ====================
-
+@unauthenticated_user
 def salary_dashboard(request):
     """Salary management dashboard"""
     current_month = timezone.now().month
@@ -473,7 +475,7 @@ def salary_dashboard(request):
     
     return render(request, 'salary/dashboard.html', context)
 
-
+@unauthenticated_user
 def calculate_monthly_salary(request):
     """Calculate salary for all staff for a given month"""
     if request.method == 'POST':
@@ -504,7 +506,7 @@ def calculate_monthly_salary(request):
     
     return render(request, 'salary/calculate_salary.html', context)
 
-
+@unauthenticated_user
 def salary_list(request):
     """List all salary records"""
     month = request.GET.get('month', timezone.now().month)
@@ -535,7 +537,7 @@ def salary_list(request):
     
     return render(request, 'salary/salary_list.html', context)
 
-
+@unauthenticated_user
 def salary_detail(request, salary_id):
     """View detailed salary information"""
     salary = get_object_or_404(MonthlySalary, pk=salary_id)
@@ -558,51 +560,65 @@ def salary_detail(request, salary_id):
     
     return render(request, 'salary/salary_detail.html', context)
 
-
+@unauthenticated_user
 def update_salary_payment(request, salary_id):
     """Update payment status for a salary record"""
     salary = get_object_or_404(MonthlySalary, pk=salary_id)
+    if salary.payment_status == "paid":
+        messages.info(request, 'Cannot edit the salary this salary is already paid..')
+        return redirect('salary_detail', salary_id = salary_id )
+    else:
+        if request.method == 'POST':
+            salary.payment_status = request.POST.get('payment_status')
+            salary.payment_date = request.POST.get('payment_date')
+            salary.payment_method = request.POST.get('payment_method')
+            salary.payment_reference = request.POST.get('payment_reference')
+            salary.save()
+            if salary.payment_status == "paid":
+                expense = Expense.objects.create(amount = salary.net_salary, perticulers = f'Salary Payment to {salary.teacher} of month {salary.month} by {salary.payment_method}', bill_number = salary.payment_reference  )
+                expense.save()
+            
+            messages.success(request, 'Payment information updated successfully')
+            return redirect('salary_detail', salary_id=salary_id)
     
-    if request.method == 'POST':
-        salary.payment_status = request.POST.get('payment_status')
-        salary.payment_date = request.POST.get('payment_date')
-        salary.payment_method = request.POST.get('payment_method')
-        salary.payment_reference = request.POST.get('payment_reference')
-        salary.save()
-        
-        messages.success(request, 'Payment information updated successfully')
-        return redirect('salary_detail', salary_id=salary_id)
-    
-    context = {'salary': salary}
-    return render(request, 'salary/update_payment.html', context)
+        context = {'salary': salary}
+        return render(request, 'salary/update_payment.html', context)
 
 from decimal import Decimal
 
-
+@unauthenticated_user
 def make_deductions(request, salary_id):
     salary = get_object_or_404(MonthlySalary, id = salary_id)
-
-
-    if request.method == "POST":
-        amount = request.POST['deduction_amount']
-        remark = request.POST['deduction_remarks'] 
-        salary.other_deductions = Decimal(str(amount))
-        salary.other_deductions_remarks = remark
-        salary.save()
-        messages.success(request,"Deductions Added Success..")
-        return redirect('salary_detail', salary_id = salary_id)
+    if salary.payment_status == "paid":
+        messages.info(request, 'Cannot edit the salary this salary is already paid..')
+        return redirect('salary_detail', salary_id = salary_id )
     else:
-        return redirect('salary_detail', salary_id = salary_id)
+        if request.method == "POST":
+            amount = request.POST['deduction_amount']
+            remark = request.POST['deduction_remarks'] 
+            salary.other_deductions = Decimal(str(amount))
+            salary.other_deductions_remarks = remark
+            salary.save()
+            messages.success(request,"Deductions Added Success..")
+            return redirect('salary_detail', salary_id = salary_id)
+        else:
+            return redirect('salary_detail', salary_id = salary_id)
 
+
+@unauthenticated_user
 def make_extra_payment(request, salary_id):
     salary = get_object_or_404(MonthlySalary, id = salary_id)
-    if request.method == "POST":
-        amount = request.POST['extra_payment_amount']
-        remark = request.POST['extra_payment_remarks'] 
-        salary.other_additions = Decimal(str(amount))
-        salary.other_additions_remarks = remark
-        salary.save()
-        messages.success(request,"Deductions Added Success..")
-        return redirect('salary_detail', salary_id = salary_id)
+    if salary.payment_status == "paid":
+        messages.info(request, 'Cannot edit the salary this salary is already paid..')
+        return redirect('salary_detail', salary_id = salary_id )
     else:
-        return redirect('salary_detail', salary_id = salary_id)
+        if request.method == "POST":
+            amount = request.POST['extra_payment_amount']
+            remark = request.POST['extra_payment_remarks'] 
+            salary.other_additions = Decimal(str(amount))
+            salary.other_additions_remarks = remark
+            salary.save()
+            messages.success(request,"Deductions Added Success..")
+            return redirect('salary_detail', salary_id = salary_id)
+        else:
+            return redirect('salary_detail', salary_id = salary_id)

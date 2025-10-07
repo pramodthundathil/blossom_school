@@ -16,7 +16,7 @@ urlpatterns = [
     # Student payment management
     path('student/<uuid:student_id>/', views.student_payment_details, name='student_payment_details'),
     path('student/<uuid:student_id>/outstanding/', views.get_student_outstanding_fees, name='student_outstanding_fees'),
-    
+    path('student/installment/marked/<int:pk>/',views.mark_as_paid,name="mark_as_paid"),
     # Payment plans
     path('plan/create/<uuid:student_id>/', views.create_payment_plan, name='create_payment_plan'),
     

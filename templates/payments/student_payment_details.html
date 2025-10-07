@@ -603,13 +603,17 @@
             <i class="fas fa-user-graduate"></i>
             Payment Details - {{ student.get_full_name }}
         </h1>
+        <div style="display: flex; gap: 12px;">
         <a href="{% url 'payment_dashboard' %}" class="back-btn">
             <i class="fas fa-arrow-left"></i>Back to Dashboard
         </a>
-
+        <a href="{% url 'student_detail' student.id %}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>Back to Student
+        </a>
         <a href="{% url 'create_payment_plan' student.id %}" class="back-btn" style="background-color: #243552;">
             <i class="fas fa-plus"></i>Add Payment Plan
         </a>
+        </div>
     </div>
 
     <!-- Student Information -->
@@ -792,6 +796,7 @@
                         <button class="pay-btn" onclick="recordPayment({{ installment.id }})">
                             <i class="fas fa-credit-card"></i> Pay Now
                         </button>
+                        <a href="{% url 'mark_as_paid' installment.id %}" class="btn btn-sm btn-secondary">Mark As Paid</a>
                     </div>
                 </div>
                 {% endfor %}
