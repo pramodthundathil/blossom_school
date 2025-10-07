@@ -854,7 +854,7 @@ def export_payment_data(request):
 
 
 # Utility functions
-@unauthenticated_user
+
 def calculate_student_balance(student):
     """Calculate current balance for a student"""
     # Get all completed payments
@@ -879,7 +879,7 @@ def calculate_student_balance(student):
         'balance': total_outstanding - total_paid
     }
 
-@unauthenticated_user
+
 def update_overdue_installments():
     """Update overdue installments and calculate late fees"""
     today = timezone.now().date()
