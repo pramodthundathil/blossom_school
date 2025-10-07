@@ -816,7 +816,7 @@ from Finance.models import  Income, Expense
 
 
 
-@unauthenticated_user
+
 def generate_fee_tracking_excel(fee_category_id, start_date, end_date):
     """Generate fee tracking Excel report"""
     fee_category = FeeCategory.objects.get(id=fee_category_id)
@@ -930,7 +930,7 @@ def generate_fee_tracking_excel(fee_category_id, start_date, end_date):
     wb.save(response)
     return response
 
-@unauthenticated_user
+
 def generate_fee_tracking_pdf(fee_category_id, start_date, end_date):
     """Generate fee tracking PDF report"""
     fee_category = FeeCategory.objects.get(id=fee_category_id)
@@ -1046,7 +1046,7 @@ def generate_fee_tracking_pdf(fee_category_id, start_date, end_date):
     return response
 
 
-@unauthenticated_user
+
 def generate_student_report(request):
     """Generate comprehensive student report"""
     if request.method == 'POST':
@@ -1060,7 +1060,7 @@ def generate_student_report(request):
     
     return redirect('reports_dashboard')
 
-@unauthenticated_user
+
 def generate_student_excel(student_id):
     """Generate comprehensive student report in Excel"""
     try:
@@ -1316,7 +1316,7 @@ def generate_student_excel(student_id):
     wb.save(response)
     return response
 
-@unauthenticated_user
+
 def generate_student_pdf(student_id):
     """Generate comprehensive student report in PDF"""
     try:
@@ -1515,7 +1515,7 @@ def generate_student_pdf(student_id):
     response['Content-Disposition'] = f'attachment; filename="Student_Report_{student.student_id}_{student.get_full_name()}.pdf"'
 
 
-@unauthenticated_user
+
 def reports_dashboard(request):
     """Main reports dashboard"""
     from students.models import Student
@@ -1528,7 +1528,7 @@ def reports_dashboard(request):
     return render(request, 'auth_templates/reports-dashboard.html', context)
 
 
-@unauthenticated_user
+
 def generate_daily_report(request):
     """Generate daily financial report"""
     if request.method == 'POST':
@@ -1542,7 +1542,7 @@ def generate_daily_report(request):
     
     return redirect('reports_dashboard')
 
-@unauthenticated_user
+
 def generate_daily_excel(report_date):
     """Generate daily report in Excel format"""
     date_obj = datetime.strptime(report_date, '%Y-%m-%d').date()
@@ -1705,7 +1705,7 @@ def generate_daily_excel(report_date):
     wb.save(response)
     return response
 
-@unauthenticated_user
+
 def generate_daily_pdf(report_date):
     """Generate daily report in PDF format"""
     date_obj = datetime.strptime(report_date, '%Y-%m-%d').date()
@@ -1787,7 +1787,7 @@ def generate_daily_pdf(report_date):
     return response
 
 
-@unauthenticated_user
+
 def generate_date_range_report(request):
     """Generate report for date range"""
     if request.method == 'POST':
@@ -1802,7 +1802,7 @@ def generate_date_range_report(request):
     
     return redirect('reports_dashboard')
 
-@unauthenticated_user
+
 def generate_range_excel(start_date, end_date):
     """Generate date range report in Excel"""
     start = datetime.strptime(start_date, '%Y-%m-%d').date()
@@ -1969,7 +1969,7 @@ def generate_range_excel(start_date, end_date):
     wb.save(response)
     return response
 
-@unauthenticated_user
+
 def generate_range_pdf(start_date, end_date):
     """Generate date range report in PDF format"""
     start = datetime.strptime(start_date, '%Y-%m-%d').date()
@@ -2151,7 +2151,7 @@ def generate_range_pdf(start_date, end_date):
     return response
 
 
-@unauthenticated_user
+
 def generate_fee_tracking_report(request):
     """Generate fee tracking report by category"""
     if request.method == 'POST':
@@ -2167,7 +2167,7 @@ def generate_fee_tracking_report(request):
     
     return redirect('reports_dashboard')
 
-@unauthenticated_user
+
 def generate_fee_tracking_excel(fee_category_id, start_date, end_date):
     """Generate fee tracking Excel report"""
     fee_category = FeeCategory.objects.get(id=fee_category_id)
