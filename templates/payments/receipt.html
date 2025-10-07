@@ -454,17 +454,17 @@
                                                 {{ item.fee_category.name }} Payment
                                             {% endif %}
                                         </td>
-                                        <td class="amount-cell">${{ item.amount|floatformat:2 }}</td>
-                                        <td class="amount-cell text-success">- ${{ item.discount_amount|floatformat:2 }}</td>
+                                        <td class="amount-cell">AED {{ item.amount|floatformat:2 }}</td>
+                                        <td class="amount-cell text-success">- AED {{ item.discount_amount|floatformat:2 }}</td>
                                         <td class="amount-cell text-warning">
                                             {% if item.late_fee > 0 %}
-                                                + ${{ item.late_fee|floatformat:2 }}
+                                                + AED {{ item.late_fee|floatformat:2 }}
                                             {% else %}
-                                                $0.00
+                                                AED 0.00
                                             {% endif %}
                                         </td>
                                         <td class="amount-cell">
-                                            <strong>${{ item.net_amount|floatformat:2 }}</strong>
+                                            <strong>AED {{ item.net_amount|floatformat:2 }}</strong>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -476,23 +476,23 @@
                         <div class="summary-card">
                             <div class="summary-row">
                                 <span>Subtotal:</span>
-                                <strong>${{ payment.total_amount|floatformat:2 }}</strong>
+                                <strong>AED {{ payment.total_amount|floatformat:2 }}</strong>
                             </div>
                             {% if payment.discount_amount > 0 %}
                             <div class="summary-row text-success">
                                 <span>Total Discount:</span>
-                                <strong>- ${{ payment.discount_amount|floatformat:2 }}</strong>
+                                <strong>- AED {{ payment.discount_amount|floatformat:2 }}</strong>
                             </div>
                             {% endif %}
                             {% if payment.late_fee_amount > 0 %}
                             <div class="summary-row text-warning">
                                 <span>Total Late Fee:</span>
-                                <strong>+ ${{ payment.late_fee_amount|floatformat:2 }}</strong>
+                                <strong>+ AED {{ payment.late_fee_amount|floatformat:2 }}</strong>
                             </div>
                             {% endif %}
                             <div class="summary-row total">
                                 <span>NET TOTAL PAID:</span>
-                                <strong>${{ payment.net_amount|floatformat:2 }}</strong>
+                                <strong>AED {{ payment.net_amount|floatformat:2 }}</strong>
                             </div>
                         </div>
 
@@ -531,9 +531,9 @@
 
                         <!-- Print Section -->
                         <div class="print-section text-center">
-                            <button onclick="window.print()" class="btn btn-print">
+                            <a href="{% url 'generate_invoice_pdf' payment.id %}" target="_blank" class="btn btn-print">
                                 <i class="fas fa-print me-2"></i>Print Receipt
-                            </button>
+                            </a>
                             <div class="mt-2 text-muted">
                                 <small>This is an official receipt. Please keep it for your records.</small>
                             </div>

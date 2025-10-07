@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - {{ payment.payment_id }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border: 1px solid #ddd;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2c3e50;
+        }
+        
+        .school-info h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .school-info p {
+            margin: 3px 0;
+            color: #555;
+        }
+        
+        .invoice-details {
+            text-align: right;
+        }
+        
+        .invoice-details h2 {
+            color: #e74c3c;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .invoice-details p {
+            margin: 5px 0;
+        }
+        
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .bill-to, .payment-info {
+            width: 48%;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .info-row {
+            margin: 5px 0;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .items-table thead {
+            background-color: #2c3e50;
+            color: white;
+        }
+        
+        .items-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .items-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .items-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .totals-table {
+            width: 350px;
+        }
+        
+        .totals-table tr {
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .totals-table td {
+            padding: 8px 12px;
+        }
+        
+        .totals-table .label {
+            text-align: right;
+            font-weight: bold;
+        }
+        
+        .totals-table .amount {
+            text-align: right;
+            width: 120px;
+        }
+        
+        .grand-total {
+            background-color: #2c3e50;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
+            text-align: center;
+        }
+        
+        .payment-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        
+        .status-completed {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .status-pending {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .status-failed {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .status-refunded {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .status-cancelled {
+            background-color: #7f8c8d;
+            color: white;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            .invoice-container {
+                border: none;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="school-info">
+                <h1>{{ school.name }}</h1>
+                <p>{{ school.address }}</p>
+                <p>{{ school.city }}</p>
+                {% if school.phone %}
+                <p>Phone: {{ school.phone }}</p>
+                {% endif %}
+                {% if school.email %}
+                <p>Email: {{ school.email }}</p>
+                {% endif %}
+            </div>
+            <div class="invoice-details">
+                <h2>INVOICE</h2>
+                <p><strong>Invoice #:</strong> {{ payment.payment_id }}</p>
+                <p><strong>Date:</strong> {{ payment.payment_date|date:"d M, Y" }}</p>
+                {% if payment.receipt_number %}
+                <p><strong>Receipt #:</strong> {{ payment.receipt_number }}</p>
+                {% endif %}
+                <p>
+                    <span class="payment-status status-{{ payment.payment_status }}">
+                        {{ payment.get_payment_status_display }}
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Bill To & Payment Info -->
+        <div class="info-section">
+            <div class="bill-to">
+                <div class="section-title">BILL TO</div>
+                <div class="info-row">
+                    <span class="info-label">Student:</span>
+                    <span>{{ student.get_full_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Student ID:</span>
+                    <span>{{ student.student_id }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Class:</span>
+                    <span>{{ student.class_room|default:"N/A" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Father:</span>
+                    <span>{{ student.father_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Contact:</span>
+                    <span>{{ student.father_mobile|default:student.phone_number }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span>{{ student.father_email|default:student.email }}</span>
+                </div>
+            </div>
+            
+            <div class="payment-info">
+                <div class="section-title">PAYMENT INFORMATION</div>
+                <div class="info-row">
+                    <span class="info-label">Payment Method:</span>
+                    <span>{{ payment.get_payment_method_display }}</span>
+                </div>
+                {% if payment.transaction_reference %}
+                <div class="info-row">
+                    <span class="info-label">Reference:</span>
+                    <span>{{ payment.transaction_reference }}</span>
+                </div>
+                {% endif %}
+                {% if payment.collected_by %}
+                <div class="info-row">
+                    <span class="info-label">Collected By:</span>
+                    <span>{{ payment.collected_by.get_full_name|default:payment.collected_by.username }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Description</th>
+                    <th class="text-center">Category</th>
+                    <th class="text-right">Amount</th>
+                    <th class="text-right">Discount</th>
+                    <th class="text-right">Late Fee</th>
+                    <th class="text-right">Net Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in payment_items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.description }}</td>
+                    <td class="text-center">{{ item.fee_category.name }}</td>
+                    <td class="text-right">AED {{ item.amount|floatformat:2 }}</td>
+                    <td class="text-right">
+                        {% if item.discount_amount > 0 %}
+                            -AED {{ item.discount_amount|floatformat:2 }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="text-right">
+                        {% if item.late_fee > 0 %}
+                            +AED {{ item.late_fee|floatformat:2 }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="text-right"><strong>AED {{ item.net_amount|floatformat:2 }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="totals-section">
+            <table class="totals-table">
+                <tr>
+                    <td class="label">Subtotal:</td>
+                    <td class="amount">AED {{ subtotal|floatformat:2 }}</td>
+                </tr>
+                {% if total_discount > 0 %}
+                <tr>
+                    <td class="label">Total Discount:</td>
+                    <td class="amount">-AED {{ total_discount|floatformat:2 }}</td>
+                </tr>
+                {% endif %}
+                {% if total_late_fee > 0 %}
+                <tr>
+                    <td class="label">Late Fee:</td>
+                    <td class="amount">+AED {{ total_late_fee|floatformat:2 }}</td>
+                </tr>
+                {% endif %}
+                <tr class="grand-total">
+                    <td class="label">GRAND TOTAL:</td>
+                    <td class="amount">AED {{ grand_total|floatformat:2 }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Remarks -->
+        {% if payment.remarks %}
+        <div style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #2c3e50;">
+            <strong>Remarks:</strong><br>
+            {{ payment.remarks }}
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="footer">
+            <p style="margin-bottom: 10px;"><strong>Thank you for your payment!</strong></p>
+            <p style="font-size: 10px; color: #777;">
+                This is a computer-generated invoice and does not require a signature.
+            </p>
+            <p style="font-size: 10px; color: #777; margin-top: 5px;">
+                For any queries, please contact us at {{ school.email }}
+            </p>
+        </div>
+    </div>
+</body>
+</html>

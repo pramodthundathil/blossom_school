@@ -32,4 +32,8 @@ urlpatterns = [
     # AJAX endpoints
     path('ajax/fee-structure/', views.get_fee_structure_amount, name='get_fee_structure_amount'),
     path('ajax/validate-amount/', views.validate_payment_amount, name='validate_payment_amount'),
+
+    #invoice 
+    path('invoice/<int:payment_id>/', views.generate_invoice, name='generate_invoice'),
+    path('invoice/<int:payment_id>/pdf/', views.generate_invoice_quick, name='generate_invoice_pdf'),
 ]

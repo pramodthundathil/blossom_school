@@ -782,9 +782,9 @@
                     <a href="{% url 'update_salary_payment' salary.id %}" class="btn-action btn-primary">
                         <i class="fas fa-edit"></i> Update Payment
                     </a>
-                    <button onclick="window.print()" class="btn-action btn-primary">
-                        <i class="fas fa-print"></i> Print
-                    </button>
+                    <a href="{% url 'generate_salary_slip_pdf' salary.id %}" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-print"></i> Salary slip
+                    </a>
                 </div>
             </div>
         </div>

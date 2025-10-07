@@ -989,3 +989,108 @@ def mark_as_paid(request, pk):
     installment.save()
     messages.success(request, 'Installment marked as Paid')
     return redirect("student_payment_details", installment.payment_plan.student.id)
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
+from weasyprint import HTML
+import tempfile
+from .models import Payment, Student
+
+@unauthenticated_user
+def generate_invoice(request, payment_id):
+    """Generate and display/download invoice for a payment"""
+    
+    # Get the payment with related data
+    payment = get_object_or_404(
+        Payment.objects.select_related('student', 'collected_by')
+                      .prefetch_related('payment_items__fee_category', 
+                                       'payment_items__installment'),
+        id=payment_id
+    )
+    
+    # School information
+    school_info = {
+        'name': 'Blossom British School',
+        'address': 'Villa No 2 University Street,',
+        'city': 'Ajman UAE',
+        'phone': '+971-XXX-XXXXX',  # Add your phone
+        'email': 'info@blossombritish.ae',  # Add your email
+    }
+    
+    # Calculate totals
+    subtotal = payment.total_amount
+    total_discount = payment.discount_amount
+    total_late_fee = payment.late_fee_amount
+    grand_total = payment.net_amount
+    
+    context = {
+        'payment': payment,
+        'student': payment.student,
+        'payment_items': payment.payment_items.all(),
+        'school': school_info,
+        'subtotal': subtotal,
+        'total_discount': total_discount,
+        'total_late_fee': total_late_fee,
+        'grand_total': grand_total,
+    }
+    
+    # Check if PDF download is requested
+    if request.GET.get('format') == 'pdf':
+        return generate_pdf_invoice(request, context)
+    
+    # Otherwise, render HTML invoice
+    return render(request, 'payments/invoice.html', context)
+
+
+def generate_pdf_invoice(request, context):
+    """Generate PDF version of invoice"""
+    
+    # Render HTML template
+    html_string = render_to_string('payments/invoice.html', context)
+    
+    # Create PDF
+    html = HTML(string=html_string, base_url=request.build_absolute_uri())
+    
+    # Generate PDF
+    result = html.write_pdf()
+    
+    # Create response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{context["payment"].payment_id}.pdf"'
+    response.write(result)
+    
+    return response
+
+
+@unauthenticated_user
+def generate_invoice_quick(request, payment_id):
+    """Quick invoice generation - returns PDF directly"""
+    payment = get_object_or_404(
+        Payment.objects.select_related('student', 'collected_by')
+                      .prefetch_related('payment_items__fee_category'),
+        id=payment_id
+    )
+    
+    school_info = {
+        'name': 'Blossom British School',
+        'address': 'Villa No 2 University Street,',
+        'city': 'Ajman UAE',
+        'phone': '+971-50 977 4927',
+        'email': 'info@blossombritish.ae',
+    }
+    
+    context = {
+        'payment': payment,
+        'student': payment.student,
+        'payment_items': payment.payment_items.all(),
+        'school': school_info,
+        'subtotal': payment.total_amount,
+        'total_discount': payment.discount_amount,
+        'total_late_fee': payment.late_fee_amount,
+        'grand_total': payment.net_amount,
+    }
+    
+    return generate_pdf_invoice(request, context)

@@ -27,4 +27,14 @@ urlpatterns = [
     path('salary/payment/<int:salary_id>/', views.update_salary_payment, name='update_salary_payment'),
     path('salary/deductions/<int:salary_id>/', views.make_deductions, name='make_deductions'),
     path('salary/extra/<int:salary_id>/', views.make_extra_payment, name='make_extra_payment'),
+
+    #salary slip
+
+    path('salary-slip/<int:salary_id>/', views.generate_salary_slip, name='generate_salary_slip'),
+    path('salary-slip/<int:salary_id>/pdf/', views.generate_salary_slip_quick, name='generate_salary_slip_pdf'),
+    
+    # Alternative: Generate by teacher ID and month/year
+    path('salary-slip/<str:teacher_id>/<int:month>/<int:year>/', 
+         views.generate_salary_slip_by_teacher_month, 
+         name='generate_salary_slip_by_teacher_month'),
 ]

@@ -123,10 +123,10 @@
                                         <i class="fas fa-user"></i>
                                     </a>
                                     {% if payment.payment_status == 'completed' %}
-                                    <button class="btn btn-sm btn-outline-secondary" 
-                                            onclick="printReceipt('{{ payment.id }}')" title="Print Receipt">
+                                    <a class="btn btn-sm btn-outline-secondary" 
+                                            href="{% url 'generate_invoice' payment.id %}" target="_blank" title="Print Receipt">
                                         <i class="fas fa-print"></i>
-                                    </button>
+                                </a>
                                     {% endif %}
                                 </div>
                             </td>

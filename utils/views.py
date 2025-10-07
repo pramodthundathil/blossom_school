@@ -622,3 +622,204 @@ def make_extra_payment(request, salary_id):
             return redirect('salary_detail', salary_id = salary_id)
         else:
             return redirect('salary_detail', salary_id = salary_id)
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
+from weasyprint import HTML
+from .models import MonthlySalary, Teacher, Attendance
+from datetime import date
+from calendar import monthrange
+
+@unauthenticated_user
+def generate_salary_slip(request, salary_id):
+    """Generate and display/download salary slip for a teacher"""
+    
+    # Get the monthly salary with related data
+    salary = get_object_or_404(
+        MonthlySalary.objects.select_related('teacher'),
+        id=salary_id
+    )
+    
+    # School information
+    school_info = {
+        'name': 'Blossom British School',
+        'address_line1': 'Villa No 2 University Street,',
+        'address_line2': 'Ajman UAE',
+        'phone': '+971-50 977 4927',  # Add your phone
+        'email': 'info@blossombritish.ae',  # Add your email
+    }
+    
+    # Get month details
+    month_name = date(salary.year, salary.month, 1).strftime('%B')
+    month_year = f"{month_name} {salary.year}"
+    
+    # Calculate attendance percentage
+    if salary.total_working_days > 0:
+        attendance_percentage = round(
+            (salary.days_present + (salary.half_days * 0.5)) / salary.total_working_days * 100, 
+            2
+        )
+    else:
+        attendance_percentage = 0
+    
+    # Prepare earnings breakdown
+    earnings = [
+        {'description': 'Basic Salary', 'amount': salary.basic_salary},
+        {'description': 'Accommodation Allowance', 'amount': salary.accommodation_allowance},
+        {'description': 'Transportation Allowance', 'amount': salary.transportation_allowance},
+    ]
+    
+    # Add additional earnings if any
+    if salary.bonus > 0:
+        earnings.append({'description': 'Bonus', 'amount': salary.bonus})
+    if salary.overtime_pay > 0:
+        earnings.append({'description': 'Overtime Pay', 'amount': salary.overtime_pay})
+    if salary.other_additions > 0:
+        description = f"Other Additions"
+        if salary.other_additions_remarks:
+            description += f" ({salary.other_additions_remarks})"
+        earnings.append({'description': description, 'amount': salary.other_additions})
+    
+    # Prepare deductions breakdown
+    deductions = []
+    if salary.absence_deduction > 0:
+        deductions.append({
+            'description': f'Absence Deduction ({salary.days_absent} days + {salary.half_days} half days)',
+            'amount': salary.absence_deduction
+        })
+    if salary.other_deductions > 0:
+        description = "Other Deductions"
+        if salary.other_deductions_remarks:
+            description += f" ({salary.other_deductions_remarks})"
+        deductions.append({'description': description, 'amount': salary.other_deductions})
+    
+    context = {
+        'salary': salary,
+        'teacher': salary.teacher,
+        'school': school_info,
+        'month_year': month_year,
+        'month_name': month_name,
+        'attendance_percentage': attendance_percentage,
+        'earnings': earnings,
+        'deductions': deductions,
+        'total_earnings': salary.gross_salary + salary.total_additions,
+        'total_deductions': salary.total_deductions,
+    }
+    
+    # Check if PDF download is requested
+    if request.GET.get('format') == 'pdf':
+        return generate_pdf_salary_slip(request, context)
+    
+    # Otherwise, render HTML
+    return render(request, 'salary/salary_slip.html', context)
+
+@unauthenticated_user
+def generate_pdf_salary_slip(request, context):
+    """Generate PDF version of salary slip"""
+    
+    # Render HTML template
+    html_string = render_to_string('salary/salary_slip.html', context)
+    
+    # Create PDF
+    html = HTML(string=html_string, base_url=request.build_absolute_uri())
+    result = html.write_pdf()
+    
+    # Create response
+    teacher_name = context['teacher'].full_name.replace(' ', '_')
+    month_year = context['month_year'].replace(' ', '_')
+    filename = f'salary_slip_{teacher_name}_{month_year}.pdf'
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response.write(result)
+    
+    return response
+
+
+@unauthenticated_user
+def generate_salary_slip_quick(request, salary_id):
+    """Quick salary slip generation - returns PDF directly"""
+    salary = get_object_or_404(
+        MonthlySalary.objects.select_related('teacher'),
+        id=salary_id
+    )
+    
+    school_info = {
+        'name': 'Blossom British School',
+        'address_line1': 'Villa No 2 University Street,',
+        'address_line2': 'Ajman UAE',
+        'phone': '+971-50 977 4927',
+        'email': 'info@blossombritish.ae',
+    }
+    
+    month_name = date(salary.year, salary.month, 1).strftime('%B')
+    month_year = f"{month_name} {salary.year}"
+    
+    if salary.total_working_days > 0:
+        attendance_percentage = round(
+            (salary.days_present + (salary.half_days * 0.5)) / salary.total_working_days * 100, 
+            2
+        )
+    else:
+        attendance_percentage = 0
+    
+    earnings = [
+        {'description': 'Basic Salary', 'amount': salary.basic_salary},
+        {'description': 'Accommodation Allowance', 'amount': salary.accommodation_allowance},
+        {'description': 'Transportation Allowance', 'amount': salary.transportation_allowance},
+    ]
+    
+    if salary.bonus > 0:
+        earnings.append({'description': 'Bonus', 'amount': salary.bonus})
+    if salary.overtime_pay > 0:
+        earnings.append({'description': 'Overtime Pay', 'amount': salary.overtime_pay})
+    if salary.other_additions > 0:
+        description = f"Other Additions"
+        if salary.other_additions_remarks:
+            description += f" ({salary.other_additions_remarks})"
+        earnings.append({'description': description, 'amount': salary.other_additions})
+    
+    deductions = []
+    if salary.absence_deduction > 0:
+        deductions.append({
+            'description': f'Absence Deduction ({salary.days_absent} days + {salary.half_days} half days)',
+            'amount': salary.absence_deduction
+        })
+    if salary.other_deductions > 0:
+        description = "Other Deductions"
+        if salary.other_deductions_remarks:
+            description += f" ({salary.other_deductions_remarks})"
+        deductions.append({'description': description, 'amount': salary.other_deductions})
+    
+    context = {
+        'salary': salary,
+        'teacher': salary.teacher,
+        'school': school_info,
+        'month_year': month_year,
+        'month_name': month_name,
+        'attendance_percentage': attendance_percentage,
+        'earnings': earnings,
+        'deductions': deductions,
+        'total_earnings': salary.gross_salary + salary.total_additions,
+        'total_deductions': salary.total_deductions,
+    }
+    
+    return generate_pdf_salary_slip(request, context)
+
+
+@unauthenticated_user
+def generate_salary_slip_by_teacher_month(request, teacher_id, month, year):
+    """Generate salary slip by teacher ID and month/year"""
+    teacher = get_object_or_404(Teacher, teacher_id=teacher_id)
+    
+    salary = get_object_or_404(
+        MonthlySalary,
+        teacher=teacher,
+        month=month,
+        year=year
+    )
+    
+    return generate_salary_slip_quick(request, salary.id)

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Slip - {{ teacher.full_name }} - {{ month_year }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .salary-slip-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #2c3e50;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .header .address {
+            font-size: 11px;
+            margin: 3px 0;
+            opacity: 0.95;
+        }
+        
+        .payslip-title {
+            background: #ecf0f1;
+            padding: 12px 30px;
+            text-align: center;
+            border-bottom: 2px solid #bdc3c7;
+        }
+        
+        .payslip-title h2 {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+        
+        .payslip-title .period {
+            font-size: 13px;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+        
+        .employee-info {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            padding: 5px 0;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            min-width: 140px;
+            color: #495057;
+        }
+        
+        .info-value {
+            color: #212529;
+        }
+        
+        .attendance-summary {
+            padding: 20px 30px;
+            background: #fff;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .summary-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .attendance-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .attendance-box {
+            text-align: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .attendance-box .label {
+            font-size: 10px;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .attendance-box .value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .attendance-box.percentage .value {
+            color: #27ae60;
+        }
+        
+        .salary-details {
+            padding: 20px 30px;
+        }
+        
+        .salary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .earnings-section, .deductions-section {
+            background: #fff;
+        }
+        
+        .section-header {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 0;
+        }
+        
+        .deductions-section .section-header {
+            background: #e74c3c;
+        }
+        
+        .salary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .salary-table tr {
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .salary-table td {
+            padding: 10px 15px;
+        }
+        
+        .salary-table .description {
+            color: #495057;
+        }
+        
+        .salary-table .amount {
+            text-align: right;
+            font-weight: bold;
+            color: #2c3e50;
+            white-space: nowrap;
+        }
+        
+        .salary-table .total-row {
+            background: #f8f9fa;
+            font-weight: bold;
+            font-size: 12px;
+            border-top: 2px solid #dee2e6;
+        }
+        
+        .salary-table .total-row td {
+            padding: 12px 15px;
+            color: #2c3e50;
+        }
+        
+        .net-salary-section {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            padding: 20px 30px;
+            margin: 0;
+        }
+        
+        .net-salary-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .net-salary-label {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .net-salary-amount {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .payment-info {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .payment-item {
+            padding: 8px 0;
+        }
+        
+        .payment-item .label {
+            font-size: 10px;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        
+        .payment-item .value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-paid {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .status-pending {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .status-processed {
+            background: #3498db;
+            color: white;
+        }
+        
+        .status-hold {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .remarks-section {
+            padding: 15px 30px;
+            background: #fff3cd;
+            border-top: 1px solid #ffc107;
+        }
+        
+        .remarks-section .title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        
+        .remarks-section .content {
+            color: #856404;
+        }
+        
+        .footer {
+            padding: 20px 30px;
+            text-align: center;
+            background: #f8f9fa;
+            border-top: 2px solid #dee2e6;
+        }
+        
+        .footer p {
+            margin: 5px 0;
+            font-size: 10px;
+            color: #6c757d;
+        }
+        
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            padding: 40px 30px 20px;
+            margin-top: 30px;
+        }
+        
+        .signature-box {
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        .signature-line {
+            border-top: 2px solid #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .signature-label {
+            font-size: 11px;
+            color: #495057;
+            font-weight: bold;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            .salary-slip-container {
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="salary-slip-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>{{ school.name }}</h1>
+            <div class="address">{{ school.address_line1 }}</div>
+            <div class="address">{{ school.address_line2 }}</div>
+            {% if school.phone %}
+            <div class="address">Phone: {{ school.phone }} | Email: {{ school.email }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Payslip Title -->
+        <div class="payslip-title">
+            <h2>SALARY SLIP</h2>
+            <div class="period">{{ month_year }}</div>
+        </div>
+
+        <!-- Employee Information -->
+        <div class="employee-info">
+            <div class="info-grid">
+                <div class="info-row">
+                    <span class="info-label">Employee Name:</span>
+                    <span class="info-value">{{ teacher.full_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Employee ID:</span>
+                    <span class="info-value">{{ teacher.teacher_id }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Designation:</span>
+                    <span class="info-value">{{ teacher.get_position_display }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Department:</span>
+                    <span class="info-value">Teaching Staff</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date of Joining:</span>
+                    <span class="info-value">{{ teacher.start_date|date:"d M, Y" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Emirates ID:</span>
+                    <span class="info-value">{{ teacher.emirates_id|default:"N/A" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Summary -->
+        <div class="attendance-summary">
+            <div class="summary-title">ATTENDANCE SUMMARY</div>
+            <div class="attendance-grid">
+                <div class="attendance-box">
+                    <div class="label">Total Working Days</div>
+                    <div class="value">{{ salary.total_working_days }}</div>
+                </div>
+                <div class="attendance-box">
+                    <div class="label">Days Present</div>
+                    <div class="value">{{ salary.days_present }}</div>
+                </div>
+                <div class="attendance-box">
+                    <div class="label">Days Absent</div>
+                    <div class="value">{{ salary.days_absent }}</div>
+                </div>
+                <div class="attendance-box percentage">
+                    <div class="label">Attendance %</div>
+                    <div class="value">{{ attendance_percentage }}%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary Details -->
+        <div class="salary-details">
+            <div class="salary-grid">
+                <!-- Earnings -->
+                <div class="earnings-section">
+                    <div class="section-header">EARNINGS</div>
+                    <table class="salary-table">
+                        <tbody>
+                            {% for earning in earnings %}
+                            <tr>
+                                <td class="description">{{ earning.description }}</td>
+                                <td class="amount">AED {{ earning.amount|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td>TOTAL EARNINGS</td>
+                                <td class="amount">AED {{ total_earnings|floatformat:2 }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Deductions -->
+                <div class="deductions-section">
+                    <div class="section-header">DEDUCTIONS</div>
+                    <table class="salary-table">
+                        <tbody>
+                            {% if deductions %}
+                                {% for deduction in deductions %}
+                                <tr>
+                                    <td class="description">{{ deduction.description }}</td>
+                                    <td class="amount">AED {{ deduction.amount|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td class="description">No Deductions</td>
+                                    <td class="amount">AED 0.00</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td>TOTAL DEDUCTIONS</td>
+                                <td class="amount">AED {{ total_deductions|floatformat:2 }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Salary -->
+        <div class="net-salary-section">
+            <div class="net-salary-content">
+                <div class="net-salary-label">NET SALARY PAYABLE</div>
+                <div class="net-salary-amount">AED {{ salary.net_salary|floatformat:2 }}</div>
+            </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="payment-info">
+            <div class="payment-grid">
+                <div class="payment-item">
+                    <div class="label">Payment Status</div>
+                    <div class="value">
+                        <span class="status-badge status-{{ salary.payment_status }}">
+                            {{ salary.get_payment_status_display }}
+                        </span>
+                    </div>
+                </div>
+                {% if salary.payment_date %}
+                <div class="payment-item">
+                    <div class="label">Payment Date</div>
+                    <div class="value">{{ salary.payment_date|date:"d M, Y" }}</div>
+                </div>
+                {% endif %}
+                {% if salary.payment_method %}
+                <div class="payment-item">
+                    <div class="label">Payment Method</div>
+                    <div class="value">{{ salary.payment_method }}</div>
+                </div>
+                {% endif %}
+                {% if salary.payment_reference %}
+                <div class="payment-item">
+                    <div class="label">Reference Number</div>
+                    <div class="value">{{ salary.payment_reference }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Remarks -->
+        {% if salary.remarks %}
+        <div class="remarks-section">
+            <div class="title">REMARKS:</div>
+            <div class="content">{{ salary.remarks }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-label">Employee Signature</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-label">Authorized Signatory</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>This is a computer-generated salary slip and does not require a signature.</strong></p>
+            <p>Generated on {{ salary.calculated_at|date:"d M, Y - H:i" }}</p>
+            <p>For any queries, please contact HR department at {{ school.email }}</p>
+        </div>
+    </div>
+</body>
+</html>
