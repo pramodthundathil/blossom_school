@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -45,11 +47,11 @@ def teacher_create(request):
             # AJAX request
             if form.is_valid():
                 teacher = form.save()
-                messages.success(request,"Staff Created")
+                messages.success(request, "Staff Created")
                 return JsonResponse({
                     'success': True,
                     'message': 'Teacher registered successfully!',
-                    'redirect_url': f'/teachers/{teacher.pk}/'
+                    'redirect_url': reverse('teacher_detail', kwargs={'pk': teacher.pk})
                 })
             else:
                 return JsonResponse({
@@ -73,7 +75,6 @@ def teacher_create(request):
         'title': 'Add New Teacher/Staff'
     }
     return render(request, 'teachers/teacher_form.html', context)
-
 @unauthenticated_user
 def teacher_detail(request, pk):
     """Display teacher details"""
@@ -632,6 +633,7 @@ from weasyprint import HTML
 from .models import MonthlySalary, Teacher, Attendance
 from datetime import date
 from calendar import monthrange
+from django.urls import reverse
 
 @unauthenticated_user
 def generate_salary_slip(request, salary_id):

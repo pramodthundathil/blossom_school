@@ -817,233 +817,233 @@ from Finance.models import  Income, Expense
 
 
 
-def generate_fee_tracking_excel(fee_category_id, start_date, end_date):
-    """Generate fee tracking Excel report"""
-    fee_category = FeeCategory.objects.get(id=fee_category_id)
-    start = datetime.strptime(start_date, '%Y-%m-%d').date()
-    end = datetime.strptime(end_date, '%Y-%m-%d').date()
+# def generate_fee_tracking_excel(fee_category_id, start_date, end_date):
+#     """Generate fee tracking Excel report"""
+#     fee_category = FeeCategory.objects.get(id=fee_category_id)
+#     start = datetime.strptime(start_date, '%Y-%m-%d').date()
+#     end = datetime.strptime(end_date, '%Y-%m-%d').date()
     
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = f"{fee_category.name} Tracking"
+#     wb = openpyxl.Workbook()
+#     ws = wb.active
+#     ws.title = f"{fee_category.name} Tracking"
     
-    # School Header
-    ws.merge_cells('A1:H1')
-    ws['A1'] = "Blossom British School"
-    ws['A1'].font = Font(size=16, bold=True, color="214888")
-    ws['A1'].alignment = Alignment(horizontal='center')
+#     # School Header
+#     ws.merge_cells('A1:H1')
+#     ws['A1'] = "Blossom British School"
+#     ws['A1'].font = Font(size=16, bold=True, color="214888")
+#     ws['A1'].alignment = Alignment(horizontal='center')
     
-    ws.merge_cells('A2:H2')
-    ws['A2'] = "Villa No 2 University Street, Ajman UAE"
-    ws['A2'].alignment = Alignment(horizontal='center')
+#     ws.merge_cells('A2:H2')
+#     ws['A2'] = "Villa No 2 University Street, Ajman UAE"
+#     ws['A2'].alignment = Alignment(horizontal='center')
     
-    ws.merge_cells('A3:H3')
-    ws['A3'] = f"Fee Tracking Report: {fee_category.name}"
-    ws['A3'].font = Font(size=14, bold=True)
-    ws['A3'].alignment = Alignment(horizontal='center')
+#     ws.merge_cells('A3:H3')
+#     ws['A3'] = f"Fee Tracking Report: {fee_category.name}"
+#     ws['A3'].font = Font(size=14, bold=True)
+#     ws['A3'].alignment = Alignment(horizontal='center')
     
-    ws.merge_cells('A4:H4')
-    ws['A4'] = f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}"
-    ws['A4'].alignment = Alignment(horizontal='center')
+#     ws.merge_cells('A4:H4')
+#     ws['A4'] = f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}"
+#     ws['A4'].alignment = Alignment(horizontal='center')
     
-    row = 6
+#     row = 6
     
-    # Headers
-    headers = ['Student ID', 'Student Name', 'Class', 'Total Due', 'Paid Amount', 'Balance', 'Payment Date', 'Status']
-    for col, header in enumerate(headers, 1):
-        cell = ws.cell(row=row, column=col, value=header)
-        cell.font = Font(bold=True, color="FFFFFF")
-        cell.fill = PatternFill(start_color="214888", end_color="214888", fill_type="solid")
-        cell.alignment = Alignment(horizontal='center')
-    row += 1
+#     # Headers
+#     headers = ['Student ID', 'Student Name', 'Class', 'Total Due', 'Paid Amount', 'Balance', 'Payment Date', 'Status']
+#     for col, header in enumerate(headers, 1):
+#         cell = ws.cell(row=row, column=col, value=header)
+#         cell.font = Font(bold=True, color="FFFFFF")
+#         cell.fill = PatternFill(start_color="214888", end_color="214888", fill_type="solid")
+#         cell.alignment = Alignment(horizontal='center')
+#     row += 1
     
-    # Get all students with this fee category
-    fee_assignments = StudentFeeAssignment.objects.filter(
-        fee_structure__fee_category=fee_category,
-        is_active=True
-    ).select_related('student', 'fee_structure')
+#     # Get all students with this fee category
+#     fee_assignments = StudentFeeAssignment.objects.filter(
+#         fee_structure__fee_category=fee_category,
+#         is_active=True
+#     ).select_related('student', 'fee_structure')
     
-    total_due = Decimal('0')
-    total_paid = Decimal('0')
+#     total_due = Decimal('0')
+#     total_paid = Decimal('0')
     
-    for assignment in fee_assignments:
-        student = assignment.student
-        due_amount = assignment.get_final_amount()
+#     for assignment in fee_assignments:
+#         student = assignment.student
+#         due_amount = assignment.get_final_amount()
         
-        # Calculate paid amount for this fee category
-        paid = PaymentItem.objects.filter(
-            payment__student=student,
-            fee_category=fee_category,
-            payment__payment_date__gte=start,
-            payment__payment_date__lte=end,
-            payment__payment_status='completed'
-        ).aggregate(total=Sum('net_amount'))['total'] or Decimal('0')
+#         # Calculate paid amount for this fee category
+#         paid = PaymentItem.objects.filter(
+#             payment__student=student,
+#             fee_category=fee_category,
+#             payment__payment_date__gte=start,
+#             payment__payment_date__lte=end,
+#             payment__payment_status='completed'
+#         ).aggregate(total=Sum('net_amount'))['total'] or Decimal('0')
         
-        balance = due_amount - paid
+#         balance = due_amount - paid
         
-        # Get last payment date
-        last_payment = Payment.objects.filter(
-            student=student,
-            payment_items__fee_category=fee_category,
-            payment_date__gte=start,
-            payment_date__lte=end
-        ).order_by('-payment_date').first()
+#         # Get last payment date
+#         last_payment = Payment.objects.filter(
+#             student=student,
+#             payment_items__fee_category=fee_category,
+#             payment_date__gte=start,
+#             payment_date__lte=end
+#         ).order_by('-payment_date').first()
         
-        payment_date = last_payment.payment_date.strftime('%d %b %Y') if last_payment else 'N/A'
-        status = 'Paid' if balance <= 0 else 'Pending' if paid == 0 else 'Partial'
+#         payment_date = last_payment.payment_date.strftime('%d %b %Y') if last_payment else 'N/A'
+#         status = 'Paid' if balance <= 0 else 'Pending' if paid == 0 else 'Partial'
         
-        ws.cell(row=row, column=1, value=student.student_id)
-        ws.cell(row=row, column=2, value=student.get_full_name())
-        ws.cell(row=row, column=3, value=student.class_room.class_name if student.class_room else 'N/A')
-        ws.cell(row=row, column=4, value=float(due_amount))
-        ws.cell(row=row, column=5, value=float(paid))
-        ws.cell(row=row, column=6, value=float(balance))
-        ws.cell(row=row, column=7, value=payment_date)
-        ws.cell(row=row, column=8, value=status)
+#         ws.cell(row=row, column=1, value=student.student_id)
+#         ws.cell(row=row, column=2, value=student.get_full_name())
+#         ws.cell(row=row, column=3, value=student.class_room.class_name if student.class_room else 'N/A')
+#         ws.cell(row=row, column=4, value=float(due_amount))
+#         ws.cell(row=row, column=5, value=float(paid))
+#         ws.cell(row=row, column=6, value=float(balance))
+#         ws.cell(row=row, column=7, value=payment_date)
+#         ws.cell(row=row, column=8, value=status)
         
-        # Color code status
-        status_cell = ws.cell(row=row, column=8)
-        if status == 'Paid':
-            status_cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
-        elif status == 'Pending':
-            status_cell.fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
-        else:
-            status_cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
+#         # Color code status
+#         status_cell = ws.cell(row=row, column=8)
+#         if status == 'Paid':
+#             status_cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+#         elif status == 'Pending':
+#             status_cell.fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+#         else:
+#             status_cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
         
-        total_due += due_amount
-        total_paid += paid
-        row += 1
+#         total_due += due_amount
+#         total_paid += paid
+#         row += 1
     
-    # Totals
-    row += 1
-    ws.cell(row=row, column=3, value="TOTALS:").font = Font(bold=True, size=12)
-    ws.cell(row=row, column=4, value=float(total_due)).font = Font(bold=True, size=12)
-    ws.cell(row=row, column=5, value=float(total_paid)).font = Font(bold=True, size=12)
-    ws.cell(row=row, column=6, value=float(total_due - total_paid)).font = Font(bold=True, size=12)
+#     # Totals
+#     row += 1
+#     ws.cell(row=row, column=3, value="TOTALS:").font = Font(bold=True, size=12)
+#     ws.cell(row=row, column=4, value=float(total_due)).font = Font(bold=True, size=12)
+#     ws.cell(row=row, column=5, value=float(total_paid)).font = Font(bold=True, size=12)
+#     ws.cell(row=row, column=6, value=float(total_due - total_paid)).font = Font(bold=True, size=12)
     
-    # Adjust column widths
-    for col in range(1, 9):
-        ws.column_dimensions[get_column_letter(col)].width = 16
+#     # Adjust column widths
+#     for col in range(1, 9):
+#         ws.column_dimensions[get_column_letter(col)].width = 16
     
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename="Fee_Tracking_{fee_category.name}_{start}_to_{end}.xlsx"'
-    wb.save(response)
-    return response
+#     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+#     response['Content-Disposition'] = f'attachment; filename="Fee_Tracking_{fee_category.name}_{start}_to_{end}.xlsx"'
+#     wb.save(response)
+#     return response
 
 
-def generate_fee_tracking_pdf(fee_category_id, start_date, end_date):
-    """Generate fee tracking PDF report"""
-    fee_category = FeeCategory.objects.get(id=fee_category_id)
-    start = datetime.strptime(start_date, '%Y-%m-%d').date()
-    end = datetime.strptime(end_date, '%Y-%m-%d').date()
+# def generate_fee_tracking_pdf(fee_category_id, start_date, end_date):
+#     """Generate fee tracking PDF report"""
+#     fee_category = FeeCategory.objects.get(id=fee_category_id)
+#     start = datetime.strptime(start_date, '%Y-%m-%d').date()
+#     end = datetime.strptime(end_date, '%Y-%m-%d').date()
     
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=30, leftMargin=30, topMargin=50, bottomMargin=30)
+#     buffer = BytesIO()
+#     doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=30, leftMargin=30, topMargin=50, bottomMargin=30)
     
-    elements = []
-    styles = getSampleStyleSheet()
+#     elements = []
+#     styles = getSampleStyleSheet()
     
-    # Custom styles
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=18,
-        textColor=colors.HexColor('#214888'),
-        alignment=TA_CENTER,
-        spaceAfter=10
-    )
+#     # Custom styles
+#     title_style = ParagraphStyle(
+#         'CustomTitle',
+#         parent=styles['Heading1'],
+#         fontSize=18,
+#         textColor=colors.HexColor('#214888'),
+#         alignment=TA_CENTER,
+#         spaceAfter=10
+#     )
     
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=14,
-        textColor=colors.HexColor('#214888'),
-        spaceAfter=10
-    )
+#     heading_style = ParagraphStyle(
+#         'CustomHeading',
+#         parent=styles['Heading2'],
+#         fontSize=14,
+#         textColor=colors.HexColor('#214888'),
+#         spaceAfter=10
+#     )
     
-    # Header
-    elements.append(Paragraph("Blossom British School", title_style))
-    elements.append(Paragraph("Villa No 2 University Street, Ajman UAE", styles['Normal']))
-    elements.append(Paragraph(f"Fee Tracking Report: {fee_category.name}", heading_style))
-    elements.append(Paragraph(f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}", styles['Normal']))
-    elements.append(Spacer(1, 20))
+#     # Header
+#     elements.append(Paragraph("Blossom British School", title_style))
+#     elements.append(Paragraph("Villa No 2 University Street, Ajman UAE", styles['Normal']))
+#     elements.append(Paragraph(f"Fee Tracking Report: {fee_category.name}", heading_style))
+#     elements.append(Paragraph(f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}", styles['Normal']))
+#     elements.append(Spacer(1, 20))
     
-    # Get all students with this fee category
-    fee_assignments = StudentFeeAssignment.objects.filter(
-        fee_structure__fee_category=fee_category,
-        is_active=True
-    ).select_related('student', 'fee_structure')
+#     # Get all students with this fee category
+#     fee_assignments = StudentFeeAssignment.objects.filter(
+#         fee_structure__fee_category=fee_category,
+#         is_active=True
+#     ).select_related('student', 'fee_structure')
     
-    # Create table data
-    table_data = [['Student ID', 'Name', 'Class', 'Due', 'Paid', 'Balance', 'Status']]
-    total_due = Decimal('0')
-    total_paid = Decimal('0')
+#     # Create table data
+#     table_data = [['Student ID', 'Name', 'Class', 'Due', 'Paid', 'Balance', 'Status']]
+#     total_due = Decimal('0')
+#     total_paid = Decimal('0')
     
-    for assignment in fee_assignments:
-        student = assignment.student
-        due_amount = assignment.get_final_amount()
+#     for assignment in fee_assignments:
+#         student = assignment.student
+#         due_amount = assignment.get_final_amount()
         
-        # Calculate paid amount
-        paid = PaymentItem.objects.filter(
-            payment__student=student,
-            fee_category=fee_category,
-            payment__payment_date__gte=start,
-            payment__payment_date__lte=end,
-            payment__payment_status='completed'
-        ).aggregate(total=Sum('net_amount'))['total'] or Decimal('0')
+#         # Calculate paid amount
+#         paid = PaymentItem.objects.filter(
+#             payment__student=student,
+#             fee_category=fee_category,
+#             payment__payment_date__gte=start,
+#             payment__payment_date__lte=end,
+#             payment__payment_status='completed'
+#         ).aggregate(total=Sum('net_amount'))['total'] or Decimal('0')
         
-        balance = due_amount - paid
-        status = 'Paid' if balance <= 0 else 'Pending' if paid == 0 else 'Partial'
+#         balance = due_amount - paid
+#         status = 'Paid' if balance <= 0 else 'Pending' if paid == 0 else 'Partial'
         
-        table_data.append([
-            student.student_id,
-            student.get_full_name()[:25],
-            student.class_room.class_name if student.class_room else 'N/A',
-            f"AED {due_amount:.2f}",
-            f"AED {paid:.2f}",
-            f"AED {balance:.2f}",
-            status
-        ])
+#         table_data.append([
+#             student.student_id,
+#             student.get_full_name()[:25],
+#             student.class_room.class_name if student.class_room else 'N/A',
+#             f"AED {due_amount:.2f}",
+#             f"AED {paid:.2f}",
+#             f"AED {balance:.2f}",
+#             status
+#         ])
         
-        total_due += due_amount
-        total_paid += paid
+#         total_due += due_amount
+#         total_paid += paid
     
-    # Add totals row
-    table_data.append([
-        '', 'TOTALS', '',
-        f"AED {total_due:.2f}",
-        f"AED {total_paid:.2f}",
-        f"AED {(total_due - total_paid):.2f}",
-        ''
-    ])
+#     # Add totals row
+#     table_data.append([
+#         '', 'TOTALS', '',
+#         f"AED {total_due:.2f}",
+#         f"AED {total_paid:.2f}",
+#         f"AED {(total_due - total_paid):.2f}",
+#         ''
+#     ])
     
-    # Create table
-    col_widths = [1.2*inch, 2*inch, 1*inch, 1.2*inch, 1.2*inch, 1.2*inch, 1*inch]
-    table = Table(table_data, colWidths=col_widths)
+#     # Create table
+#     col_widths = [1.2*inch, 2*inch, 1*inch, 1.2*inch, 1.2*inch, 1.2*inch, 1*inch]
+#     table = Table(table_data, colWidths=col_widths)
     
-    # Apply styles
-    table_style = TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#214888')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#FFB804')),
-        ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('FONTSIZE', (0, 1), (-1, -1), 8)
-    ])
+#     # Apply styles
+#     table_style = TableStyle([
+#         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#214888')),
+#         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+#         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+#         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+#         ('FONTSIZE', (0, 0), (-1, 0), 10),
+#         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+#         ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#FFB804')),
+#         ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+#         ('GRID', (0, 0), (-1, -1), 1, colors.black),
+#         ('FONTSIZE', (0, 1), (-1, -1), 8)
+#     ])
     
-    table.setStyle(table_style)
-    elements.append(table)
+#     table.setStyle(table_style)
+#     elements.append(table)
     
-    doc.build(elements)
-    buffer.seek(0)
+#     doc.build(elements)
+#     buffer.seek(0)
     
-    response = HttpResponse(buffer, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Fee_Tracking_{fee_category.name}_{start}_to_{end}.pdf"'
-    return response
+#     response = HttpResponse(buffer, content_type='application/pdf')
+#     response['Content-Disposition'] = f'attachment; filename="Fee_Tracking_{fee_category.name}_{start}_to_{end}.pdf"'
+#     return response
 
 
 
@@ -2152,6 +2152,286 @@ def generate_range_pdf(start_date, end_date):
 
 
 
+def generate_fee_tracking_excel(fee_category_id, start_date, end_date):
+    """Generate fee tracking Excel report from Payment and PaymentItem models"""
+    try:
+        fee_category = FeeCategory.objects.get(id=fee_category_id)
+        start = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end = datetime.strptime(end_date, '%Y-%m-%d').date()
+        
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = f"{fee_category.name} Tracking"
+        
+        # School Header
+        ws.merge_cells('A1:H1')
+        ws['A1'] = "Blossom British School"
+        ws['A1'].font = Font(size=16, bold=True, color="214888")
+        ws['A1'].alignment = Alignment(horizontal='center')
+        
+        ws.merge_cells('A2:H2')
+        ws['A2'] = "Villa No 2 University Street, Ajman UAE"
+        ws['A2'].alignment = Alignment(horizontal='center')
+        
+        ws.merge_cells('A3:H3')
+        ws['A3'] = f"Fee Tracking Report: {fee_category.name}"
+        ws['A3'].font = Font(size=14, bold=True)
+        ws['A3'].alignment = Alignment(horizontal='center')
+        
+        ws.merge_cells('A4:H4')
+        ws['A4'] = f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}"
+        ws['A4'].alignment = Alignment(horizontal='center')
+        
+        row = 6
+        
+        # Headers
+        headers = ['Student ID', 'Student Name', 'Class', 'Total Due', 'Paid Amount', 'Balance', 'Payment Date', 'Status']
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=row, column=col, value=header)
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = PatternFill(start_color="214888", end_color="214888", fill_type="solid")
+            cell.alignment = Alignment(horizontal='center')
+        row += 1
+        
+        # Get all payment items for this fee category within date range
+        payment_items = PaymentItem.objects.filter(
+            fee_category=fee_category,
+            payment__payment_date__gte=start,
+            payment__payment_date__lte=end,
+            payment__payment_status='completed'
+        ).select_related('payment', 'payment__student', 'payment__student__class_room')
+        
+        print(f"DEBUG: Found {payment_items.count()} payment items for fee category {fee_category.name}")
+        
+        # Group by student
+        student_data = {}
+        for item in payment_items:
+            student = item.payment.student
+            student_id = student.id
+            
+            if student_id not in student_data:
+                student_data[student_id] = {
+                    'student_id': student.student_id,
+                    'student_name': student.get_full_name(),
+                    'class_name': student.class_room.class_name if student.class_room else 'N/A',
+                    'total_due': Decimal('0'),
+                    'total_paid': Decimal('0'),
+                    'last_payment_date': None,
+                }
+            
+            # Add to totals
+            student_data[student_id]['total_due'] += item.amount
+            student_data[student_id]['total_paid'] += item.net_amount
+            
+            # Track latest payment date
+            if item.payment.payment_date:
+                if student_data[student_id]['last_payment_date'] is None:
+                    student_data[student_id]['last_payment_date'] = item.payment.payment_date
+                else:
+                    if item.payment.payment_date > student_data[student_id]['last_payment_date']:
+                        student_data[student_id]['last_payment_date'] = item.payment.payment_date
+        
+        print(f"DEBUG: Grouped data for {len(student_data)} students")
+        
+        total_due = Decimal('0')
+        total_paid = Decimal('0')
+        
+        # Write data rows
+        for student_id, data in sorted(student_data.items(), key=lambda x: x[1]['student_name']):
+            balance = data['total_due'] - data['total_paid']
+            payment_date = data['last_payment_date'].strftime('%d %b %Y') if data['last_payment_date'] else 'N/A'
+            status = 'Paid' if balance <= 0 else 'Pending' if data['total_paid'] == 0 else 'Partial'
+            
+            ws.cell(row=row, column=1, value=data['student_id'])
+            ws.cell(row=row, column=2, value=data['student_name'])
+            ws.cell(row=row, column=3, value=data['class_name'])
+            ws.cell(row=row, column=4, value=float(data['total_due']))
+            ws.cell(row=row, column=5, value=float(data['total_paid']))
+            ws.cell(row=row, column=6, value=float(balance))
+            ws.cell(row=row, column=7, value=payment_date)
+            ws.cell(row=row, column=8, value=status)
+            
+            # Color code status
+            status_cell = ws.cell(row=row, column=8)
+            if status == 'Paid':
+                status_cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+            elif status == 'Pending':
+                status_cell.fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+            else:
+                status_cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
+            
+            total_due += data['total_due']
+            total_paid += data['total_paid']
+            row += 1
+        
+        # Totals row
+        row += 1
+        ws.cell(row=row, column=3, value="TOTALS:").font = Font(bold=True, size=12)
+        ws.cell(row=row, column=4, value=float(total_due)).font = Font(bold=True, size=12)
+        ws.cell(row=row, column=5, value=float(total_paid)).font = Font(bold=True, size=12)
+        ws.cell(row=row, column=6, value=float(total_due - total_paid)).font = Font(bold=True, size=12)
+        
+        # Adjust column widths
+        for col in range(1, 9):
+            ws.column_dimensions[get_column_letter(col)].width = 16
+        
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="Fee_Tracking_{fee_category.name}_{start}_to_{end}.xlsx"'
+        wb.save(response)
+        return response
+    
+    except Exception as e:
+        print(f"ERROR in generate_fee_tracking_excel: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
+
+
+def generate_fee_tracking_pdf(fee_category_id, start_date, end_date):
+    """Generate fee tracking PDF report from Payment and PaymentItem models"""
+    try:
+        fee_category = FeeCategory.objects.get(id=fee_category_id)
+        start = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end = datetime.strptime(end_date, '%Y-%m-%d').date()
+        
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=30, leftMargin=30, topMargin=50, bottomMargin=30)
+        
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            textColor=colors.HexColor('#214888'),
+            alignment=TA_CENTER,
+            spaceAfter=10
+        )
+        
+        heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=styles['Heading2'],
+            fontSize=14,
+            textColor=colors.HexColor('#214888'),
+            spaceAfter=10
+        )
+        
+        # Header
+        elements.append(Paragraph("Blossom British School", title_style))
+        elements.append(Paragraph("Villa No 2 University Street, Ajman UAE", styles['Normal']))
+        elements.append(Paragraph(f"Fee Tracking Report: {fee_category.name}", heading_style))
+        elements.append(Paragraph(f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}", styles['Normal']))
+        elements.append(Spacer(1, 20))
+        
+        # Get all payment items for this fee category within date range
+        payment_items = PaymentItem.objects.filter(
+            fee_category=fee_category,
+            payment__payment_date__gte=start,
+            payment__payment_date__lte=end,
+            payment__payment_status='completed'
+        ).select_related('payment', 'payment__student', 'payment__student__class_room')
+        
+        print(f"DEBUG: Found {payment_items.count()} payment items for fee category {fee_category.name}")
+        
+        # Group by student
+        student_data = {}
+        for item in payment_items:
+            student = item.payment.student
+            student_id = student.id
+            
+            if student_id not in student_data:
+                student_data[student_id] = {
+                    'student_id': student.student_id,
+                    'student_name': student.get_full_name(),
+                    'class_name': student.class_room.class_name if student.class_room else 'N/A',
+                    'total_due': Decimal('0'),
+                    'total_paid': Decimal('0'),
+                    'last_payment_date': None,
+                }
+            
+            # Add to totals
+            student_data[student_id]['total_due'] += item.amount
+            student_data[student_id]['total_paid'] += item.net_amount
+            
+            # Track latest payment date
+            if item.payment.payment_date:
+                if student_data[student_id]['last_payment_date'] is None:
+                    student_data[student_id]['last_payment_date'] = item.payment.payment_date
+                else:
+                    if item.payment.payment_date > student_data[student_id]['last_payment_date']:
+                        student_data[student_id]['last_payment_date'] = item.payment.payment_date
+        
+        print(f"DEBUG: Grouped data for {len(student_data)} students")
+        
+        # Create table data
+        table_data = [['Student ID', 'Name', 'Class', 'Due', 'Paid', 'Balance', 'Status']]
+        total_due = Decimal('0')
+        total_paid = Decimal('0')
+        
+        # Write data rows
+        for student_id, data in sorted(student_data.items(), key=lambda x: x[1]['student_name']):
+            balance = data['total_due'] - data['total_paid']
+            status = 'Paid' if balance <= 0 else 'Pending' if data['total_paid'] == 0 else 'Partial'
+            
+            table_data.append([
+                data['student_id'],
+                data['student_name'][:25],
+                data['class_name'],
+                f"AED {data['total_due']:.2f}",
+                f"AED {data['total_paid']:.2f}",
+                f"AED {balance:.2f}",
+                status
+            ])
+            
+            total_due += data['total_due']
+            total_paid += data['total_paid']
+        
+        # Add totals row
+        table_data.append([
+            '', 'TOTALS', '',
+            f"AED {total_due:.2f}",
+            f"AED {total_paid:.2f}",
+            f"AED {(total_due - total_paid):.2f}",
+            ''
+        ])
+        
+        # Create table
+        col_widths = [1.2*inch, 2*inch, 1*inch, 1.2*inch, 1.2*inch, 1.2*inch, 1*inch]
+        table = Table(table_data, colWidths=col_widths)
+        
+        # Apply styles
+        table_style = TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#214888')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor('#FFB804')),
+            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 1), (-1, -1), 8)
+        ])
+        
+        table.setStyle(table_style)
+        elements.append(table)
+        
+        doc.build(elements)
+        buffer.seek(0)
+        
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="Fee_Tracking_{fee_category.name}_{start}_to_{end}.pdf"'
+        return response
+    
+    except Exception as e:
+        print(f"ERROR in generate_fee_tracking_pdf: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
+
+
 def generate_fee_tracking_report(request):
     """Generate fee tracking report by category"""
     if request.method == 'POST':
@@ -2160,123 +2440,128 @@ def generate_fee_tracking_report(request):
         end_date = request.POST.get('end_date')
         report_format = request.POST.get('format', 'excel')
         
-        if report_format == 'excel':
-            return generate_fee_tracking_excel(fee_category_id, start_date, end_date)
-        else:
-            return generate_fee_tracking_pdf(fee_category_id, start_date, end_date)
+        print(f"DEBUG: fee_category_id={fee_category_id}, start_date={start_date}, end_date={end_date}, format={report_format}")
+        
+        try:
+            if report_format == 'excel':
+                return generate_fee_tracking_excel(fee_category_id, start_date, end_date)
+            else:
+                return generate_fee_tracking_pdf(fee_category_id, start_date, end_date)
+        except Exception as e:
+            print(f"ERROR in generate_fee_tracking_report: {str(e)}")
+            messages.error(request, f"Error generating report: {str(e)}")
+            return redirect('reports_dashboard')
     
     return redirect('reports_dashboard')
-
-
-def generate_fee_tracking_excel(fee_category_id, start_date, end_date):
-    """Generate fee tracking Excel report"""
-    fee_category = FeeCategory.objects.get(id=fee_category_id)
-    start = datetime.strptime(start_date, '%Y-%m-%d').date()
-    end = datetime.strptime(end_date, '%Y-%m-%d').date()
+# def generate_fee_tracking_excel(fee_category_id, start_date, end_date):
+#     """Generate fee tracking Excel report"""
+#     fee_category = FeeCategory.objects.get(id=fee_category_id)
+#     start = datetime.strptime(start_date, '%Y-%m-%d').date()
+#     end = datetime.strptime(end_date, '%Y-%m-%d').date()
     
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.title = f"{fee_category.name} Tracking"
+#     wb = openpyxl.Workbook()
+#     ws = wb.active
+#     ws.title = f"{fee_category.name} Tracking"
     
-    # School Header
-    ws.merge_cells('A1:H1')
-    ws['A1'] = "Blossom British School"
-    ws['A1'].font = Font(size=16, bold=True, color="214888")
-    ws['A1'].alignment = Alignment(horizontal='center')
+#     # School Header
+#     ws.merge_cells('A1:H1')
+#     ws['A1'] = "Blossom British School"
+#     ws['A1'].font = Font(size=16, bold=True, color="214888")
+#     ws['A1'].alignment = Alignment(horizontal='center')
     
-    ws.merge_cells('A2:H2')
-    ws['A2'] = "Villa No 2 University Street, Ajman UAE"
-    ws['A2'].alignment = Alignment(horizontal='center')
+#     ws.merge_cells('A2:H2')
+#     ws['A2'] = "Villa No 2 University Street, Ajman UAE"
+#     ws['A2'].alignment = Alignment(horizontal='center')
     
-    ws.merge_cells('A3:H3')
-    ws['A3'] = f"Fee Tracking Report: {fee_category.name}"
-    ws['A3'].font = Font(size=14, bold=True)
-    ws['A3'].alignment = Alignment(horizontal='center')
+#     ws.merge_cells('A3:H3')
+#     ws['A3'] = f"Fee Tracking Report: {fee_category.name}"
+#     ws['A3'].font = Font(size=14, bold=True)
+#     ws['A3'].alignment = Alignment(horizontal='center')
     
-    ws.merge_cells('A4:H4')
-    ws['A4'] = f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}"
-    ws['A4'].alignment = Alignment(horizontal='center')
+#     ws.merge_cells('A4:H4')
+#     ws['A4'] = f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}"
+#     ws['A4'].alignment = Alignment(horizontal='center')
     
-    row = 6
+#     row = 6
     
-    # Headers
-    headers = ['Student ID', 'Student Name', 'Class', 'Total Due', 'Paid Amount', 'Balance', 'Payment Date', 'Status']
-    for col, header in enumerate(headers, 1):
-        cell = ws.cell(row=row, column=col, value=header)
-        cell.font = Font(bold=True, color="FFFFFF")
-        cell.fill = PatternFill(start_color="214888", end_color="214888", fill_type="solid")
-        cell.alignment = Alignment(horizontal='center')
-    row += 1
+#     # Headers
+#     headers = ['Student ID', 'Student Name', 'Class', 'Total Due', 'Paid Amount', 'Balance', 'Payment Date', 'Status']
+#     for col, header in enumerate(headers, 1):
+#         cell = ws.cell(row=row, column=col, value=header)
+#         cell.font = Font(bold=True, color="FFFFFF")
+#         cell.fill = PatternFill(start_color="214888", end_color="214888", fill_type="solid")
+#         cell.alignment = Alignment(horizontal='center')
+#     row += 1
     
-    # Get all students with this fee category
-    fee_assignments = StudentFeeAssignment.objects.filter(
-        fee_structure__fee_category=fee_category,
-        is_active=True
-    ).select_related('student', 'fee_structure')
+#     # Get all students with this fee category
+#     fee_assignments = StudentFeeAssignment.objects.filter(
+#         fee_structure__fee_category=fee_category,
+#         is_active=True
+#     ).select_related('student', 'fee_structure')
     
-    total_due = Decimal('0')
-    total_paid = Decimal('0')
+#     total_due = Decimal('0')
+#     total_paid = Decimal('0')
     
-    for assignment in fee_assignments:
-        student = assignment.student
-        due_amount = assignment.get_final_amount()
+#     for assignment in fee_assignments:
+#         student = assignment.student
+#         due_amount = assignment.get_final_amount()
         
-        # Calculate paid amount for this fee category
-        paid = PaymentItem.objects.filter(
-            payment__student=student,
-            fee_category=fee_category,
-            payment__payment_date__gte=start,
-            payment__payment_date__lte=end,
-            payment__payment_status='completed'
-        ).aggregate(total=Sum('net_amount'))['total'] or Decimal('0')
+#         # Calculate paid amount for this fee category
+#         paid = PaymentItem.objects.filter(
+#             payment__student=student,
+#             fee_category=fee_category,
+#             payment__payment_date__gte=start,
+#             payment__payment_date__lte=end,
+#             payment__payment_status='completed'
+#         ).aggregate(total=Sum('net_amount'))['total'] or Decimal('0')
         
-        balance = due_amount - paid
+#         balance = due_amount - paid
         
-        # Get last payment date
-        last_payment = Payment.objects.filter(
-            student=student,
-            payment_items__fee_category=fee_category,
-            payment_date__gte=start,
-            payment_date__lte=end
-        ).order_by('-payment_date').first()
+#         # Get last payment date
+#         last_payment = Payment.objects.filter(
+#             student=student,
+#             payment_items__fee_category=fee_category,
+#             payment_date__gte=start,
+#             payment_date__lte=end
+#         ).order_by('-payment_date').first()
         
-        payment_date = last_payment.payment_date.strftime('%d %b %Y') if last_payment else 'N/A'
-        status = 'Paid' if balance <= 0 else 'Pending' if paid == 0 else 'Partial'
+#         payment_date = last_payment.payment_date.strftime('%d %b %Y') if last_payment else 'N/A'
+#         status = 'Paid' if balance <= 0 else 'Pending' if paid == 0 else 'Partial'
         
-        ws.cell(row=row, column=1, value=student.student_id)
-        ws.cell(row=row, column=2, value=student.get_full_name())
-        ws.cell(row=row, column=3, value=student.class_room.class_name if student.class_room else 'N/A')
-        ws.cell(row=row, column=4, value=float(due_amount))
-        ws.cell(row=row, column=5, value=float(paid))
-        ws.cell(row=row, column=6, value=float(balance))
-        ws.cell(row=row, column=7, value=payment_date)
-        ws.cell(row=row, column=8, value=status)
+#         ws.cell(row=row, column=1, value=student.student_id)
+#         ws.cell(row=row, column=2, value=student.get_full_name())
+#         ws.cell(row=row, column=3, value=student.class_room.class_name if student.class_room else 'N/A')
+#         ws.cell(row=row, column=4, value=float(due_amount))
+#         ws.cell(row=row, column=5, value=float(paid))
+#         ws.cell(row=row, column=6, value=float(balance))
+#         ws.cell(row=row, column=7, value=payment_date)
+#         ws.cell(row=row, column=8, value=status)
         
-        # Color code status
-        status_cell = ws.cell(row=row, column=8)
-        if status == 'Paid':
-            status_cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
-        elif status == 'Pending':
-            status_cell.fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
-        else:
-            status_cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
+#         # Color code status
+#         status_cell = ws.cell(row=row, column=8)
+#         if status == 'Paid':
+#             status_cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+#         elif status == 'Pending':
+#             status_cell.fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
+#         else:
+#             status_cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
         
-        total_due += due_amount
-        total_paid += paid
-        row += 1
+#         total_due += due_amount
+#         total_paid += paid
+#         row += 1
     
-    # Totals
-    row += 1
-    ws.cell(row=row, column=3, value="TOTALS:").font = Font(bold=True, size=12)
-    ws.cell(row=row, column=4, value=float(total_due)).font = Font(bold=True, size=12)
-    ws.cell(row=row, column=5, value=float(total_paid)).font = Font(bold=True, size=12)
-    ws.cell(row=row, column=6, value=float(total_due - total_paid)).font = Font(bold=True, size=12)
+#     # Totals
+#     row += 1
+#     ws.cell(row=row, column=3, value="TOTALS:").font = Font(bold=True, size=12)
+#     ws.cell(row=row, column=4, value=float(total_due)).font = Font(bold=True, size=12)
+#     ws.cell(row=row, column=5, value=float(total_paid)).font = Font(bold=True, size=12)
+#     ws.cell(row=row, column=6, value=float(total_due - total_paid)).font = Font(bold=True, size=12)
     
-    # Adjust column widths
-    for col in range(1, 9):
-        ws.column_dimensions[get_column_letter(col)].width = 16
+#     # Adjust column widths
+#     for col in range(1, 9):
+#         ws.column_dimensions[get_column_letter(col)].width = 16
     
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename="Fee_Tracking_{fee_category.name}_{start}_to_{end}.xlsx"'
-    wb.save(response)
-    return response
+#     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+#     response['Content-Disposition'] = f'attachment; filename="Fee_Tracking_{fee_category.name}_{start}_to_{end}.xlsx"'
+#     wb.save(response)
+#     return response
