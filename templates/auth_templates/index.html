@@ -15,6 +15,94 @@
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .notification-dropdown-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .notification-dropdown-item {
+        padding: 16px;
+        border-bottom: 1px solid var(--e-global-color-5d90ead);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+
+    .notification-dropdown-item:hover {
+        background: var(--e-global-color-accent);
+    }
+
+    .notification-dropdown-item.unread {
+        background: var(--e-global-color-fe7363b);
+        border-left: 3px solid var(--e-global-color-secondary);
+    }
+
+    .notification-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .notification-item-type {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 4px;
+    }
+
+    .notification-item-type.upcoming {
+        background: var(--e-global-color-bea3118);
+        color: white;
+    }
+
+    .notification-item-type.overdue {
+        background: var(--e-global-color-7d1e931);
+        color: white;
+    }
+
+    .notification-item-time {
+        font-size: 11px;
+        color: var(--e-global-color-text);
+        opacity: 0.6;
+    }
+
+    .notification-item-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--e-global-color-primary);
+        margin: 0 0 6px 0;
+    }
+
+    .notification-item-message {
+        font-size: 12px;
+        color: var(--e-global-color-text);
+        margin: 0;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .notification-dropdown-empty {
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--e-global-color-text);
+        opacity: 0.6;
+    }
+
+    .notification-dropdown-empty i {
+        font-size: 48px;
+        margin-bottom: 12px;
+        display: block;
+        color: var(--e-global-color-e1cf4e4);
+    }
+    </style>
 
 </head>
 
@@ -280,12 +368,12 @@
             <!-- Right Side Menu -->
             <ul class="navbar-nav ms-auto">
                 <!-- Notifications -->
-                <!-- <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link notification-link" href="#">
                         <i class="fas fa-bell"></i>
-                        <span class="notification-badge">3</span>
+                        <span class="notification-badge">{{ unread_notification_count }}</span>
                     </a>
-                </li> -->
+                </li>
 
                 <!-- User Menu -->
                 <li class="nav-item dropdown">
@@ -1188,7 +1276,178 @@ setInterval(fetchDashboardData, 300000);
         '{% endfor %}'
     </script>
     {% endif %}
-
+<script>
+    function showNotifications() {
+    // Create notification dropdown
+    const notificationDropdown = document.createElement('div');
+    notificationDropdown.className = 'notification-dropdown';
+    notificationDropdown.innerHTML = `
+        <div class="notification-header">
+            <h4>Notifications</h4>
+            <button class="mark-all-read">Mark all as read</button>
+        </div>
+        <div class="notification-list">
+            {% if recent_notifications %}
+                {% for notification in recent_notifications %}
+                <a href="{% url 'student_detail' notification.student.pk %}" 
+                   class="notification-dropdown-item {% if not notification.is_read %}unread{% endif %}"
+                   onclick="markNotificationRead(event, {{ notification.id }}, '{% url 'student_detail' notification.student.pk %}')">
+                    <div class="notification-item-header">
+                        <span class="notification-item-type {{ notification.notification_type }}">
+                            {{ notification.get_notification_type_display }}
+                        </span>
+                        <span class="notification-item-time">{{ notification.created_at|timesince }} ago</span>
+                    </div>
+                    <h4 class="notification-item-title">{{ notification.title }}</h4>
+                    <p class="notification-item-message">{{ notification.message }}</p>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="notification-dropdown-empty">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>No notifications</p>
+                </div>
+            {% endif %}
+        </div>
+        <div class="notification-footer">
+            <a href="/admissions/notifications/">View all notifications</a>
+        </div>
+    `;
+    
+    // Add styles for notification dropdown
+    const style = document.createElement('style');
+    style.textContent = `
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 320px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            overflow: hidden;
+        }
+        
+        .notification-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #F0F0F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .notification-header h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #453F4E;
+        }
+        
+        .mark-all-read {
+            background: none;
+            border: none;
+            color: #214888;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .notification-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .notification-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid #F0F0F0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .notification-item:hover {
+            background-color: #F3EBFF;
+        }
+        
+        .notification-item.unread {
+            background-color: #FBF8FF;
+            position: relative;
+        }
+        
+        .notification-item.unread::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: #214888;
+            border-radius: 50%;
+        }
+        
+        .notification-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #F3EBFF;
+            color: #214888;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .notification-content p {
+            font-size: 14px;
+            color: #453F4E;
+            margin-bottom: 4px;
+        }
+        
+        .notification-time {
+            font-size: 12px;
+            color: #453F4E;
+            opacity: 0.6;
+        }
+        
+        .notification-footer {
+            padding: 12px 20px;
+            text-align: center;
+            border-top: 1px solid #F0F0F0;
+        }
+        
+        .notification-footer a {
+            color: #214888;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    `;
+    
+    document.head.appendChild(style);
+    
+    // Position dropdown
+    const notificationLink = document.querySelector('.notification-link');
+    const navItem = notificationLink.closest('.nav-item');
+    
+    navItem.style.position = 'relative';
+    navItem.appendChild(notificationDropdown);
+    
+    // Close dropdown when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', function closeNotifications(e) {
+            if (!navItem.contains(e.target)) {
+                notificationDropdown.remove();
+                style.remove();
+                document.removeEventListener('click', closeNotifications);
+            }
+        });
+    }, 100);
+}
+</script>
 </body>
 
 </html>

@@ -241,182 +241,7 @@ function initializeNotifications() {
     }
 }
 
-function showNotifications() {
-    // Create notification dropdown
-    const notificationDropdown = document.createElement('div');
-    notificationDropdown.className = 'notification-dropdown';
-    notificationDropdown.innerHTML = `
-        <div class="notification-header">
-            <h4>Notifications</h4>
-            <button class="mark-all-read">Mark all as read</button>
-        </div>
-        <div class="notification-list">
-            <div class="notification-item unread">
-                <div class="notification-icon">
-                    <i class="fas fa-exclamation-triangle"></i>
-                </div>
-                <div class="notification-content">
-                    <p>Fee reminder for 3 students pending</p>
-                    <span class="notification-time">2 hours ago</span>
-                </div>
-            </div>
-            <div class="notification-item unread">
-                <div class="notification-icon">
-                    <i class="fas fa-user-plus"></i>
-                </div>
-                <div class="notification-content">
-                    <p>New admission application received</p>
-                    <span class="notification-time">4 hours ago</span>
-                </div>
-            </div>
-            <div class="notification-item">
-                <div class="notification-icon">
-                    <i class="fas fa-credit-card"></i>
-                </div>
-                <div class="notification-content">
-                    <p>Monthly fee collection completed</p>
-                    <span class="notification-time">1 day ago</span>
-                </div>
-            </div>
-        </div>
-        <div class="notification-footer">
-            <a href="#">View all notifications</a>
-        </div>
-    `;
-    
-    // Add styles for notification dropdown
-    const style = document.createElement('style');
-    style.textContent = `
-        .notification-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            width: 320px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            z-index: 1001;
-            overflow: hidden;
-        }
-        
-        .notification-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #F0F0F0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .notification-header h4 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #453F4E;
-        }
-        
-        .mark-all-read {
-            background: none;
-            border: none;
-            color: #214888;
-            font-size: 12px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        
-        .notification-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .notification-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px 20px;
-            border-bottom: 1px solid #F0F0F0;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        
-        .notification-item:hover {
-            background-color: #F3EBFF;
-        }
-        
-        .notification-item.unread {
-            background-color: #FBF8FF;
-            position: relative;
-        }
-        
-        .notification-item.unread::before {
-            content: '';
-            position: absolute;
-            left: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 6px;
-            height: 6px;
-            background-color: #214888;
-            border-radius: 50%;
-        }
-        
-        .notification-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #F3EBFF;
-            color: #214888;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-        
-        .notification-content p {
-            font-size: 14px;
-            color: #453F4E;
-            margin-bottom: 4px;
-        }
-        
-        .notification-time {
-            font-size: 12px;
-            color: #453F4E;
-            opacity: 0.6;
-        }
-        
-        .notification-footer {
-            padding: 12px 20px;
-            text-align: center;
-            border-top: 1px solid #F0F0F0;
-        }
-        
-        .notification-footer a {
-            color: #214888;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-        }
-    `;
-    
-    document.head.appendChild(style);
-    
-    // Position dropdown
-    const notificationLink = document.querySelector('.notification-link');
-    const navItem = notificationLink.closest('.nav-item');
-    
-    navItem.style.position = 'relative';
-    navItem.appendChild(notificationDropdown);
-    
-    // Close dropdown when clicking outside
-    setTimeout(() => {
-        document.addEventListener('click', function closeNotifications(e) {
-            if (!navItem.contains(e.target)) {
-                notificationDropdown.remove();
-                style.remove();
-                document.removeEventListener('click', closeNotifications);
-            }
-        });
-    }, 100);
-}
+
 
 // Real-time Data Updates
 function updateRealTimeData() {
@@ -473,84 +298,84 @@ function animateNumberChange(element, newValue) {
     }
 }
 
-function updateActivities() {
-    // Add new activity items occasionally
-    if (Math.random() > 0.7) {
-        const activityList = document.querySelector('.activity-list');
-        if (activityList) {
-            const activities = [
-                {
-                    icon: 'user-plus',
-                    iconClass: 'new',
-                    text: '<strong>New Student</strong> enrolled in Pre-KG',
-                    time: 'Just now'
-                },
-                {
-                    icon: 'credit-card',
-                    iconClass: 'payment',
-                    text: '<strong>Payment</strong> received for transport fee',
-                    time: 'Few minutes ago'
-                },
-                {
-                    icon: 'bell',
-                    iconClass: 'warning',
-                    text: 'Reminder sent for <strong>pending fees</strong>',
-                    time: 'An hour ago'
-                }
-            ];
+// function updateActivities() {
+//     // Add new activity items occasionally
+//     if (Math.random() > 0.7) {
+//         const activityList = document.querySelector('.activity-list');
+//         if (activityList) {
+//             const activities = [
+//                 {
+//                     icon: 'user-plus',
+//                     iconClass: 'new',
+//                     text: '<strong>New Student</strong> enrolled in Pre-KG',
+//                     time: 'Just now'
+//                 },
+//                 {
+//                     icon: 'credit-card',
+//                     iconClass: 'payment',
+//                     text: '<strong>Payment</strong> received for transport fee',
+//                     time: 'Few minutes ago'
+//                 },
+//                 {
+//                     icon: 'bell',
+//                     iconClass: 'warning',
+//                     text: 'Reminder sent for <strong>pending fees</strong>',
+//                     time: 'An hour ago'
+//                 }
+//             ];
             
-            const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+//             const randomActivity = activities[Math.floor(Math.random() * activities.length)];
             
-            const newActivity = document.createElement('div');
-            newActivity.className = 'activity-item';
-            newActivity.innerHTML = `
-                <div class="activity-icon ${randomActivity.iconClass}">
-                    <i class="fas fa-${randomActivity.icon}"></i>
-                </div>
-                <div class="activity-content">
-                    <p>${randomActivity.text}</p>
-                    <span class="activity-time">${randomActivity.time}</span>
-                </div>
-            `;
+//             const newActivity = document.createElement('div');
+//             newActivity.className = 'activity-item';
+//             newActivity.innerHTML = `
+//                 <div class="activity-icon ${randomActivity.iconClass}">
+//                     <i class="fas fa-${randomActivity.icon}"></i>
+//                 </div>
+//                 <div class="activity-content">
+//                     <p>${randomActivity.text}</p>
+//                     <span class="activity-time">${randomActivity.time}</span>
+//                 </div>
+//             `;
             
-            activityList.insertBefore(newActivity, activityList.firstChild);
+//             activityList.insertBefore(newActivity, activityList.firstChild);
             
-            // Remove oldest activity if more than 5
-            const activities_elements = activityList.querySelectorAll('.activity-item');
-            if (activities_elements.length > 4) {
-                activityList.removeChild(activities_elements[activities_elements.length - 1]);
-            }
-        }
-    }
-}
+//             // Remove oldest activity if more than 5
+//             const activities_elements = activityList.querySelectorAll('.activity-item');
+//             if (activities_elements.length > 4) {
+//                 activityList.removeChild(activities_elements[activities_elements.length - 1]);
+//             }
+//         }
+//     }
+// }
 
-function updateNotificationCount() {
-    const notificationBadge = document.querySelector('.notification-badge');
-    if (notificationBadge && Math.random() > 0.8) {
-        const currentCount = parseInt(notificationBadge.textContent);
-        const newCount = Math.max(0, currentCount + (Math.random() > 0.5 ? 1 : -1));
-        notificationBadge.textContent = newCount;
+// function updateNotificationCount() {
+//     const notificationBadge = document.querySelector('.notification-badge');
+//     if (notificationBadge && Math.random() > 0.8) {
+//         const currentCount = parseInt(notificationBadge.textContent);
+//         const newCount = Math.max(0, currentCount + (Math.random() > 0.5 ? 1 : -1));
+//         notificationBadge.textContent = newCount;
         
-        if (newCount === 0) {
-            notificationBadge.style.display = 'none';
-        } else {
-            notificationBadge.style.display = 'block';
-        }
-    }
-}
+//         if (newCount === 0) {
+//             notificationBadge.style.display = 'none';
+//         } else {
+//             notificationBadge.style.display = 'block';
+//         }
+//     }
+// }
 
 // Utility Functions
-function formatCurrency(amount) {
-    return '₹' + amount.toLocaleString('en-IN');
-}
+// function formatCurrency(amount) {
+//     return '₹' + amount.toLocaleString('en-IN');
+// }
 
-function formatDate(date) {
-    return new Date(date).toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-}
+// function formatDate(date) {
+//     return new Date(date).toLocaleDateString('en-IN', {
+//         year: 'numeric',
+//         month: 'short',
+//         day: 'numeric'
+//     });
+// }
 
 function showToast(message, type = 'info') {
     const toast = document.createElement('div');

@@ -220,3 +220,64 @@ class Transportation(models.Model):
 
     def __str__(self):
         return f"Transpiration for {self.student.get_full_name()}"
+    
+
+from django.utils import timezone
+
+
+class Notification(models.Model):
+    """Store notifications for payment reminders and overdue alerts"""
+    NOTIFICATION_TYPE_CHOICES = [
+        ('upcoming', 'Upcoming Payment'),
+        ('overdue', 'Overdue Payment'),
+        ('paid', 'Payment Received'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='payment_notifications')
+    installment = models.ForeignKey('payments.PaymentInstallment', on_delete=models.CASCADE, related_name='notifications')
+    
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPE_CHOICES)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    
+    is_read = models.BooleanField(default=False)
+    is_sent = models.BooleanField(default=False)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'is_read']),
+            models.Index(fields=['notification_type', 'created_at']),
+            models.Index(fields=['installment', 'notification_type']),
+        ]
+
+    def __str__(self):
+        return f"{self.notification_type} - {self.student.get_full_name()} - {self.title}"
+
+    def mark_as_read(self):
+        """Mark notification as read"""
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save(update_fields=['is_read', 'read_at'])
+
+    def mark_as_sent(self):
+        """Mark notification as sent"""
+        if not self.is_sent:
+            self.is_sent = True
+            self.sent_at = timezone.now()
+            self.save(update_fields=['is_sent', 'sent_at'])

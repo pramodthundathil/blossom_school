@@ -670,3 +670,112 @@ def add_transportation(request, student_id):
 
             return redirect("student_detail",pk = student_id)
 
+
+# notifications 
+
+# views.py
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.utils import timezone
+from .models import Notification
+from django.views.decorators.csrf import csrf_exempt
+
+
+@login_required
+def notification_list(request):
+    """Display all notifications with filtering options"""
+    filter_type = request.GET.get('filter', 'all')
+    
+    # Base queryset
+    notifications = Notification.objects.filter(user=request.user).select_related(
+        'student', 'installment', 'installment__payment_plan'
+    )
+    
+    # Apply filters
+    if filter_type == 'unread':
+        notifications = notifications.filter(is_read=False)
+    elif filter_type == 'upcoming':
+        notifications = notifications.filter(notification_type='upcoming')
+    elif filter_type == 'overdue':
+        notifications = notifications.filter(notification_type='overdue')
+    # 'all' shows everything
+    
+    # Get unread count
+    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
+    
+    # Pagination
+    paginator = Paginator(notifications, 20)  # 20 notifications per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'notifications': page_obj,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
+        'unread_count': unread_count,
+        'filter_type': filter_type,
+    }
+    
+    return render(request, 'notifications/notification_list.html', context)
+
+
+@login_required
+@csrf_exempt
+def mark_notification_read(request, pk):
+    """Mark a single notification as read (AJAX endpoint)"""
+    if request.method == 'POST':
+        try:
+            notification = get_object_or_404(Notification, pk=pk, user=request.user)
+            notification.mark_as_read()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+
+
+@login_required
+@csrf_exempt
+def mark_all_notifications_read(request):
+    """Mark all notifications as read for the current user (AJAX endpoint)"""
+    if request.method == 'POST':
+        try:
+            updated_count = Notification.objects.filter(
+                user=request.user,
+                is_read=False
+            ).update(
+                is_read=True,
+                read_at=timezone.now()
+            )
+            return JsonResponse({'success': True, 'count': updated_count})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+
+
+@login_required
+@csrf_exempt
+def get_unread_notification_count(request):
+    """Get count of unread notifications (AJAX endpoint)"""
+    count = Notification.objects.filter(user=request.user, is_read=False).count()
+    return JsonResponse({'count': count})
+
+
+@login_required
+@csrf_exempt
+def delete_notification(request, pk):
+    """Delete a notification (AJAX endpoint)"""
+    if request.method == 'POST':
+        try:
+            notification = get_object_or_404(Notification, pk=pk, user=request.user)
+            notification.delete()
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)

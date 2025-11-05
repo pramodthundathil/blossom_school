@@ -38,4 +38,11 @@ urlpatterns = [
 
     # AJAX validation endpoint
     path('students/validate-field/', views.student_validate_field, name='student_validate_field'),
+
+    # Notification URLs
+    path('notifications/', views.notification_list, name='notification_list'),
+    path('notifications/<int:pk>/mark-read/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
+    path('notifications/unread-count/', views.get_unread_notification_count, name='unread_notification_count'),
+    path('notifications/<int:pk>/delete/', views.delete_notification, name='delete_notification'),
 ]

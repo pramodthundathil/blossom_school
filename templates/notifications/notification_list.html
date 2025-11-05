@@ -1,0 +1,774 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    :root {
+        --e-global-color-primary: #214888;
+        --e-global-color-secondary: #D54395;
+        --e-global-color-text: #453F4E;
+        --e-global-color-accent: #FBF8FF;
+        --e-global-color-3a7e2f2: #FFB804;
+        --e-global-color-e1cf4e4: #DEC8FE;
+        --e-global-color-fe7363b: #F7F1FF;
+        --e-global-color-aa4a27d: #FEFEFE;
+        --e-global-color-eecedb7: #F3EBFF;
+        --e-global-color-d2fd119: #FF854B;
+        --e-global-color-3e3936d: #FFEFC6;
+        --e-global-color-bea3118: #89C0FF;
+        --e-global-color-4e9ef99: #43A574;
+        --e-global-color-7d1e931: #FF9587;
+        --e-global-color-5d90ead: #F0F0F0;
+        --e-global-typography-primary-font-family: "Poppins";
+        
+        --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.15);
+        
+        --border-radius-sm: 6px;
+        --border-radius: 12px;
+        --border-radius-lg: 16px;
+    }
+
+    * {
+        font-family: var(--e-global-typography-primary-font-family), sans-serif;
+    }
+
+    /* Breadcrumb Styles */
+    /* .breadcrumb-container {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: white;
+        border-bottom: 2px solid var(--e-global-color-5d90ead);
+        margin-bottom: 24px;
+    }
+
+    .custom-breadcrumb {
+        padding: 16px 0;
+    }
+
+    .breadcrumb-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .breadcrumb-list {
+        display: flex;
+        align-items: center;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        gap: 12px;
+    }
+
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .breadcrumb-item::after {
+        content: '›';
+        color: var(--e-global-color-text);
+        opacity: 0.5;
+        margin-left: 12px;
+        font-size: 20px;
+    }
+
+    .breadcrumb-item.active::after {
+        display: none;
+    }
+
+    .breadcrumb-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--e-global-color-primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .breadcrumb-link:hover {
+        color: var(--e-global-color-secondary);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--e-global-color-text);
+        font-weight: 600;
+    } */
+
+    /* Main Container
+    .notifications-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px 40px;
+    } */
+
+    /* Header */
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .notifications-title {
+        color: var(--e-global-color-primary);
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .notification-badge {
+        background: var(--e-global-color-secondary);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* Filter Tabs */
+    .notification-filters {
+        display: flex;
+        gap: 12px;
+        background: var(--e-global-color-accent);
+        padding: 8px;
+        border-radius: var(--border-radius);
+    }
+
+    .filter-btn {
+        padding: 10px 24px;
+        border: none;
+        background: transparent;
+        color: var(--e-global-color-text);
+        font-weight: 600;
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+
+    .filter-btn:hover {
+        background: var(--e-global-color-eecedb7);
+    }
+
+    .filter-btn.active {
+        background: var(--e-global-color-primary);
+        color: white;
+        box-shadow: var(--shadow-light);
+    }
+
+    /* Actions */
+    .notifications-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .action-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .mark-all-read-btn {
+        background: var(--e-global-color-4e9ef99);
+        color: white;
+    }
+
+    .mark-all-read-btn:hover {
+        background: #368861;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    /* Notification List */
+    .notification-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .notification-item {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 20px;
+        box-shadow: var(--shadow-light);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border-left: 4px solid transparent;
+        position: relative;
+    }
+
+    .notification-item:hover {
+        box-shadow: var(--shadow-medium);
+        transform: translateX(4px);
+    }
+
+    .notification-item.unread {
+        background: linear-gradient(135deg, var(--e-global-color-fe7363b) 0%, white 100%);
+        border-left-color: var(--e-global-color-secondary);
+    }
+
+    .notification-item.unread::before {
+        content: '';
+        position: absolute;
+        left: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        background: var(--e-global-color-secondary);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: translateY(-50%) scale(1.2);
+        }
+    }
+
+    /* Priority Colors */
+    .notification-item.priority-urgent {
+        border-left-color: #dc2626;
+    }
+
+    .notification-item.priority-high {
+        border-left-color: var(--e-global-color-d2fd119);
+    }
+
+    .notification-item.priority-medium {
+        border-left-color: var(--e-global-color-3a7e2f2);
+    }
+
+    .notification-item.priority-low {
+        border-left-color: var(--e-global-color-bea3118);
+    }
+
+    /* Notification Content */
+    .notification-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+        gap: 16px;
+    }
+
+    .notification-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .notification-type-badge {
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .notification-type-badge.upcoming {
+        background: var(--e-global-color-bea3118);
+        color: white;
+    }
+
+    .notification-type-badge.overdue {
+        background: var(--e-global-color-7d1e931);
+        color: white;
+    }
+
+    .notification-type-badge.paid {
+        background: var(--e-global-color-4e9ef99);
+        color: white;
+    }
+
+    .notification-priority {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .notification-priority.urgent {
+        background: #fee;
+        color: #dc2626;
+    }
+
+    .notification-priority.high {
+        background: var(--e-global-color-3e3936d);
+        color: var(--e-global-color-d2fd119);
+    }
+
+    .notification-priority.medium {
+        background: var(--e-global-color-eecedb7);
+        color: var(--e-global-color-primary);
+    }
+
+    .notification-priority.low {
+        background: #e0f2fe;
+        color: var(--e-global-color-bea3118);
+    }
+
+    .notification-time {
+        color: var(--e-global-color-text);
+        opacity: 0.6;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .notification-title {
+        color: var(--e-global-color-primary);
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+    }
+
+    .notification-message {
+        color: var(--e-global-color-text);
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 0 0 16px 0;
+    }
+
+    .notification-student {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: var(--e-global-color-accent);
+        border-radius: var(--border-radius-sm);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--e-global-color-primary);
+        margin-bottom: 12px;
+    }
+
+    .notification-actions-row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .view-student-btn {
+        padding: 8px 20px;
+        background: var(--e-global-color-primary);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .view-student-btn:hover {
+        background: var(--e-global-color-secondary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-light);
+    }
+
+    .mark-read-btn {
+        padding: 8px 16px;
+        background: transparent;
+        color: var(--e-global-color-4e9ef99);
+        border: 2px solid var(--e-global-color-4e9ef99);
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .mark-read-btn:hover {
+        background: var(--e-global-color-4e9ef99);
+        color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+    }
+
+    .empty-state-icon {
+        font-size: 80px;
+        color: var(--e-global-color-e1cf4e4);
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        color: var(--e-global-color-primary);
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+
+    .empty-state p {
+        color: var(--e-global-color-text);
+        opacity: 0.7;
+        font-size: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .notifications-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .notification-filters {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .notification-header-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .notification-actions-row {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .view-student-btn,
+        .mark-read-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .notifications-title {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<!-- Fixed Breadcrumbs -->
+<div class="breadcrumb-container">
+    <nav aria-label="breadcrumb" class="custom-breadcrumb">
+        <div class="breadcrumb-wrapper">
+            <ol class="breadcrumb-list">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </li>
+            </ol>
+        </div>
+    </nav>
+</div>
+
+<!-- Main Container -->
+<div class="notifications-container">
+    <!-- Header -->
+    <div class="notifications-header">
+        <h1 class="notifications-title">
+            <i class="fas fa-bell"></i>
+            Notifications
+            {% if unread_count > 0 %}
+                <span class="notification-badge">{{ unread_count }}</span>
+            {% endif %}
+        </h1>
+
+        <div class="notifications-actions">
+            {% if unread_count > 0 %}
+                <button class="action-btn mark-all-read-btn" onclick="markAllAsRead()">
+                    <i class="fas fa-check-double"></i>
+                    Mark All as Read
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="notification-filters">
+        <button class="filter-btn {% if filter_type == 'all' or not filter_type %}active{% endif %}" 
+                onclick="filterNotifications('all')">
+            All Notifications
+        </button>
+        <button class="filter-btn {% if filter_type == 'unread' %}active{% endif %}" 
+                onclick="filterNotifications('unread')">
+            Unread ({{ unread_count }})
+        </button>
+        <button class="filter-btn {% if filter_type == 'upcoming' %}active{% endif %}" 
+                onclick="filterNotifications('upcoming')">
+            <i class="fas fa-clock"></i> Upcoming
+        </button>
+        <button class="filter-btn {% if filter_type == 'overdue' %}active{% endif %}" 
+                onclick="filterNotifications('overdue')">
+            <i class="fas fa-exclamation-triangle"></i> Overdue
+        </button>
+    </div>
+
+    <!-- Notification List -->
+    {% if notifications %}
+        <div class="notification-list">
+            {% for notification in notifications %}
+            <div class="notification-item {% if not notification.is_read %}unread{% endif %} priority-{{ notification.priority }}" 
+                 data-id="{{ notification.id }}">
+                
+                <div class="notification-header-row">
+                    <div class="notification-meta">
+                        <span class="notification-type-badge {{ notification.notification_type }}">
+                            {% if notification.notification_type == 'upcoming' %}
+                                <i class="fas fa-clock"></i> {{ notification.get_notification_type_display }}
+                            {% elif notification.notification_type == 'overdue' %}
+                                <i class="fas fa-exclamation-triangle"></i> {{ notification.get_notification_type_display }}
+                            {% elif notification.notification_type == 'paid' %}
+                                <i class="fas fa-check-circle"></i> {{ notification.get_notification_type_display }}
+                            {% endif %}
+                        </span>
+                        <span class="notification-priority {{ notification.priority }}">
+                            {{ notification.priority }}
+                        </span>
+                    </div>
+                    <span class="notification-time">
+                        <i class="fas fa-clock"></i>
+                        {{ notification.created_at|timesince }} ago
+                    </span>
+                </div>
+
+                <h3 class="notification-title">{{ notification.title }}</h3>
+                
+                <div class="notification-student">
+                    <i class="fas fa-user-graduate"></i>
+                    {{ notification.student.get_full_name }}
+                </div>
+
+                <p class="notification-message">{{ notification.message }}</p>
+
+                <div class="notification-actions-row">
+                    <a href="{% url 'student_detail' notification.student.pk %}" 
+                       class="view-student-btn"
+                       onclick="markAsReadAndRedirect(event, {{ notification.id }}, '{% url 'student_detail' notification.student.pk %}')">
+                        <i class="fas fa-user"></i>
+                        View Student Details
+                    </a>
+                    
+                    {% if not notification.is_read %}
+                        <button class="mark-read-btn" onclick="markAsRead(event, {{ notification.id }})">
+                            <i class="fas fa-check"></i>
+                            Mark as Read
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div style="margin-top: 32px; text-align: center;">
+            <div style="display: inline-flex; gap: 8px; align-items: center;">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if filter_type %}&filter={{ filter_type }}{% endif %}" 
+                       style="padding: 8px 16px; background: var(--e-global-color-primary); color: white; 
+                              border-radius: var(--border-radius-sm); text-decoration: none;">
+                        First
+                    </a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if filter_type %}&filter={{ filter_type }}{% endif %}" 
+                       style="padding: 8px 16px; background: var(--e-global-color-primary); color: white; 
+                              border-radius: var(--border-radius-sm); text-decoration: none;">
+                        Previous
+                    </a>
+                {% endif %}
+
+                <span style="padding: 8px 16px; color: var(--e-global-color-text);">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if filter_type %}&filter={{ filter_type }}{% endif %}" 
+                       style="padding: 8px 16px; background: var(--e-global-color-primary); color: white; 
+                              border-radius: var(--border-radius-sm); text-decoration: none;">
+                        Next
+                    </a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if filter_type %}&filter={{ filter_type }}{% endif %}" 
+                       style="padding: 8px 16px; background: var(--e-global-color-primary); color: white; 
+                              border-radius: var(--border-radius-sm); text-decoration: none;">
+                        Last
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-bell-slash"></i>
+            </div>
+            <h3>No Notifications</h3>
+            <p>You're all caught up! No notifications to display.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // CSRF Token for POST requests
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    // Mark single notification as read
+    function markAsRead(event, notificationId) {
+        event.stopPropagation();
+        
+        fetch(`/admissions/notifications/${notificationId}/mark-read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const item = document.querySelector(`[data-id="${notificationId}"]`);
+                item.classList.remove('unread');
+                const markReadBtn = item.querySelector('.mark-read-btn');
+                if (markReadBtn) {
+                    markReadBtn.remove();
+                }
+                
+                // Update badge count
+                updateUnreadCount();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Mark as read and redirect to student detail
+    function markAsReadAndRedirect(event, notificationId, redirectUrl) {
+        event.preventDefault();
+        
+        fetch(`/admissions/notifications/${notificationId}/mark-read/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = redirectUrl;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Redirect anyway if there's an error
+            window.location.href = redirectUrl;
+        });
+    }
+
+    // Mark all notifications as read
+    function markAllAsRead() {
+        if (!confirm('Mark all notifications as read?')) {
+            return;
+        }
+
+        fetch('/admissions/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Filter notifications
+    function filterNotifications(filterType) {
+        const currentUrl = new URL(window.location.href);
+        if (filterType === 'all') {
+            currentUrl.searchParams.delete('filter');
+        } else {
+            currentUrl.searchParams.set('filter', filterType);
+        }
+        currentUrl.searchParams.delete('page'); // Reset to first page
+        window.location.href = currentUrl.toString();
+    }
+
+    // Update unread count
+    function updateUnreadCount() {
+        fetch('/admissions/notifications/unread-count/')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                    } else {
+                        badge.remove();
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+
+{% endblock %}
