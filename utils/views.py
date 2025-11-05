@@ -282,7 +282,7 @@ def mark_attendance(request, teacher_id=None):
     else:
         form = AttendanceForm(instance=attendance, initial={'date': today})
     
-    active_teachers = Teacher.objects.filter(is_active=True, status='active')
+    active_teachers = Teacher.objects.filter(is_active=True)
     
     context = {
         'form': form,
