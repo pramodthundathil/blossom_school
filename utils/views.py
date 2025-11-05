@@ -276,7 +276,9 @@ def mark_attendance(request, teacher_id=None):
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': True, 'message': 'Attendance marked successfully'})
-            return redirect('attendance_list')
+            
+            # Redirect back to mark_attendance page to allow marking another teacher
+            return redirect('mark_attendance')
     else:
         form = AttendanceForm(instance=attendance, initial={'date': today})
     
@@ -290,6 +292,7 @@ def mark_attendance(request, teacher_id=None):
     }
     
     return render(request, 'attendance/mark_attendance.html', context)
+
 
 @unauthenticated_user
 def bulk_mark_attendance(request):

@@ -294,39 +294,39 @@
         transition: width 0.3s ease;
     }
 
-    
+
     /* Responsive Design */
     @media (max-width: 768px) {
-       
+
 
         .form-grid {
             grid-template-columns: 1fr;
         }
-        
+
         .students-container {
             padding: 1rem 0.5rem;
         }
-        
+
         .card-content {
             padding: 1.5rem;
         }
-        
+
         .form-section {
             padding: 1rem;
         }
-        
+
         .card-header {
             padding: 1rem;
         }
-        
+
         .card-header h3 {
             font-size: 1.25rem;
         }
-        
+
         .submit-section {
             padding: 1.5rem;
         }
-        
+
         .submit-button {
             width: 100%;
             padding: 1rem;
@@ -342,8 +342,15 @@
     }
 
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     /* Field validation states */
@@ -415,7 +422,7 @@
 
             <form id="studentForm" enctype="multipart/form-data" method="post" novalidate>
                 {% csrf_token %}
-                
+
                 <div class="form-sections">
                     <!-- Child Information Section -->
                     <div class="form-section">
@@ -423,68 +430,68 @@
                             <i class="fas fa-child"></i>
                             Child Information
                         </h4>
-                        
+
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="id_first_name" class="form-label required-field">First Name</label>
                                 {{ form.first_name }}
                                 <div class="error-message" id="error_first_name"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_last_name" class="form-label required-field">Last Name</label>
                                 {{ form.last_name }}
                                 <div class="error-message" id="error_last_name"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_family_name" class="form-label">Family Name</label>
                                 {{ form.family_name }}
                                 <div class="error-message" id="error_family_name"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_nationality" class="form-label required-field">Nationality</label>
                                 {{ form.nationality }}
                                 <div class="error-message" id="error_nationality"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_gender" class="form-label required-field">Gender</label>
                                 {{ form.gender }}
                                 <div class="error-message" id="error_gender"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_date_of_birth" class="form-label required-field">Date of Birth</label>
                                 {{ form.date_of_birth }}
                                 <div class="error-message" id="error_date_of_birth"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_age_at_enrollment" class="form-label">Age at Enrollment</label>
                                 {{ form.age_at_enrollment }}
                                 <div class="error-message" id="error_age_at_enrollment"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_religion" class="form-label">Religion</label>
                                 {{ form.religion }}
                                 <div class="error-message" id="error_religion"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_child_emirates_id" class="form-label">Emirates ID</label>
                                 {{ form.child_emirates_id }}
                                 <div class="error-message" id="error_child_emirates_id"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_languages_spoken" class="form-label">Languages Spoken</label>
                                 {{ form.languages_spoken }}
                                 <div class="error-message" id="error_languages_spoken"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_child_photo" class="form-label">Child Photo</label>
                                 {{ form.child_photo }}
@@ -499,50 +506,51 @@
                             <i class="fas fa-male"></i>
                             Father Information
                         </h4>
-                        
+
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="id_father_name" class="form-label required-field">Father's Name</label>
                                 {{ form.father_name }}
                                 <div class="error-message" id="error_father_name"></div>
                             </div>
-                            
+
                             <div class="form-group">
-                                <label for="id_father_nationality" class="form-label required-field">Father's Nationality</label>
+                                <label for="id_father_nationality" class="form-label required-field">Father's
+                                    Nationality</label>
                                 {{ form.father_nationality }}
                                 <div class="error-message" id="error_father_nationality"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_father_place_of_work" class="form-label">Place of Work</label>
                                 {{ form.father_place_of_work }}
                                 <div class="error-message" id="error_father_place_of_work"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_father_position_held" class="form-label">Position Held</label>
                                 {{ form.father_position_held }}
                                 <div class="error-message" id="error_father_position_held"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_father_mobile" class="form-label">Mobile Number</label>
                                 {{ form.father_mobile }}
                                 <div class="error-message" id="error_father_mobile"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_father_work_telephone" class="form-label">Work Telephone</label>
                                 {{ form.father_work_telephone }}
                                 <div class="error-message" id="error_father_work_telephone"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_father_email" class="form-label">Email Address</label>
                                 {{ form.father_email }}
                                 <div class="error-message" id="error_father_email"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_father_photo" class="form-label">Father Photo</label>
                                 {{ form.father_photo }}
@@ -557,50 +565,51 @@
                             <i class="fas fa-female"></i>
                             Mother Information
                         </h4>
-                        
+
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="id_mother_name" class="form-label required-field">Mother's Name</label>
                                 {{ form.mother_name }}
                                 <div class="error-message" id="error_mother_name"></div>
                             </div>
-                            
+
                             <div class="form-group">
-                                <label for="id_mother_nationality" class="form-label required-field">Mother's Nationality</label>
+                                <label for="id_mother_nationality" class="form-label required-field">Mother's
+                                    Nationality</label>
                                 {{ form.mother_nationality }}
                                 <div class="error-message" id="error_mother_nationality"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_mother_place_of_work" class="form-label">Place of Work</label>
                                 {{ form.mother_place_of_work }}
                                 <div class="error-message" id="error_mother_place_of_work"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_mother_position_held" class="form-label">Position Held</label>
                                 {{ form.mother_position_held }}
                                 <div class="error-message" id="error_mother_position_held"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_mother_mobile" class="form-label">Mobile Number</label>
                                 {{ form.mother_mobile }}
                                 <div class="error-message" id="error_mother_mobile"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_mother_work_telephone" class="form-label">Work Telephone</label>
                                 {{ form.mother_work_telephone }}
                                 <div class="error-message" id="error_mother_work_telephone"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_mother_email" class="form-label">Email Address</label>
                                 {{ form.mother_email }}
                                 <div class="error-message" id="error_mother_email"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_mother_photo" class="form-label">Mother Photo</label>
                                 {{ form.mother_photo }}
@@ -615,44 +624,45 @@
                             <i class="fas fa-address-book"></i>
                             Contact & Address Information
                         </h4>
-                        
+
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="id_siblings_info" class="form-label">Siblings Information</label>
                                 {{ form.siblings_info }}
                                 <div class="error-message" id="error_siblings_info"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_home_telephone" class="form-label">Home Telephone</label>
                                 {{ form.home_telephone }}
                                 <div class="error-message" id="error_home_telephone"></div>
                             </div>
-                            
+
                             <div class="form-group">
-                                <label for="id_full_home_address" class="form-label required-field">Full Home Address</label>
+                                <label for="id_full_home_address" class="form-label required-field">Full Home
+                                    Address</label>
                                 {{ form.full_home_address }}
                                 <div class="error-message" id="error_full_home_address"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_po_box_number" class="form-label">PO Box Number</label>
                                 {{ form.po_box_number }}
                                 <div class="error-message" id="error_po_box_number"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_city" class="form-label required-field">City</label>
                                 {{ form.city }}
                                 <div class="error-message" id="error_city"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_email" class="form-label">Primary Email</label>
                                 {{ form.email }}
                                 <div class="error-message" id="error_email"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_phone_number" class="form-label">Primary Phone Number</label>
                                 {{ form.phone_number }}
@@ -667,38 +677,41 @@
                             <i class="fas fa-exclamation-triangle"></i>
                             Emergency Contacts
                         </h4>
-                        
+
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="id_first_contact_person" class="form-label required-field">First Contact Person</label>
+                                <label for="id_first_contact_person" class="form-label required-field">First Contact
+                                    Person</label>
                                 {{ form.first_contact_person }}
                                 <div class="error-message" id="error_first_contact_person"></div>
                             </div>
-                            
+
                             <div class="form-group">
-                                <label for="id_first_contact_relationship" class="form-label required-field">Relationship</label>
+                                <label for="id_first_contact_relationship"
+                                    class="form-label required-field">Relationship</label>
                                 {{ form.first_contact_relationship }}
                                 <div class="error-message" id="error_first_contact_relationship"></div>
                             </div>
-                            
+
                             <div class="form-group">
-                                <label for="id_first_contact_telephone" class="form-label required-field">Telephone</label>
+                                <label for="id_first_contact_telephone"
+                                    class="form-label required-field">Telephone</label>
                                 {{ form.first_contact_telephone }}
                                 <div class="error-message" id="error_first_contact_telephone"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_second_contact_person" class="form-label">Second Contact Person</label>
                                 {{ form.second_contact_person }}
                                 <div class="error-message" id="error_second_contact_person"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_second_contact_relationship" class="form-label">Relationship</label>
                                 {{ form.second_contact_relationship }}
                                 <div class="error-message" id="error_second_contact_relationship"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_second_contact_telephone" class="form-label">Telephone</label>
                                 {{ form.second_contact_telephone }}
@@ -713,49 +726,73 @@
                             <i class="fas fa-school"></i>
                             School Information
                         </h4>
-                        
+
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="id_term_to_begin" class="form-label">Term to Begin</label>
                                 {{ form.term_to_begin }}
                                 <div class="error-message" id="error_term_to_begin"></div>
                             </div>
-                            
+
                             <div class="form-group">
-                                <label for="id_days_per_week" class="form-label required-field">Days per Week</label>
+                                <label for="id_days_per_week" class="form-label required-field">No of Days Needed in a
+                                    Week</label>
                                 {{ form.days_per_week }}
                                 <div class="error-message" id="error_days_per_week"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_hours_required" class="form-label">Hours Required</label>
                                 {{ form.hours_required }}
                                 <div class="error-message" id="error_hours_required"></div>
                             </div>
-                            
-                            <div class="form-group">
-                                <label for="id_year_of_admission" class="form-label required-field">Year of Admission</label>
-                                {{ form.year_of_admission }}
-                                <div class="error-message" id="error_year_of_admission"></div>
-                            </div>
-                            
+
+
+
                             <div class="form-group">
                                 <label for="id_date_start" class="form-label">Start Date</label>
                                 {{ form.date_start }}
                                 <div class="error-message" id="error_date_start"></div>
                             </div>
-                            
+
+                            <div class="form-group">
+                                <label for="id_deals" class="form-label">Deals of Admission</label>
+                                <select name="deals" required id="deals" class="form-input">
+                                    <option selected disabled>Select Deal</option>
+                                    <option value="1">1 month Deal</option>
+                                    <option value="2">2 month Deal</option>
+                                    <option value="3">3 month Deal</option>
+                                    <option value="4">4 month Deal</option>
+                                    <option value="5">5 month Deal</option>
+                                    <option value="6">6 month Deal</option>
+                                    <option value="7">7 month Deal</option>
+                                    <option value="8">8 month Deal</option>
+                                    <option value="9">9 month Deal</option>
+                                    <option value="10">10 month Deal</option>
+                                    <option value="11">11 month Deal</option>
+                                    <option value="12">12 month Deal</option>
+                                </select>
+                                <div class="error-message" id="error_deals"></div>
+                            </div>
+
                             <div class="form-group">
                                 <label for="id_date_end" class="form-label">End Date</label>
                                 {{ form.date_end }}
                                 <div class="error-message" id="error_date_end"></div>
                             </div>
-                             <div class="form-group">
+
+                            <div class="form-group">
+                                <label for="id_year_of_admission" class="form-label required-field">Year of
+                                    Admission</label>
+                                {{ form.year_of_admission }}
+                                <div class="error-message" id="error_year_of_admission"></div>
+                            </div>
+                            <div class="form-group">
                                 <label for="id_class_room" class="form-label">Class room</label>
                                 {{ form.class_room }}
                                 <div class="error-message" id="error_class_room"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="id_parent_signature_date" class="form-label">Parent Signature Date</label>
                                 {{ form.parent_signature_date }}
@@ -783,480 +820,529 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('studentForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const submitText = document.getElementById('submitText');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const alertContainer = document.getElementById('alertContainer');
-    const progressFill = document.getElementById('progressFill');
-    
-    // Form validation and progress tracking
-    const requiredFields = [
-        'first_name', 'last_name', 'nationality', 'gender', 'date_of_birth',
-        'father_name', 'father_nationality', 'mother_name', 'mother_nationality',
-        'full_home_address', 'city', 'first_contact_person', 'first_contact_relationship',
-        'first_contact_telephone', 'days_per_week', 'year_of_admission','class_room'
-    ];
-    
-    // Real-time validation function
-    function validateField(fieldName, value) {
-        const field = document.getElementById(`id_${fieldName}`);
-        const errorElement = document.getElementById(`error_${fieldName}`);
-        
-        if (!field || !errorElement) return true;
-        
-        // Clear previous states
-        field.classList.remove('error', 'success', 'field-valid', 'field-invalid');
-        errorElement.textContent = '';
-        errorElement.style.display = 'none';
-        
-        let isValid = true;
-        let errorMessage = '';
-        
-        // Check if required field is empty
-        if (requiredFields.includes(fieldName)) {
-            if (!value || value.toString().trim() === '') {
-                isValid = false;
-                errorMessage = 'This field is required';
-            }
-        }
-        
-        // Specific field validations
-        if (value && value.toString().trim() !== '') {
-            switch (fieldName) {
-                case 'first_name':
-                case 'last_name':
-                case 'father_name':
-                case 'mother_name':
-                    if (value.length < 2) {
-                        isValid = false;
-                        errorMessage = 'Name must be at least 2 characters long';
-                    } else if (!/^[a-zA-Z\s'-]+$/.test(value)) {
-                        isValid = false;
-                        errorMessage = 'Name can only contain letters, spaces, hyphens and apostrophes';
-                    }
-                    break;
-                    
-                case 'father_email':
-                case 'mother_email':
-                case 'email':
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(value)) {
-                        isValid = false;
-                        errorMessage = 'Please enter a valid email address';
-                    }
-                    break;
-                    
-                case 'father_mobile':
-                case 'mother_mobile':
-                case 'phone_number':
-                case 'home_telephone':
-                case 'father_work_telephone':
-                case 'mother_work_telephone':
-                case 'first_contact_telephone':
-                case 'second_contact_telephone':
-                    const phoneRegex = /^[\+]?[\d\s\-\(\)]+$/;
-                    if (!phoneRegex.test(value) || value.replace(/\D/g, '').length < 7) {
-                        isValid = false;
-                        errorMessage = 'Please enter a valid phone number (minimum 7 digits)';
-                    }
-                    break;
-                    
-                case 'date_of_birth':
-                    const birthDate = new Date(value);
-                    const today = new Date();
-                    if (isNaN(birthDate.getTime())) {
-                        isValid = false;
-                        errorMessage = 'Please enter a valid date';
-                    } else {
-                        const age = today.getFullYear() - birthDate.getFullYear();
-                        const monthDiff = today.getMonth() - birthDate.getMonth();
-                        let actualAge = age;
-                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                            actualAge--;
-                        }
-                        
-                        if (actualAge < 1 || actualAge > 18) {
-                            isValid = false;
-                            errorMessage = 'Child must be between 1 and 18 years old';
-                        }
-                    }
-                    break;
-                    
-                case 'age_at_enrollment':
-                    const age = parseInt(value);
-                    if (isNaN(age) || age < 1 || age > 18) {
-                        isValid = false;
-                        errorMessage = 'Age must be between 1 and 18';
-                    }
-                    break;
-                    
-                case 'year_of_admission':
-                    const year = parseInt(value);
-                    const currentYear = new Date().getFullYear();
-                    if (isNaN(year) || year < currentYear - 1 || year > currentYear + 2) {
-                        isValid = false;
-                        errorMessage = `Year must be between ${currentYear - 1} and ${currentYear + 2}`;
-                    }
-                    break;
-                    
-                case 'date_start':
-                case 'date_end':
-                case 'parent_signature_date':
-                    const date = new Date(value);
-                    if (isNaN(date.getTime())) {
-                        isValid = false;
-                        errorMessage = 'Please enter a valid date';
-                    }
-                    break;
-                    
-                case 'child_emirates_id':
-                    if (value && !/^\d{15}$/.test(value.replace(/\D/g, ''))) {
-                        isValid = false;
-                        errorMessage = 'Emirates ID should be 15 digits';
-                    }
-                    break;
-            }
-        }
-        
-        // Apply validation state
-        if (!isValid) {
-            field.classList.add('error', 'field-invalid');
-            errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
-            errorElement.style.display = 'flex';
-        } else if (value && value.toString().trim() !== '') {
-            field.classList.add('success', 'field-valid');
-        }
-        
-        return isValid;
-    }
-    
-    // Update progress bar
-    function updateProgress() {
-        let filledRequiredFields = 0;
-        let totalRequiredFields = requiredFields.length;
-        
-        requiredFields.forEach(fieldName => {
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('studentForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const alertContainer = document.getElementById('alertContainer');
+        const progressFill = document.getElementById('progressFill');
+
+        // Form validation and progress tracking
+        const requiredFields = [
+            'first_name', 'last_name', 'nationality', 'gender', 'date_of_birth',
+            'father_name', 'father_nationality', 'mother_name', 'mother_nationality',
+            'full_home_address', 'city', 'first_contact_person', 'first_contact_relationship',
+            'first_contact_telephone', 'days_per_week', 'year_of_admission', 'class_room'
+        ];
+
+        // Real-time validation function
+        function validateField(fieldName, value) {
             const field = document.getElementById(`id_${fieldName}`);
-            if (field && field.value && field.value.trim() !== '') {
-                filledRequiredFields++;
+            const errorElement = document.getElementById(`error_${fieldName}`);
+
+            if (!field || !errorElement) return true;
+
+            // Clear previous states
+            field.classList.remove('error', 'success', 'field-valid', 'field-invalid');
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+
+            let isValid = true;
+            let errorMessage = '';
+
+            // Check if required field is empty
+            if (requiredFields.includes(fieldName)) {
+                if (!value || value.toString().trim() === '') {
+                    isValid = false;
+                    errorMessage = 'This field is required';
+                }
             }
-        });
-        
-        const progress = (filledRequiredFields / totalRequiredFields) * 100;
-        progressFill.style.width = `${progress}%`;
-        
-        return progress;
-    }
-    
-    // Show alert message
-    function showAlert(message, type = 'error') {
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type}`;
-        alert.innerHTML = `
+
+            // Specific field validations
+            if (value && value.toString().trim() !== '') {
+                switch (fieldName) {
+                    case 'first_name':
+                    case 'last_name':
+                    case 'father_name':
+                    case 'mother_name':
+                        if (value.length < 2) {
+                            isValid = false;
+                            errorMessage = 'Name must be at least 2 characters long';
+                        } else if (!/^[a-zA-Z\s'-]+$/.test(value)) {
+                            isValid = false;
+                            errorMessage = 'Name can only contain letters, spaces, hyphens and apostrophes';
+                        }
+                        break;
+
+                    case 'father_email':
+                    case 'mother_email':
+                    case 'email':
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(value)) {
+                            isValid = false;
+                            errorMessage = 'Please enter a valid email address';
+                        }
+                        break;
+
+                    case 'father_mobile':
+                    case 'mother_mobile':
+                    case 'phone_number':
+                    case 'home_telephone':
+                    case 'father_work_telephone':
+                    case 'mother_work_telephone':
+                    case 'first_contact_telephone':
+                    case 'second_contact_telephone':
+                        const phoneRegex = /^[\+]?[\d\s\-\(\)]+$/;
+                        if (!phoneRegex.test(value) || value.replace(/\D/g, '').length < 7) {
+                            isValid = false;
+                            errorMessage = 'Please enter a valid phone number (minimum 7 digits)';
+                        }
+                        break;
+
+                    case 'date_of_birth':
+                        const birthDate = new Date(value);
+                        const today = new Date();
+                        if (isNaN(birthDate.getTime())) {
+                            isValid = false;
+                            errorMessage = 'Please enter a valid date';
+                        } else {
+                            const age = today.getFullYear() - birthDate.getFullYear();
+                            const monthDiff = today.getMonth() - birthDate.getMonth();
+                            let actualAge = age;
+                            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                                actualAge--;
+                            }
+
+                            if (actualAge < 1 || actualAge > 18) {
+                                isValid = false;
+                                errorMessage = 'Child must be between 1 and 18 years old';
+                            }
+                        }
+                        break;
+
+                    case 'age_at_enrollment':
+                        const age = parseInt(value);
+                        if (isNaN(age) || age < 1 || age > 18) {
+                            isValid = false;
+                            errorMessage = 'Age must be between 1 and 18';
+                        }
+                        break;
+
+                    case 'year_of_admission':
+                        const year = parseInt(value);
+                        const currentYear = new Date().getFullYear();
+                        if (isNaN(year) || year < currentYear - 1 || year > currentYear + 2) {
+                            isValid = false;
+                            errorMessage = `Year must be between ${currentYear - 1} and ${currentYear + 2}`;
+                        }
+                        break;
+
+                    case 'date_start':
+                    case 'date_end':
+                    case 'parent_signature_date':
+                        const date = new Date(value);
+                        if (isNaN(date.getTime())) {
+                            isValid = false;
+                            errorMessage = 'Please enter a valid date';
+                        }
+                        break;
+
+                    case 'child_emirates_id':
+                        if (value && !/^\d{15}$/.test(value.replace(/\D/g, ''))) {
+                            isValid = false;
+                            errorMessage = 'Emirates ID should be 15 digits';
+                        }
+                        break;
+                }
+            }
+
+            // Apply validation state
+            if (!isValid) {
+                field.classList.add('error', 'field-invalid');
+                errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
+                errorElement.style.display = 'flex';
+            } else if (value && value.toString().trim() !== '') {
+                field.classList.add('success', 'field-valid');
+            }
+
+            return isValid;
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            let filledRequiredFields = 0;
+            let totalRequiredFields = requiredFields.length;
+
+            requiredFields.forEach(fieldName => {
+                const field = document.getElementById(`id_${fieldName}`);
+                if (field && field.value && field.value.trim() !== '') {
+                    filledRequiredFields++;
+                }
+            });
+
+            const progress = (filledRequiredFields / totalRequiredFields) * 100;
+            progressFill.style.width = `${progress}%`;
+
+            return progress;
+        }
+
+        // Show alert message
+        function showAlert(message, type = 'error') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
             <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
             ${message}
         `;
-        
-        alertContainer.innerHTML = '';
-        alertContainer.appendChild(alert);
-        
-        // Auto-hide success messages
-        if (type === 'success') {
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-            }, 5000);
-        }
-        
-        // Scroll to alert
-        alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-    
-    // Add event listeners to all form fields
-    const allFields = form.querySelectorAll('input, select, textarea');
-    allFields.forEach(field => {
-        const fieldName = field.id.replace('id_', '');
-        
-        // Real-time validation on input
-        field.addEventListener('input', function(e) {
-            clearTimeout(this.validationTimeout);
-            this.validationTimeout = setTimeout(() => {
-                validateField(fieldName, this.value);
-                updateProgress();
-            }, 300); // Debounce validation
-        });
-        
-        // Validation on blur (when user leaves field)
-        field.addEventListener('blur', function() {
-            validateField(fieldName, this.value);
-            updateProgress();
-        });
-        
-        // Validation on change (for selects and file inputs)
-        field.addEventListener('change', function() {
-            validateField(fieldName, this.value);
-            updateProgress();
-        });
-    });
-    
-    // Auto-calculate age from date of birth
-    const dobField = document.getElementById('id_date_of_birth');
-    const ageField = document.getElementById('id_age_at_enrollment');
-    
-    if (dobField && ageField) {
-        dobField.addEventListener('change', function() {
-            if (this.value) {
-                const birthDate = new Date(this.value);
-                const today = new Date();
-                let age = today.getFullYear() - birthDate.getFullYear();
-                const monthDiff = today.getMonth() - birthDate.getMonth();
-                
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                    age--;
-                }
-                
-                if (age >= 1 && age <= 18) {
-                    ageField.value = age;
-                    validateField('age_at_enrollment', age);
-                }
-            }
-        });
-    }
-    
-    // Set default year of admission
-    const yearField = document.getElementById('id_year_of_admission');
-    if (yearField && !yearField.value) {
-        const currentYear = new Date().getFullYear();
-        yearField.value = currentYear;
-        validateField('year_of_admission', currentYear);
-    }
-    
-    // File input validation
-    const fileInputs = form.querySelectorAll('input[type="file"]');
-    fileInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            const fieldName = this.id.replace('id_', '');
-            const errorElement = document.getElementById(`error_${fieldName}`);
-            
-            this.classList.remove('error', 'success');
-            errorElement.textContent = '';
-            errorElement.style.display = 'none';
-            
-            if (this.files.length > 0) {
-                const file = this.files[0];
-                let isValid = true;
-                let errorMessage = '';
-                
-                // Validate file size (max 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    isValid = false;
-                    errorMessage = 'File size must be less than 5MB';
-                }
-                
-                // Validate file type for photos
-                if (this.id.includes('photo')) {
-                    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-                    if (!allowedTypes.includes(file.type)) {
-                        isValid = false;
-                        errorMessage = 'Please select a valid image file (JPEG, PNG, GIF, WEBP)';
+
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
                     }
-                }
-                
-                if (!isValid) {
-                    this.classList.add('error');
-                    errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
-                    errorElement.style.display = 'flex';
-                    this.value = '';
-                } else {
-                    this.classList.add('success');
-                }
+                }, 5000);
             }
-        });
-    });
-    
-    // Form submission
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Show loading state
-        submitBtn.disabled = true;
-        loadingSpinner.style.display = 'block';
-        submitText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        
-        // Clear previous alerts
-        alertContainer.innerHTML = '';
-        
-        // Validate all fields
-        let isFormValid = true;
-        let firstErrorField = null;
-        
-        // Validate required fields
-        requiredFields.forEach(fieldName => {
-            const field = document.getElementById(`id_${fieldName}`);
-            if (field) {
-                const isValid = validateField(fieldName, field.value);
-                if (!isValid && isFormValid) {
-                    isFormValid = false;
-                    firstErrorField = field;
-                }
-            }
-        });
-        
-        // Validate all other fields that have values
+
+            // Scroll to alert
+            alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Add event listeners to all form fields
+        const allFields = form.querySelectorAll('input, select, textarea');
         allFields.forEach(field => {
             const fieldName = field.id.replace('id_', '');
-            if (!requiredFields.includes(fieldName) && field.value) {
-                const isValid = validateField(fieldName, field.value);
-                if (!isValid && isFormValid) {
-                    isFormValid = false;
-                    if (!firstErrorField) {
+
+            // Real-time validation on input
+            field.addEventListener('input', function (e) {
+                clearTimeout(this.validationTimeout);
+                this.validationTimeout = setTimeout(() => {
+                    validateField(fieldName, this.value);
+                    updateProgress();
+                }, 300); // Debounce validation
+            });
+
+            // Validation on blur (when user leaves field)
+            field.addEventListener('blur', function () {
+                validateField(fieldName, this.value);
+                updateProgress();
+            });
+
+            // Validation on change (for selects and file inputs)
+            field.addEventListener('change', function () {
+                validateField(fieldName, this.value);
+                updateProgress();
+            });
+        });
+
+        // Auto-calculate age from date of birth
+        const dobField = document.getElementById('id_date_of_birth');
+        const ageField = document.getElementById('id_age_at_enrollment');
+
+        if (dobField && ageField) {
+            dobField.addEventListener('change', function () {
+                if (this.value) {
+                    const birthDate = new Date(this.value);
+                    const today = new Date();
+                    let age = today.getFullYear() - birthDate.getFullYear();
+                    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+
+                    if (age >= 1 && age <= 18) {
+                        ageField.value = age;
+                        validateField('age_at_enrollment', age);
+                    }
+                }
+            });
+        }
+
+        // Set default year of admission
+        const yearField = document.getElementById('id_year_of_admission');
+        if (yearField && !yearField.value) {
+            const currentYear = new Date().getFullYear();
+            yearField.value = currentYear;
+            validateField('year_of_admission', currentYear);
+        }
+
+        // File input validation
+        const fileInputs = form.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+            input.addEventListener('change', function () {
+                const fieldName = this.id.replace('id_', '');
+                const errorElement = document.getElementById(`error_${fieldName}`);
+
+                this.classList.remove('error', 'success');
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+
+                if (this.files.length > 0) {
+                    const file = this.files[0];
+                    let isValid = true;
+                    let errorMessage = '';
+
+                    // Validate file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        isValid = false;
+                        errorMessage = 'File size must be less than 5MB';
+                    }
+
+                    // Validate file type for photos
+                    if (this.id.includes('photo')) {
+                        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                        if (!allowedTypes.includes(file.type)) {
+                            isValid = false;
+                            errorMessage = 'Please select a valid image file (JPEG, PNG, GIF, WEBP)';
+                        }
+                    }
+
+                    if (!isValid) {
+                        this.classList.add('error');
+                        errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
+                        errorElement.style.display = 'flex';
+                        this.value = '';
+                    } else {
+                        this.classList.add('success');
+                    }
+                }
+            });
+        });
+
+        // Form submission
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Show loading state
+            submitBtn.disabled = true;
+            loadingSpinner.style.display = 'block';
+            submitText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            // Clear previous alerts
+            alertContainer.innerHTML = '';
+
+            // Validate all fields
+            let isFormValid = true;
+            let firstErrorField = null;
+
+            // Validate required fields
+            requiredFields.forEach(fieldName => {
+                const field = document.getElementById(`id_${fieldName}`);
+                if (field) {
+                    const isValid = validateField(fieldName, field.value);
+                    if (!isValid && isFormValid) {
+                        isFormValid = false;
                         firstErrorField = field;
                     }
                 }
-            }
-        });
-        
-        // Additional custom validations
-        const fatherEmail = document.getElementById('id_father_email').value;
-        const motherEmail = document.getElementById('id_mother_email').value;
-        const primaryEmail = document.getElementById('id_email').value;
-        
-        if (!fatherEmail && !motherEmail && !primaryEmail) {
-            isFormValid = false;
-            const emailField = document.getElementById('id_father_email');
-            const errorElement = document.getElementById('error_father_email');
-            emailField.classList.add('error');
-            errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> At least one email address must be provided';
-            errorElement.style.display = 'flex';
-            if (!firstErrorField) {
-                firstErrorField = emailField;
-            }
-        }
-        
-        if (!isFormValid) {
-            showAlert('Please fix all errors before submitting the form.', 'error');
-            resetSubmitButton();
-            if (firstErrorField) {
-                firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstErrorField.focus();
-            }
-            return;
-        }
-        
-        // Submit form via AJAX
-        const formData = new FormData(form);
-        
-        fetch(form.action || window.location.href, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                showAlert('Student registered successfully! Redirecting...', 'success');
-                progressFill.style.width = '100%';
-                
-                // Redirect after success
-                setTimeout(() => {
-                    window.location.href = data.redirect_url || '/students/';
-                }, 2000);
-            } else {
-                // Handle form errors
-                let hasErrors = false;
-                if (data.errors) {
-                    Object.keys(data.errors).forEach(fieldName => {
-                        const errorElement = document.getElementById(`error_${fieldName}`);
-                        const field = document.getElementById(`id_${fieldName}`);
-                        
-                        if (errorElement && field) {
-                            field.classList.add('error');
-                            const errorMsg = Array.isArray(data.errors[fieldName]) 
-                                ? data.errors[fieldName][0] 
-                                : data.errors[fieldName];
-                            errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMsg}`;
-                            errorElement.style.display = 'flex';
-                            hasErrors = true;
+            });
+
+            // Validate all other fields that have values
+            allFields.forEach(field => {
+                const fieldName = field.id.replace('id_', '');
+                if (!requiredFields.includes(fieldName) && field.value) {
+                    const isValid = validateField(fieldName, field.value);
+                    if (!isValid && isFormValid) {
+                        isFormValid = false;
+                        if (!firstErrorField) {
+                            firstErrorField = field;
                         }
-                    });
-                }
-                
-                if (hasErrors) {
-                    showAlert('Please fix the errors below and try again.', 'error');
-                } else {
-                    showAlert(data.message || 'An error occurred while submitting the form.', 'error');
-                }
-                resetSubmitButton();
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('An unexpected error occurred. Please try again.', 'error');
-            resetSubmitButton();
-        });
-    });
-    
-    function resetSubmitButton() {
-        submitBtn.disabled = false;
-        loadingSpinner.style.display = 'none';
-        submitText.innerHTML = '<i class="fas fa-user-plus"></i> Register Student';
-    }
-    
-    // Initial setup
-    updateProgress();
-    
-    // Form auto-save (optional - saves to localStorage every 30 seconds)
-    setInterval(() => {
-        const formData = new FormData(form);
-        const formObject = {};
-        for (let [key, value] of formData.entries()) {
-            if (value && typeof value === 'string') {
-                formObject[key] = value;
-            }
-        }
-        try {
-            localStorage.setItem('studentFormDraft', JSON.stringify(formObject));
-        } catch (e) {
-            // Handle localStorage errors silently
-        }
-    }, 30000);
-    
-    // Load form draft on page load
-    try {
-        const savedDraft = localStorage.getItem('studentFormDraft');
-        if (savedDraft) {
-            const draftData = JSON.parse(savedDraft);
-            Object.keys(draftData).forEach(key => {
-                const field = document.getElementById(key);
-                if (field && field.type !== 'file' && !field.value) {
-                    field.value = draftData[key];
+                    }
                 }
             });
-            updateProgress();
+
+            // Additional custom validations
+            const fatherEmail = document.getElementById('id_father_email').value;
+            const motherEmail = document.getElementById('id_mother_email').value;
+            const primaryEmail = document.getElementById('id_email').value;
+
+            if (!fatherEmail && !motherEmail && !primaryEmail) {
+                isFormValid = false;
+                const emailField = document.getElementById('id_father_email');
+                const errorElement = document.getElementById('error_father_email');
+                emailField.classList.add('error');
+                errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> At least one email address must be provided';
+                errorElement.style.display = 'flex';
+                if (!firstErrorField) {
+                    firstErrorField = emailField;
+                }
+            }
+
+            if (!isFormValid) {
+                showAlert('Please fix all errors before submitting the form.', 'error');
+                resetSubmitButton();
+                if (firstErrorField) {
+                    firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstErrorField.focus();
+                }
+                return;
+            }
+
+            // Submit form via AJAX
+            const formData = new FormData(form);
+
+            fetch(form.action || window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Student registered successfully! Redirecting...', 'success');
+                        progressFill.style.width = '100%';
+
+                        // Redirect after success
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url || '/students/';
+                        }, 2000);
+                    } else {
+                        // Handle form errors
+                        let hasErrors = false;
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(fieldName => {
+                                const errorElement = document.getElementById(`error_${fieldName}`);
+                                const field = document.getElementById(`id_${fieldName}`);
+
+                                if (errorElement && field) {
+                                    field.classList.add('error');
+                                    const errorMsg = Array.isArray(data.errors[fieldName])
+                                        ? data.errors[fieldName][0]
+                                        : data.errors[fieldName];
+                                    errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMsg}`;
+                                    errorElement.style.display = 'flex';
+                                    hasErrors = true;
+                                }
+                            });
+                        }
+
+                        if (hasErrors) {
+                            showAlert('Please fix the errors below and try again.', 'error');
+                        } else {
+                            showAlert(data.message || 'An error occurred while submitting the form.', 'error');
+                        }
+                        resetSubmitButton();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('An unexpected error occurred. Please try again.', 'error');
+                    resetSubmitButton();
+                });
+        });
+
+        function resetSubmitButton() {
+            submitBtn.disabled = false;
+            loadingSpinner.style.display = 'none';
+            submitText.innerHTML = '<i class="fas fa-user-plus"></i> Register Student';
         }
-    } catch (e) {
-        // Handle localStorage errors silently
-    }
-    
-    // Clear draft on successful submission
-    form.addEventListener('submit', function() {
+
+        // Initial setup
+        updateProgress();
+
+        // Form auto-save (optional - saves to localStorage every 30 seconds)
+        setInterval(() => {
+            const formData = new FormData(form);
+            const formObject = {};
+            for (let [key, value] of formData.entries()) {
+                if (value && typeof value === 'string') {
+                    formObject[key] = value;
+                }
+            }
+            try {
+                localStorage.setItem('studentFormDraft', JSON.stringify(formObject));
+            } catch (e) {
+                // Handle localStorage errors silently
+            }
+        }, 30000);
+
+        // Load form draft on page load
         try {
-            localStorage.removeItem('studentFormDraft');
+            const savedDraft = localStorage.getItem('studentFormDraft');
+            if (savedDraft) {
+                const draftData = JSON.parse(savedDraft);
+                Object.keys(draftData).forEach(key => {
+                    const field = document.getElementById(key);
+                    if (field && field.type !== 'file' && !field.value) {
+                        field.value = draftData[key];
+                    }
+                });
+                updateProgress();
+            }
         } catch (e) {
             // Handle localStorage errors silently
         }
+
+        // Clear draft on successful submission
+        form.addEventListener('submit', function () {
+            try {
+                localStorage.removeItem('studentFormDraft');
+            } catch (e) {
+                // Handle localStorage errors silently
+            }
+        });
     });
-});
 </script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dealsSelect = document.getElementById('deals');
+        const startDateInput = document.getElementById('id_date_start');
+        const endDateInput = document.getElementById('id_date_end');
+        const errorStartDate = document.getElementById('error_date_start');
+
+        // Make start date required
+        startDateInput.setAttribute('required', 'required');
+
+        function calculateEndDate() {
+            const startDate = startDateInput.value;
+            const months = parseInt(dealsSelect.value);
+
+            // Validate start date is entered
+            if (!startDate) {
+                errorStartDate.textContent = 'Start date is required to calculate end date';
+                errorStartDate.style.display = 'block';
+                endDateInput.value = '';
+                return;
+            } else {
+                errorStartDate.textContent = '';
+                errorStartDate.style.display = 'none';
+            }
+
+            if (startDate && months) {
+                const start = new Date(startDate);
+                const end = new Date(start);
+                end.setMonth(end.getMonth() + months);
+
+                // Format date to YYYY-MM-DD for input field
+                const formattedDate = end.toISOString().split('T')[0];
+                endDateInput.value = formattedDate;
+            }
+        }
+
+        // Trigger calculation on both start date and deals change
+        dealsSelect.addEventListener('change', calculateEndDate);
+        startDateInput.addEventListener('change', calculateEndDate);
+
+        // Clear error on start date input
+        startDateInput.addEventListener('input', function () {
+            if (this.value) {
+                errorStartDate.textContent = '';
+                errorStartDate.style.display = 'none';
+            }
+        });
+    });
+</script>
 {% endblock %}

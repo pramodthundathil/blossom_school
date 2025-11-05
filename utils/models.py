@@ -196,6 +196,7 @@ class Attendance(models.Model):
     STATUS_CHOICES = [
         ('present', 'Present'),
         ('absent', 'Absent'),
+        ('sick_leave', 'Sick Leave'),
         ('half_day', 'Half Day'),
         ('sunday', 'Sunday (Weekly Off)'),
     ]
@@ -224,8 +225,9 @@ class Attendance(models.Model):
         return f"{self.teacher.full_name} - {self.date} - {self.get_status_display()}"
     
     def save(self, *args, **kwargs):
-        # Auto-mark Sunday as weekly off
-        if self.date.weekday() == 6:  # Sunday = 6
+        # Auto-mark Sunday as weekly off ONLY if no status is explicitly set
+        # or if it's a new record without a status
+        if self.date.weekday() == 6 and not self.status:  # Sunday = 6
             self.status = 'sunday'
         super().save(*args, **kwargs)
 
@@ -255,7 +257,7 @@ class MonthlySalary(models.Model):
     days_present = models.IntegerField(default=0)
     days_absent = models.IntegerField(default=0)
     half_days = models.IntegerField(default=0)
-    
+    sick_leave = models.IntegerField(default=0)
     # Additions
     bonus = models.DecimalField(max_digits=10, decimal_places=2, default=0,
                                help_text="Performance bonus or incentives")
@@ -339,6 +341,7 @@ class MonthlySalary(models.Model):
         self.days_present = attendances.filter(status='present').count()
         self.days_absent = attendances.filter(status='absent').count()
         self.half_days = attendances.filter(status='half_day').count()
+        self.sick_leave = attendances.filter(status='sick_leave').count()
         
         # Calculate per day salary
         per_day_salary = self.gross_salary / Decimal(self.total_working_days)
@@ -346,7 +349,12 @@ class MonthlySalary(models.Model):
         # Calculate deductions
         # Full day absent = full day deduction
         # Half day = 50% deduction
-        absence_days = Decimal(self.days_absent) + (Decimal(self.half_days) * Decimal('0.5'))
+        # sick leave calculation is one sick leave is allowed in a month
+        if self.sick_leave > 1:
+            sick_leaves =  self.sick_leave - 1
+        else:
+            sick_leaves = 0
+        absence_days = Decimal(self.days_absent) + (Decimal(self.half_days) * Decimal('0.5')) + Decimal(sick_leaves)
         self.absence_deduction = per_day_salary * absence_days
         
         # Total deductions

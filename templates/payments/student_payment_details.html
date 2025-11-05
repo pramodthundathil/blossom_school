@@ -630,11 +630,11 @@
                 </div>
                 <div class="meta-item">
                     <i class="fas fa-graduation-cap"></i>
-                    <span>Class: {% if student.current_class %}{{ student.current_class }}{% else %}Not assigned{% endif %}</span>
+                    <span>Class: {% if student.class_room %}{{ student.class_room }}{% else %}Not assigned{% endif %}</span>
                 </div>
                 <div class="meta-item">
                     <i class="fas fa-phone"></i>
-                    <span>Phone: {% if student.phone %}{{ student.phone }}{% else %}Not provided{% endif %}</span>
+                    <span>Phone: {% if student.first_contact_telephone %}{{ student.first_contact_telephone }}{% else %}Not provided{% endif %}</span>
                 </div>
             </div>
         </div>

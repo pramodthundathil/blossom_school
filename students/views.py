@@ -4,6 +4,7 @@ from django.contrib import messages
 from .forms import * 
 from .models import * 
 from home.decorators import unauthenticated_user
+from payments.models import PaymentPlan, Payment, PaymentInstallment, PaymentItem, PaymentReminder
 
 
 from django.http import JsonResponse
@@ -16,6 +17,9 @@ from django.db import transaction
 from datetime import datetime
 import logging
 import json
+from django.db.models import Sum, Q, F
+
+
 # Set up logging
 logger = logging.getLogger(__name__)
 
@@ -477,7 +481,40 @@ def student_detail(request, pk):
     initial_data = {}
     initial_data['student'] = student
     form = TransportationForm(initial=initial_data)
-    return render(request, 'students/student_detail.html', {'student': student,"document_form":document_form,"form":form})
+
+    """Show detailed payment information for a student"""
+    
+    # Get payment plans
+    payment_plans = PaymentPlan.objects.filter(student=student).order_by('-academic_year')
+    
+    # Get all payments
+    payments = Payment.objects.filter(student=student).order_by('-payment_date')
+    
+    # Get outstanding installments
+    outstanding_installments = PaymentInstallment.objects.filter(
+        payment_plan__student=student,
+        status__in=['pending', 'overdue', 'partially_paid']
+    ).order_by('due_date')
+    
+    # Calculate totals
+    total_paid = payments.filter(payment_status='completed').aggregate(
+        Sum('net_amount')
+    )['net_amount__sum'] or 0
+    
+    total_outstanding = sum(inst.get_outstanding_amount() for inst in outstanding_installments)
+
+    context = {
+        'student': student,
+        'payment_plans': payment_plans,
+        'payments': payments,
+        'outstanding_installments': outstanding_installments,
+        'total_paid': total_paid,
+        'total_outstanding': total_outstanding,
+        "document_form":document_form,
+        "form":form
+    }
+    
+    return render(request, 'students/student_detail.html', context)
 
 @unauthenticated_user
 def student_update(request, pk):

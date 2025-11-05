@@ -13,6 +13,7 @@
         --success: #10B981;
         --error: #EF4444;
         --warning: #f59e0b;
+        --sick-leave: #3B82F6;
         --border-color: #E5E7EB;
         --border-radius: 12px;
     }
@@ -84,6 +85,12 @@
         background: rgba(245, 158, 11, 0.1);
         color: var(--warning);
         border: 2px solid var(--warning);
+    }
+
+    .bulk-action-btn.sick-leave {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--sick-leave);
+        border: 2px solid var(--sick-leave);
     }
 
     .bulk-action-btn:hover {
@@ -164,6 +171,7 @@
     .status-radio-group {
         display: flex;
         gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .status-radio-group input[type="radio"] {
@@ -197,6 +205,12 @@
         background: var(--warning);
         color: var(--white);
         border-color: var(--warning);
+    }
+
+    .status-radio-group input[type="radio"]:checked + .status-radio-label.sick-leave {
+        background: var(--sick-leave);
+        color: var(--white);
+        border-color: var(--sick-leave);
     }
 
     .status-radio-label:hover {
@@ -372,6 +386,9 @@
                         <button type="button" class="bulk-action-btn half-day" onclick="markAllAs('half_day')">
                             <i class="fas fa-adjust"></i> Mark All Half Day
                         </button>
+                        <button type="button" class="bulk-action-btn sick-leave" onclick="markAllAs('sick_leave')">
+                            <i class="fas fa-briefcase-medical"></i> Mark All Sick Leave
+                        </button>
                     </div>
 
                     <!-- Attendance Table -->
@@ -424,6 +441,14 @@
                                                    onchange="updateCount()">
                                             <label for="half_{{ data.teacher.id }}" class="status-radio-label half-day">
                                                 <i class="fas fa-adjust"></i> Half Day
+                                            </label>
+
+                                            <input type="radio" name="status_{{ data.teacher.id }}" 
+                                                   id="sick_{{ data.teacher.id }}" value="sick_leave"
+                                                   {% if data.existing_status == 'sick_leave' %}checked{% endif %}
+                                                   onchange="updateCount()">
+                                            <label for="sick_{{ data.teacher.id }}" class="status-radio-label sick-leave">
+                                                <i class="fas fa-briefcase-medical"></i> Sick Leave
                                             </label>
                                         </div>
                                     </td>
@@ -500,7 +525,5 @@ function updateCount() {
 document.addEventListener('DOMContentLoaded', function() {
     updateCount();
 });
-
-
 </script>
 {% endblock %}

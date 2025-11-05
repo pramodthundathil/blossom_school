@@ -451,7 +451,605 @@
         }
     }
 </style>
+<style>
+    .student-payment-details-container {
+        background: var(--e-global-color-fe7363b);
+        min-height: 100vh;
+        padding: 24px;
+    }
 
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        padding: 0 8px;
+    }
+
+    .page-title {
+        color: var(--e-global-color-primary);
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-title i {
+        font-size: 24px;
+        color: var(--e-global-color-secondary);
+    }
+
+    .back-btn {
+        background: var(--e-global-color-primary);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-light);
+    }
+
+    .back-btn:hover {
+        background: #1a3a70;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        color: white;
+    }
+
+    /* Student Info Card */
+    .student-info-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-light);
+        padding: 24px;
+        margin-bottom: 24px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .student-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--e-global-color-primary) 0%, var(--e-global-color-secondary) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .student-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .student-name {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--e-global-color-text);
+        margin: 0;
+    }
+
+    .student-meta {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        color: var(--e-global-color-text);
+        opacity: 0.8;
+    }
+
+    .meta-item i {
+        color: var(--e-global-color-primary);
+    }
+
+    .payment-summary {
+        display: flex;
+        gap: 20px;
+    }
+
+    .summary-item {
+        text-align: center;
+        padding: 16px;
+        border-radius: var(--border-radius);
+        min-width: 120px;
+    }
+
+    .summary-paid {
+        background: rgba(67, 165, 116, 0.1);
+        border-left: 4px solid var(--e-global-color-4e9ef99);
+    }
+
+    .summary-outstanding {
+        background: rgba(255, 184, 4, 0.1);
+        border-left: 4px solid var(--e-global-color-3a7e2f2);
+    }
+
+    .summary-label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        opacity: 0.8;
+    }
+
+    .summary-value {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .summary-paid .summary-value {
+        color: var(--e-global-color-4e9ef99);
+    }
+
+    .summary-outstanding .summary-value {
+        color: var(--e-global-color-3a7e2f2);
+    }
+
+    /* Tabs Navigation */
+    .tabs-navigation {
+        display: flex;
+        gap: 4px;
+        background: white;
+        padding: 8px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-light);
+        margin-bottom: 24px;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 12px 16px;
+        border: none;
+        background: transparent;
+        color: var(--e-global-color-text);
+        font-weight: 600;
+        border-radius: var(--border-radius-sm);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .tab-btn.active {
+        background: var(--e-global-color-primary);
+        color: white;
+    }
+
+    .tab-btn:hover:not(.active) {
+        background: var(--e-global-color-eecedb7);
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Payment Plans Section */
+    .payment-plans-grid {
+        display: grid;
+        gap: 20px;
+    }
+
+    .payment-plan-card {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-light);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .payment-plan-card:hover {
+        box-shadow: var(--shadow-medium);
+        transform: translateY(-2px);
+    }
+
+    .plan-header {
+        background: linear-gradient(135deg, var(--e-global-color-primary) 0%, var(--e-global-color-bea3118) 100%);
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .plan-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .plan-meta {
+        display: flex;
+        gap: 16px;
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .plan-content {
+        padding: 20px;
+    }
+
+    .installments-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    .installment-item {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 16px;
+        align-items: center;
+        padding: 16px;
+        background: var(--e-global-color-fe7363b);
+        border-radius: var(--border-radius);
+        border-left: 4px solid transparent;
+    }
+
+    .installment-item.overdue {
+        border-left-color: var(--e-global-color-7d1e931);
+        background: rgba(255, 149, 135, 0.1);
+    }
+
+    .installment-item.pending {
+        border-left-color: var(--e-global-color-3a7e2f2);
+        background: rgba(255, 184, 4, 0.1);
+    }
+
+    .installment-item.paid {
+        border-left-color: var(--e-global-color-4e9ef99);
+        background: rgba(67, 165, 116, 0.1);
+    }
+
+    .installment-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .installment-name {
+        font-weight: 600;
+        color: var(--e-global-color-text);
+    }
+
+    .installment-meta {
+        font-size: 12px;
+        color: var(--e-global-color-text);
+        opacity: 0.7;
+    }
+
+    .installment-amount {
+        text-align: right;
+    }
+
+    .amount-due {
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .amount-paid {
+        font-size: 12px;
+        color: var(--e-global-color-4e9ef99);
+    }
+
+    .installment-status {
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-overdue {
+        background: rgba(255, 149, 135, 0.2);
+        color: var(--e-global-color-7d1e931);
+    }
+
+    .status-pending {
+        background: rgba(255, 184, 4, 0.2);
+        color: var(--e-global-color-3a7e2f2);
+    }
+
+    .status-paid {
+        background: rgba(67, 165, 116, 0.2);
+        color: var(--e-global-color-4e9ef99);
+    }
+
+    .status-partial {
+        background: rgba(137, 192, 255, 0.2);
+        color: var(--e-global-color-bea3118);
+    }
+
+    /* Payments History */
+    .payments-table-container {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-light);
+        overflow: hidden;
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, var(--e-global-color-primary) 0%, var(--e-global-color-bea3118) 100%);
+        color: white;
+        padding: 20px;
+    }
+
+    .table-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .payments-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .payments-table th {
+        background: var(--e-global-color-eecedb7);
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--e-global-color-text);
+        font-size: 14px;
+    }
+
+    .payments-table td {
+        padding: 16px;
+        border-bottom: 1px solid var(--e-global-color-5d90ead);
+        color: var(--e-global-color-text);
+        font-size: 14px;
+    }
+
+    .payments-table tr:hover {
+        background: var(--e-global-color-fe7363b);
+    }
+
+    .payment-id {
+        font-weight: 600;
+        color: var(--e-global-color-primary);
+    }
+
+    .payment-amount {
+        font-weight: 700;
+        color: var(--e-global-color-text);
+    }
+
+    .payment-method {
+        padding: 6px 12px;
+        background: var(--e-global-color-5d90ead);
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .payment-status {
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-completed {
+        background: rgba(67, 165, 116, 0.15);
+        color: var(--e-global-color-4e9ef99);
+    }
+
+    .status-pending {
+        background: rgba(255, 184, 4, 0.15);
+        color: var(--e-global-color-3a7e2f2);
+    }
+
+    /* Outstanding Installments */
+    .installments-summary {
+        background: white;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-light);
+        padding: 24px;
+    }
+
+    .summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .summary-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--e-global-color-text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .urgency-badge {
+        padding: 6px 12px;
+        background: rgba(255, 149, 135, 0.2);
+        color: var(--e-global-color-7d1e931);
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .installment-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .pay-btn {
+        background: var(--e-global-color-primary);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: var(--border-radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .pay-btn:hover {
+        background: #1a3a70;
+        transform: translateY(-1px);
+    }
+
+    /* Empty States */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--e-global-color-text);
+        opacity: 0.6;
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .empty-state h4 {
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        font-size: 14px;
+        margin: 0;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .student-payment-details-container {
+            padding: 16px;
+        }
+
+        .page-header {
+            flex-direction: column;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .page-title {
+            font-size: 24px;
+        }
+
+        .student-info-card {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 16px;
+        }
+
+        .payment-summary {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tabs-navigation {
+            flex-direction: column;
+        }
+
+        .installment-item {
+            grid-template-columns: 1fr;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .installment-actions {
+            justify-content: center;
+        }
+
+        .payments-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .student-avatar {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+        }
+
+        .student-name {
+            font-size: 20px;
+        }
+
+        .student-meta {
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .plan-header {
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .plan-meta {
+            justify-content: center;
+        }
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .student-info-card,
+    .payment-plan-card,
+    .payments-table-container,
+    .installments-summary {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .payment-plan-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    .payment-plan-card:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+</style>
 <!-- Fixed Breadcrumbs -->
 <div class="breadcrumb-container">
     <nav aria-label="breadcrumb" class="custom-breadcrumb">
@@ -562,11 +1160,19 @@
             <div class="accordion accordion-flush mb-4 bg-success" id="accordionFlushExample">
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed text-center " style="border: 1px solid #214888;font-weight: 800;" type="button" data-bs-toggle="collapse"
+                        <button class="accordion-button collapsed text-center "
+                            style="border: 1px solid #214888;font-weight: 800;" type="button" data-bs-toggle="collapse"
                             data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
                             Utility Actions
                         </button>
+                        <br>
+                        <button class="accordion-button collapsed text-center "
+                            style="border: 1px solid #214888;font-weight: 800;" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                            Payments
+                        </button>
                     </h2>
+
                     <div id="flush-collapseOne" class="accordion-collapse collapse"
                         data-bs-parent="#accordionFlushExample">
                         <!-- Action Buttons -->
@@ -616,11 +1222,221 @@
                                 Payments
                             </a>
 
-                            <button data-bs-toggle="modal" data-bs-target="#transportationModal" class="btn btn-outline-dark">
+                            <button data-bs-toggle="modal" data-bs-target="#transportationModal"
+                                class="btn btn-outline-dark">
                                 <i class="fas fa-car"></i>
                                 Add Transportation
                             </button>
                         </div>
+                    </div>
+
+                    <div id="flush-collapseTwo" class="accordion-collapse collapse"
+                        data-bs-parent="#accordionFlushExample">
+
+                        <div class="student-payment-details-container">
+                            <!-- Page Header -->
+                            <div class="page-header">
+                                <div style="display: flex; gap: 12px;">
+                                    <a href="{% url 'create_payment_plan' student.id %}" class="back-btn"
+                                        style="background-color: #243552;">
+                                        <i class="fas fa-plus"></i>Add Payment Plan
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Student Information -->
+                            <div class="student-info-card">
+                                
+                                <div class="payment-summary">
+                                    <div class="summary-item summary-paid">
+                                        <div class="summary-label">Total Paid</div>
+                                        <div class="summary-value"><span style='font-size:small'>AED </span>
+                                           {{ total_paid|floatformat:2 }}</div>
+                                    </div>
+                                    <div class="summary-item summary-outstanding">
+                                        <div class="summary-label">Outstanding</div>
+                                        <div class="summary-value"><span style='font-size:small'>AED </span>
+                                            {{ total_outstanding|floatformat:2}}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabs Navigation -->
+                            <div class="tabs-navigation">
+                                <button class="tab-btn active" data-tab="payment-plans">
+                                    <i class="fas fa-calendar-alt"></i>Payment Plans
+                                </button>
+                                <button class="tab-btn" data-tab="payments-history">
+                                    <i class="fas fa-history"></i>Payments History
+                                </button>
+                                <button class="tab-btn" data-tab="outstanding">
+                                    <i class="fas fa-exclamation-triangle"></i>Outstanding
+                                </button>
+                            </div>
+
+                            <!-- Payment Plans Tab -->
+                            <div id="payment-plans" class="tab-content active">
+                                {% if payment_plans %}
+                                <div class="payment-plans-grid">
+                                    {% for plan in payment_plans %}
+                                    <div class="payment-plan-card">
+                                        <div class="plan-header">
+                                            <h3 class="plan-title">Academic Year - {{ plan.academic_year }}</h3>
+                                            <div class="plan-meta">
+                                                <span><i class="fas fa-calendar"></i> {{ plan.installments.count }}
+                                                    Installments</span>
+                                                <span> <span
+                                                        style='font-size:small'>AED </span>
+                                                  {{ plan.total_amount|floatformat:2 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="plan-content">
+                                            <div class="installments-grid">
+                                                {% for installment in plan.installments.all %}
+                                                <div
+                                                    class="installment-item {% if installment.status == 'overdue' %}overdue{% elif installment.status == 'paid' %}paid{% else %}pending{% endif %}">
+                                                    <div class="installment-details">
+                                                        <div class="installment-name">{{ installment.fee_category.name }}</div>
+                                                            
+                                                        <div class="installment-meta">
+                                                            Due: {{ installment.due_date|date:"M d, Y" }}
+                                                            {% if installment.paid_date %}
+                                                            • Paid: {{ installment.paid_date|date:"M d, Y" }}
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="installment-amount">
+                                                        <div class="amount-due"><span style='font-size:small'>AED
+                                                            </span>{{ installment.amount|floatformat:2 }}</div>
+                                                        {% if installment.paid_amount > 0 %}
+                                                        <div class="amount-paid">Paid: <span style='font-size:small'>AED
+                                                            </span>{{ installment.paid_amount|floatformat:2 }}</div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="installment-status status-{{ installment.status }}">
+                                                        {{ installment.get_status_display }}
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-calendar-times"></i>
+                                    <h4>No Payment Plans</h4>
+                                    <p>No payment plans have been created for this student yet.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Payments History Tab -->
+                            <div id="payments-history" class="tab-content">
+                                {% if payments %}
+                                <div class="payments-table-container">
+                                    <div class="table-header">
+                                        <h3><i class="fas fa-receipt"></i> Payment History</h3>
+                                    </div>
+                                    <table class="payments-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Payment ID</th>
+                                                <th>Date</th>
+                                                <th>Amount</th>
+                                                <th>Method</th>
+                                                <th>Status</th>
+                                                <th>Reference</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for payment in payments %}
+                                            <tr>
+                                                <td>
+                                                    <a href="{% url 'payment_receipt' payment.id %}" class="payment-id">
+                                                        {{ payment.payment_id }}
+                                                    </a>
+                                                </td>
+                                                <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                                                <td class="payment-amount"><span style='font-size:small'>AED </span>
+                                                    {{ payment.net_amount|floatformat:2 }}</td>
+                                                <td>
+                                                    <span class="payment-method">{{ payment.get_payment_method_display}}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="payment-status status-{{ payment.payment_status }}">
+                                                        {{ payment.get_payment_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ payment.transaction_reference|default:"-" }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-receipt"></i>
+                                    <h4>No Payment History</h4>
+                                    <p>No payments have been recorded for this student yet.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Outstanding Tab -->
+                            <div id="outstanding" class="tab-content">
+                                {% if outstanding_installments %}
+                                <div class="installments-summary">
+                                    <div class="summary-header">
+                                        <h3><i class="fas fa-exclamation-circle"></i> Outstanding Installments</h3>
+                                        <div class="urgency-badge">
+                                            <i class="fas fa-clock"></i> Requires Attention
+                                        </div>
+                                    </div>
+                                    <div class="installments-grid">
+                                        {% for installment in outstanding_installments %}
+                                        <div
+                                            class="installment-item {% if installment.status == 'overdue' %}overdue{% else %}pending{% endif %}">
+                                            <div class="installment-details">
+                                                <div class="installment-name">{{ installment.fee_category.name }}</div>
+                                                <div class="installment-meta">
+                                                    {{ installment.payment_plan.fee_structure.name }} •
+                                                    Due: {{ installment.due_date|date:"M d, Y" }}
+                                                    {% if installment.status == 'overdue' %}
+                                                    • <strong class="text-danger">{{ installment.due_date|timesince }}
+                                                        overdue</strong>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="installment-amount">
+                                                <div class="amount-due"><span style='font-size:small'>AED </span>{{ installment.get_outstanding_amount|floatformat:2 }}
+                                                    </div>
+                                                <div class="amount-paid">Total: <span style='font-size:small'>AED
+                                                    </span>{{ installment.amount|floatformat:2 }}</div>
+                                            </div>
+                                            <div class="installment-actions">
+                                                <button class="pay-btn" onclick="recordPayment({{ installment.id }})">
+                                                    <i class="fas fa-credit-card"></i> Pay Now
+                                                </button>
+                                                <a href="{% url 'mark_as_paid' installment.id %}"
+                                                    class="btn btn-sm btn-secondary">Mark As Paid</a>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="empty-state">
+                                    <i class="fas fa-check-circle"></i>
+                                    <h4>All Payments Cleared</h4>
+                                    <p>No outstanding installments for this student. Great job!</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+
                     </div>
                 </div>
 
@@ -906,7 +1722,7 @@
                     </div>
                     {% endif %}
 
-                    
+
                     {% if student.transportation.exists %}
                     <div class="notes-info">
                         <h4 class="section-title">
@@ -920,7 +1736,7 @@
                                 <small>Amount: {{transport.amount}}</small>
                             </div>
                             {% endfor %}
-                            
+
                         </div>
                     </div>
                     {% endif %}
@@ -1229,7 +2045,8 @@
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
-                    <form action="{% url 'add_transportation' student.id %}" method="post" enctype="multipart/form-data">
+                    <form action="{% url 'add_transportation' student.id %}" method="post"
+                        enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row">
                             {% for fields in form %}
@@ -1254,5 +2071,32 @@
 </div>
 
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching functionality
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+            
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding content
+            this.classList.add('active');
+            document.getElementById(targetTab).classList.add('active');
+        });
+    });
+});
+
+// Optional: Payment button handler
+function recordPayment(installmentId) {
+    // Add your payment recording logic here
+    alert('Recording payment for installment ID: ' + installmentId);
+}
+</script>
 
 {% endblock %}

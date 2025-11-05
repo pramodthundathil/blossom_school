@@ -394,8 +394,8 @@
                                 <div class="detail-item">
                                     <span class="detail-label">Grade/Class:</span>
                                     <span class="detail-value">
-                                        {% if payment.student.current_class %}
-                                            {{ payment.student.current_class }}
+                                        {% if payment.student.class_room %}
+                                            {{ payment.student.class_room }}
                                         {% else %}
                                             Not assigned
                                         {% endif %}
@@ -578,7 +578,7 @@ document.addEventListener('DOMContentLoaded', function() {
         printBtn.addEventListener('click', function() {
             // Add a small delay to ensure the print dialog shows after any animations
             setTimeout(function() {
-                window.print();
+                // window.print();
             }, 100);
         });
     }

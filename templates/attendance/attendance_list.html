@@ -231,6 +231,9 @@
                                     <span class="status-badge" style="background: #fee2e2; color: #991b1b;">Absent</span>
                                 {% elif attendance.status == 'half_day' %}
                                     <span class="status-badge" style="background: #fef3c7; color: #92400e;">Half Day</span>
+                                {% elif attendance.status == 'sick_leave' %}
+                                    <span class="status-badge" style="background: #fef3c7; color: #e7874b;">Sick Leave</span>
+                                
                                 {% else %}
                                     <span class="status-badge" style="background: #e0e7ff; color: #3730a3;">Sunday</span>
                                 {% endif %}
