@@ -2,10 +2,12 @@
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from datetime import timedelta
 from payments.models import PaymentInstallment
 from students.models import Notification
+
+User = get_user_model()
 
 
 class Command(BaseCommand):
@@ -40,32 +42,76 @@ class Command(BaseCommand):
 
     def check_overdue_installments(self, today):
         """Check for overdue installments and create notifications"""
-        overdue_installments = PaymentInstallment.objects.filter(
-            due_date__lt=today,
-            status__in=['pending', 'partially_paid'],
-            is_overdue=False
+        # First, let's see ALL installments that are past due
+        all_past_due = PaymentInstallment.objects.filter(
+            due_date__lte=today
+        ).exclude(
+            status='paid'  # Only exclude fully paid installments
         ).select_related('payment_plan', 'payment_plan__student')
+        
+        self.stdout.write(f'\nChecking overdue installments...')
+        self.stdout.write(f'Total installments with due_date <= {today} (excluding paid): {all_past_due.count()}')
+        
+        # Show details of all past due installments
+        for inst in all_past_due:
+            self.stdout.write(
+                f'  - {inst.payment_plan.student.get_full_name()} | '
+                f'Installment #{inst.installment_number} | '
+                f'Due: {inst.due_date} | '
+                f'Status: {inst.status} | '
+                f'is_overdue: {inst.is_overdue} | '
+                f'Amount: ₹{inst.amount} | '
+                f'Paid: ₹{inst.paid_amount}'
+            )
+        
+        # Now filter for installments that need to be marked as overdue
+        overdue_installments = all_past_due.filter(
+            status__in=['pending', 'partially_paid', 'overdue']  # Include 'overdue' status too
+        )
+
+        self.stdout.write(f'\nInstallments to process: {overdue_installments.count()}')
 
         count = 0
         for installment in overdue_installments:
-            # Update installment status
-            installment.is_overdue = True
-            installment.status = 'overdue' if installment.paid_amount == 0 else 'partially_paid'
-            installment.save(update_fields=['is_overdue', 'status'])
-
+            # Track if this is newly marked as overdue
+            was_not_overdue = not installment.is_overdue
+            
             # Calculate days overdue
             days_overdue = (today - installment.due_date).days
+            
+            self.stdout.write(
+                f'\nProcessing: {installment.payment_plan.student.get_full_name()} - '
+                f'Installment #{installment.installment_number} - '
+                f'Due: {installment.due_date} ({days_overdue} days overdue) - '
+                f'Status: {installment.status} - '
+                f'Already marked overdue: {installment.is_overdue}'
+            )
+            
+            # Update installment status
+            installment.is_overdue = True
+            if installment.paid_amount == 0:
+                installment.status = 'overdue'
+            else:
+                installment.status = 'partially_paid'
+            installment.save(update_fields=['is_overdue', 'status'])
+            
+            self.stdout.write(f'  Updated status to: {installment.status}, is_overdue: True')
 
             # Get all staff users or assign to created_by user
             users_to_notify = self.get_users_to_notify(installment)
+            
+            self.stdout.write(f'  Users to notify: {len(users_to_notify)} user(s)')
 
             for user in users_to_notify:
-                # Check if notification already exists
+                # Only create notification if this installment was just marked as overdue
+                # or if no overdue notification exists yet
                 existing_notification = Notification.objects.filter(
                     user=user,
                     installment=installment,
                     notification_type='overdue'
                 ).exists()
+                
+                self.stdout.write(f'    Checking user: {user.username} - Existing notification: {existing_notification}')
 
                 if not existing_notification:
                     # Determine priority based on days overdue
@@ -78,26 +124,34 @@ class Command(BaseCommand):
 
                     outstanding = installment.get_outstanding_amount()
                     
-                    notification = Notification.objects.create(
-                        user=user,
-                        student=installment.payment_plan.student,
-                        installment=installment,
-                        notification_type='overdue',
-                        priority=priority,
-                        title=f'Overdue Payment - {installment.payment_plan.student.get_full_name()}',
-                        message=(
-                            f'Installment #{installment.installment_number} is {days_overdue} days overdue. '
-                            f'Due date: {installment.due_date.strftime("%d %b %Y")}. '
-                            f'Outstanding amount: ₹{outstanding:.2f}'
+                    try:
+                        notification = Notification.objects.create(
+                            user=user,
+                            student=installment.payment_plan.student,
+                            installment=installment,
+                            notification_type='overdue',
+                            priority=priority,
+                            title=f'Overdue Payment - {installment.payment_plan.student.get_full_name()}',
+                            message=(
+                                f'Installment #{installment.installment_number} is {days_overdue} days overdue. '
+                                f'Due date: {installment.due_date.strftime("%d %b %Y")}. '
+                                f'Outstanding amount: ₹{outstanding:.2f}'
+                            )
                         )
-                    )
-                    count += 1
-                    self.stdout.write(
-                        self.style.WARNING(
-                            f'  Created overdue notification for {installment.payment_plan.student.get_full_name()} '
-                            f'(Installment #{installment.installment_number})'
+                        count += 1
+                        self.stdout.write(
+                            self.style.SUCCESS(
+                                f'    ✓ Created overdue notification for {user.username}'
+                            )
                         )
-                    )
+                    except Exception as e:
+                        self.stdout.write(
+                            self.style.ERROR(
+                                f'    ✗ Error creating notification for {user.username}: {str(e)}'
+                            )
+                        )
+                else:
+                    self.stdout.write(f'    - Skipped (notification already exists)')
 
         return count
 

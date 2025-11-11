@@ -109,7 +109,7 @@ def student_create(request):
                         return JsonResponse({
                             'success': True,
                             'message': f'Student {student.get_full_name()} has been registered successfully!',
-                            'redirect_url': reverse('students'),
+                            'redirect_url': reverse('create_payment_plan', kwargs={'student_id': student.id}),
                             'student_id': str(student.pk),
                             'student_name': student.get_full_name(),
                             'student_number': student.student_id

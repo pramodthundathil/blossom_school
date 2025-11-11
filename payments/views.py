@@ -561,6 +561,9 @@ class PaymentListView(LoginRequiredMixin, ListView):
         return context
 
 
+from django.http import JsonResponse
+from django.urls import reverse
+
 @unauthenticated_user
 def create_payment_plan(request, student_id):
     """Create payment plan for a student"""
@@ -572,11 +575,30 @@ def create_payment_plan(request, student_id):
                 plan_type = request.POST.get('plan_type')
                 academic_year = int(request.POST.get('academic_year'))
                 total_amount = Decimal(request.POST.get('total_amount'))
+                advance_amount = Decimal(request.POST.get('advance_amount', '0'))
                 number_of_installments = int(request.POST.get('number_of_installments', 1))
+                installment_frequency = int(request.POST.get('installment_frequency', 30))
                 start_date = datetime.strptime(request.POST.get('start_date'), '%Y-%m-%d').date()
+                fee_category_id = request.POST.get('fee_category')
                 
-                # Calculate installment amount
-                installment_amount = total_amount / number_of_installments
+                # Validate advance amount
+                if advance_amount > total_amount:
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({
+                            'success': False,
+                            'message': 'Advance amount cannot exceed total amount'
+                        })
+                    messages.error(request, 'Advance amount cannot exceed total amount')
+                    return redirect('create_payment_plan', student_id=student_id)
+                
+                # Get fee category
+                fee_category = None
+                if fee_category_id:
+                    fee_category = FeeCategory.objects.get(id=fee_category_id)
+                
+                # Calculate balance and installment amount
+                balance_amount = total_amount - advance_amount
+                installment_amount = balance_amount / number_of_installments if number_of_installments > 0 else balance_amount
                 
                 # Create payment plan
                 payment_plan = PaymentPlan.objects.create(
@@ -584,37 +606,79 @@ def create_payment_plan(request, student_id):
                     plan_type=plan_type,
                     academic_year=academic_year,
                     total_amount=total_amount,
+                    advance_amount=advance_amount,
+                    balance_amount=balance_amount,
                     number_of_installments=number_of_installments,
                     installment_amount=installment_amount,
+                    installment_frequency=installment_frequency,
                     start_date=start_date,
+                    fee_category=fee_category,
+                    status='active',
                     created_by=request.user
                 )
                 
-                # Create installments
+                # Create advance payment if advance amount exists
+                if advance_amount > 0:
+                    advance_category, _ = FeeCategory.objects.get_or_create(name='Advance Payment')
+                    
+                    advance_payment = Payment.objects.create(
+                        student=student,
+                        total_amount=advance_amount,
+                        discount_amount=0,
+                        late_fee_amount=0,
+                        net_amount=advance_amount,
+                        payment_method='cash',  # Default, can be changed
+                        payment_status='completed',
+                        payment_date=start_date,
+                        remarks=f'Advance payment for {fee_category.name if fee_category else "fees"}',
+                        collected_by=request.user
+                    )
+                    
+                    # Create payment item for advance
+                    PaymentItem.objects.create(
+                        payment=advance_payment,
+                        fee_category=advance_category,
+                        description=f'Advance Payment - {student.get_full_name()}',
+                        amount=advance_amount,
+                        discount_amount=0,
+                        late_fee=0,
+                        net_amount=advance_amount
+                    )
+                
+                # Create installments based on frequency
                 current_date = start_date
                 for i in range(number_of_installments):
-                    # Calculate due date based on plan type
-                    if plan_type == 'monthly':
-                        due_date = current_date.replace(day=10)  # 10th of each month
-                        current_date = (current_date.replace(day=1) + timedelta(days=32)).replace(day=1)
-                    elif plan_type == 'quarterly':
-                        due_date = current_date
-                        current_date += timedelta(days=90)
-                    else:
-                        due_date = current_date + timedelta(days=30 * i)
-                    
                     PaymentInstallment.objects.create(
                         payment_plan=payment_plan,
                         installment_number=i + 1,
-                        due_date=due_date,
-                        amount=installment_amount
+                        due_date=current_date,
+                        amount=installment_amount,
+                        status='pending'
                     )
+                    
+                    # Calculate next due date based on frequency
+                    current_date += timedelta(days=installment_frequency)
                 
-                messages.success(request, f'Payment plan created successfully!')
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Payment plan created successfully!',
+                        'redirect_url': reverse('student_payment_details', kwargs={'student_id': student.id})
+                    })
+                
+                messages.success(request, 'Payment plan created successfully!')
                 return redirect('student_payment_details', student_id=student.id)
                 
+        except FeeCategory.DoesNotExist:
+            error_msg = 'Selected fee category does not exist'
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': error_msg})
+            messages.error(request, error_msg)
         except Exception as e:
-            messages.error(request, f'Error creating payment plan: {str(e)}')
+            error_msg = f'Error creating payment plan: {str(e)}'
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': error_msg})
+            messages.error(request, error_msg)
     
     # Get student's fee assignments for calculation
     fee_assignments = StudentFeeAssignment.objects.filter(
@@ -624,14 +688,19 @@ def create_payment_plan(request, student_id):
     
     total_annual_fees = sum(assignment.get_final_amount() for assignment in fee_assignments)
     
+    # Get all fee categories
+    fee_categories = FeeCategory.objects.all()
+    
     context = {
         'student': student,
         'fee_assignments': fee_assignments,
         'total_annual_fees': total_annual_fees,
         'plan_types': PaymentPlan.PLAN_TYPE_CHOICES,
+        'fee_categories': fee_categories,
     }
     
     return render(request, 'payments/create_payment_plan.html', context)
+
 
 
 @unauthenticated_user

@@ -313,19 +313,19 @@
         .form-grid {
             grid-template-columns: 1fr;
         }
-        
+
         .card-content {
             padding: 1.5rem;
         }
-        
+
         .form-section {
             padding: 1rem;
         }
-        
+
         .submit-section {
             padding: 1.5rem;
         }
-        
+
         .submit-button {
             width: 100%;
             padding: 1rem;
@@ -337,8 +337,15 @@
     }
 
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
@@ -389,13 +396,13 @@
                 <p><strong>Current Academic Year:</strong> {{ student.year_of_admission }}</p>
             </div>
 
-           
+
             <!-- Alert Messages -->
             <div id="alertContainer"></div>
 
             <form id="paymentPlanForm" method="post" novalidate>
                 {% csrf_token %}
-                
+
                 <div class="form-sections">
                     <!-- Payment Plan Details -->
                     <div class="form-section">
@@ -403,7 +410,7 @@
                             <i class="fas fa-credit-card"></i>
                             Payment Plan Details
                         </h4>
-                        
+
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="plan_type" class="form-label required-field">Plan Type</label>
@@ -415,34 +422,60 @@
                                 </select>
                                 <div class="error-message" id="error_plan_type"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="academic_year" class="form-label required-field">Academic Year</label>
-                                <input type="number" id="academic_year" name="academic_year" 
-                                       class="form-input" value="{{ student.year_of_admission }}" 
-                                       min="2024" max="2030" required>
+                                <input type="number" id="academic_year" name="academic_year" class="form-input"
+                                    value="{{ student.year_of_admission }}" min="2024" max="2030" required>
                                 <div class="error-message" id="error_academic_year"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="total_amount" class="form-label required-field">Total Amount (AED)</label>
-                                <input type="number" id="total_amount" name="total_amount" 
-                                       class="form-input" value="{{ total_annual_fees }}" 
-                                       step="0.01" min="0" required>
+                                <input type="number" id="total_amount" name="total_amount" class="form-input"
+                                    value="{{ total_annual_fees }}" step="0.01" min="0" required>
                                 <div class="error-message" id="error_total_amount"></div>
                             </div>
-                            
+
                             <div class="form-group">
-                                <label for="number_of_installments" class="form-label required-field">Number of Installments</label>
-                                <input type="number" id="number_of_installments" name="number_of_installments" 
-                                       class="form-input" value="1" min="1" max="12" required>
+                                <label for="number_of_installments" class="form-label required-field">Number of
+                                    Installments</label>
+                                <input type="number" id="number_of_installments" name="number_of_installments"
+                                    class="form-input" value="1" min="1" max="12" required>
                                 <div class="error-message" id="error_number_of_installments"></div>
                             </div>
-                            
+
+                            <!-- In the Payment Plan Details section, add these fields after number_of_installments -->
+
+                            <div class="form-group">
+                                <label for="installment_frequency" class="form-label required-field">Installment
+                                    Frequency (Days)</label>
+                                <input type="number" id="installment_frequency" name="installment_frequency"
+                                    class="form-input" value="30" min="1" max="365" required>
+                                <div class="error-message" id="error_installment_frequency"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fee_category" class="form-label required-field">Fee Category</label>
+                                <select id="fee_category" name="fee_category" class="form-input" required>
+                                    <option value="">Select Fee Category</option>
+                                    {% for category in fee_categories %}
+                                    <option value="{{ category.id }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="error-message" id="error_fee_category"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="advance_amount" class="form-label">Advance Amount (AED)</label>
+                                <input type="number" id="advance_amount" name="advance_amount" class="form-input"
+                                    value="0" step="0.01" min="0">
+                                <div class="error-message" id="error_advance_amount"></div>
+                            </div>
+
                             <div class="form-group">
                                 <label for="start_date" class="form-label required-field">Start Date</label>
-                                <input type="date" id="start_date" name="start_date" 
-                                       class="form-input" required>
+                                <input type="date" id="start_date" name="start_date" class="form-input" required>
                                 <div class="error-message" id="error_start_date"></div>
                             </div>
                         </div>
@@ -454,7 +487,7 @@
                             <i class="fas fa-calculator"></i>
                             Payment Calculation Preview
                         </h4>
-                        
+
                         <div class="calculation-card">
                             <div class="calculation-row">
                                 <span>Total Amount:</span>
@@ -473,8 +506,7 @@
                 </div>
 
                 <div class="submit-section">
-                    <button type="submit" class="submit-button" id="submitBtn" 
-                            >
+                    <button type="submit" class="submit-button" id="submitBtn">
                         <div class="loading-spinner" id="loadingSpinner"></div>
                         <span id="submitText">
                             <i class="fas fa-check-circle"></i>
@@ -483,9 +515,9 @@
                     </button>
                     <p style="margin-top: 1rem; color: var(--text-light); font-size: 0.875rem;">
                         {% if fee_assignments %}
-                            Please review all details before creating the payment plan.
+                        Please review all details before creating the payment plan.
                         {% else %}
-                            Please assign fees to this student before creating a payment plan.
+                        Please assign fees to this student before creating a payment plan.
                         {% endif %}
                     </p>
                 </div>
@@ -495,223 +527,324 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('paymentPlanForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const submitText = document.getElementById('submitText');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const alertContainer = document.getElementById('alertContainer');
-    
-    const planTypeSelect = document.getElementById('plan_type');
-    const totalAmountInput = document.getElementById('total_amount');
-    const installmentsInput = document.getElementById('number_of_installments');
-    const startDateInput = document.getElementById('start_date');
-    
-    // Set default start date to today
-    const today = new Date().toISOString().split('T')[0];
-    startDateInput.value = today;
-    startDateInput.min = today;
-    
-    // Update installment suggestions based on plan type
-    planTypeSelect.addEventListener('change', function() {
-        const planType = this.value;
-        let suggestedInstallments = 1;
-        
-        switch(planType) {
-            case 'full':
-                suggestedInstallments = 1;
-                break;
-            case 'monthly':
-                suggestedInstallments = 12;
-                break;
-            case 'quarterly':
-                suggestedInstallments = 4;
-                break;
-            case 'custom':
-                suggestedInstallments = parseInt(installmentsInput.value) || 1;
-                break;
-        }
-        
-        installmentsInput.value = suggestedInstallments;
-        updatePreview();
-    });
-    
-    // Real-time calculation preview
-    function updatePreview() {
-        const totalAmount = parseFloat(totalAmountInput.value) || 0;
-        const installments = parseInt(installmentsInput.value) || 1;
-        const installmentAmount = totalAmount / installments;
-        
-        document.getElementById('preview_total').textContent = `AED ${totalAmount.toFixed(2)}`;
-        document.getElementById('preview_installments').textContent = installments;
-        document.getElementById('preview_amount').textContent = `AED ${installmentAmount.toFixed(2)}`;
-    }
-    
-    totalAmountInput.addEventListener('input', updatePreview);
-    installmentsInput.addEventListener('input', updatePreview);
-    
-    // Validation function
-    function validateField(fieldId, value) {
-        const field = document.getElementById(fieldId);
-        const errorElement = document.getElementById(`error_${fieldId}`);
-        
-        field.classList.remove('error', 'success');
-        errorElement.textContent = '';
-        errorElement.style.display = 'none';
-        
-        let isValid = true;
-        let errorMessage = '';
-        
-        if (!value || value.toString().trim() === '') {
-            isValid = false;
-            errorMessage = 'This field is required';
-        } else {
-            switch(fieldId) {
-                case 'total_amount':
-                    const amount = parseFloat(value);
-                    if (isNaN(amount) || amount <= 0) {
-                        isValid = false;
-                        errorMessage = 'Amount must be greater than 0';
-                    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('paymentPlanForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const alertContainer = document.getElementById('alertContainer');
+
+        const planTypeSelect = document.getElementById('plan_type');
+        const totalAmountInput = document.getElementById('total_amount');
+        const advanceAmountInput = document.getElementById('advance_amount');
+        const installmentsInput = document.getElementById('number_of_installments');
+        const installmentFrequencyInput = document.getElementById('installment_frequency');
+        const startDateInput = document.getElementById('start_date');
+        const feeCategorySelect = document.getElementById('fee_category');
+
+        // Set default start date to today
+        const today = new Date().toISOString().split('T')[0];
+        startDateInput.value = today;
+        startDateInput.min = today;
+
+        // Update installment suggestions based on plan type
+        planTypeSelect.addEventListener('change', function () {
+            const planType = this.value;
+            let suggestedInstallments = 1;
+            let suggestedFrequency = 30;
+
+            switch (planType) {
+                case 'full':
+                    suggestedInstallments = 1;
+                    suggestedFrequency = 30;
                     break;
-                    
-                case 'number_of_installments':
-                    const installments = parseInt(value);
-                    if (isNaN(installments) || installments < 1 || installments > 12) {
-                        isValid = false;
-                        errorMessage = 'Installments must be between 1 and 12';
-                    }
+                case 'monthly':
+                    suggestedInstallments = 12;
+                    suggestedFrequency = 30;
                     break;
-                    
-                case 'academic_year':
-                    const year = parseInt(value);
-                    const currentYear = new Date().getFullYear();
-                    if (isNaN(year) || year < currentYear - 1 || year > currentYear + 2) {
-                        isValid = false;
-                        errorMessage = `Year must be between ${currentYear - 1} and ${currentYear + 2}`;
-                    }
+                case 'quarterly':
+                    suggestedInstallments = 4;
+                    suggestedFrequency = 90;
                     break;
-                    
-                case 'start_date':
-                    const selectedDate = new Date(value);
-                    const todayDate = new Date(today);
-                    if (selectedDate < todayDate) {
-                        isValid = false;
-                        errorMessage = 'Start date cannot be in the past';
-                    }
+                case 'custom':
+                    suggestedInstallments = parseInt(installmentsInput.value) || 1;
+                    suggestedFrequency = parseInt(installmentFrequencyInput.value) || 30;
                     break;
             }
-        }
-        
-        if (!isValid) {
-            field.classList.add('error');
-            errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
-            errorElement.style.display = 'flex';
-        } else {
-            field.classList.add('success');
-        }
-        
-        return isValid;
-    }
-    
-    // Add validation listeners
-    const fieldsToValidate = ['plan_type', 'academic_year', 'total_amount', 'number_of_installments', 'start_date'];
-    fieldsToValidate.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
-        field.addEventListener('blur', () => {
-            validateField(fieldId, field.value);
+
+            installmentsInput.value = suggestedInstallments;
+            installmentFrequencyInput.value = suggestedFrequency;
+            updatePreview();
         });
-        field.addEventListener('change', () => {
-            validateField(fieldId, field.value);
+
+        // Real-time calculation preview
+        function updatePreview() {
+            const totalAmount = parseFloat(totalAmountInput.value) || 0;
+            const advanceAmount = parseFloat(advanceAmountInput.value) || 0;
+            const installments = parseInt(installmentsInput.value) || 1;
+            const balanceAmount = totalAmount - advanceAmount;
+            const installmentAmount = balanceAmount / installments;
+
+            document.getElementById('preview_total').textContent = `AED ${totalAmount.toFixed(2)}`;
+            document.getElementById('preview_installments').textContent = installments;
+            document.getElementById('preview_amount').textContent = `AED ${installmentAmount.toFixed(2)}`;
+
+            // Add or update advance and balance amount display
+            if (advanceAmount > 0) {
+                if (!document.getElementById('preview_advance')) {
+                    const calculationCard = document.querySelector('.calculation-card');
+                    const lastRow = calculationCard.querySelector('.calculation-row:last-child');
+
+                    const advanceRow = document.createElement('div');
+                    advanceRow.className = 'calculation-row';
+                    advanceRow.id = 'advance_row';
+                    advanceRow.innerHTML = `
+                    <span>Advance Amount:</span>
+                    <span id="preview_advance">AED ${advanceAmount.toFixed(2)}</span>
+                `;
+
+                    const balanceRow = document.createElement('div');
+                    balanceRow.className = 'calculation-row';
+                    balanceRow.id = 'balance_row';
+                    balanceRow.innerHTML = `
+                    <span>Balance Amount:</span>
+                    <span id="preview_balance">AED ${balanceAmount.toFixed(2)}</span>
+                `;
+
+                    calculationCard.insertBefore(balanceRow, lastRow);
+                    calculationCard.insertBefore(advanceRow, balanceRow);
+                } else {
+                    document.getElementById('preview_advance').textContent = `AED ${advanceAmount.toFixed(2)}`;
+                    document.getElementById('preview_balance').textContent = `AED ${balanceAmount.toFixed(2)}`;
+                }
+            } else {
+                // Remove advance and balance rows if advance is 0
+                const advanceRow = document.getElementById('advance_row');
+                const balanceRow = document.getElementById('balance_row');
+                if (advanceRow) advanceRow.remove();
+                if (balanceRow) balanceRow.remove();
+            }
+        }
+
+        totalAmountInput.addEventListener('input', updatePreview);
+        advanceAmountInput.addEventListener('input', updatePreview);
+        installmentsInput.addEventListener('input', updatePreview);
+        installmentFrequencyInput.addEventListener('input', updatePreview);
+
+        // Validation function
+        function validateField(fieldId, value) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(`error_${fieldId}`);
+
+            field.classList.remove('error', 'success');
+            errorElement.textContent = '';
+            errorElement.style.display = 'none';
+
+            let isValid = true;
+            let errorMessage = '';
+
+            if (!value || value.toString().trim() === '') {
+                isValid = false;
+                errorMessage = 'This field is required';
+            } else {
+                switch (fieldId) {
+                    case 'total_amount':
+                        const amount = parseFloat(value);
+                        if (isNaN(amount) || amount <= 0) {
+                            isValid = false;
+                            errorMessage = 'Amount must be greater than 0';
+                        }
+                        break;
+
+                    case 'advance_amount':
+                        const advance = parseFloat(value);
+                        const total = parseFloat(totalAmountInput.value) || 0;
+                        if (advance < 0) {
+                            isValid = false;
+                            errorMessage = 'Advance amount cannot be negative';
+                        } else if (advance > total) {
+                            isValid = false;
+                            errorMessage = 'Advance amount cannot exceed total amount';
+                        }
+                        break;
+
+                    case 'number_of_installments':
+                        const installments = parseInt(value);
+                        if (isNaN(installments) || installments < 1 || installments > 12) {
+                            isValid = false;
+                            errorMessage = 'Installments must be between 1 and 12';
+                        }
+                        break;
+
+                    case 'installment_frequency':
+                        const frequency = parseInt(value);
+                        if (isNaN(frequency) || frequency < 1 || frequency > 365) {
+                            isValid = false;
+                            errorMessage = 'Frequency must be between 1 and 365 days';
+                        }
+                        break;
+
+                    case 'academic_year':
+                        const year = parseInt(value);
+                        const currentYear = new Date().getFullYear();
+                        if (isNaN(year) || year < currentYear - 1 || year > currentYear + 2) {
+                            isValid = false;
+                            errorMessage = `Year must be between ${currentYear - 1} and ${currentYear + 2}`;
+                        }
+                        break;
+
+                    case 'start_date':
+                        const selectedDate = new Date(value);
+                        const todayDate = new Date(today);
+                        todayDate.setHours(0, 0, 0, 0);
+                        selectedDate.setHours(0, 0, 0, 0);
+                        if (selectedDate < todayDate) {
+                            isValid = false;
+                            errorMessage = 'Start date cannot be in the past';
+                        }
+                        break;
+                }
+            }
+
+            if (!isValid) {
+                field.classList.add('error');
+                errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${errorMessage}`;
+                errorElement.style.display = 'flex';
+            } else {
+                field.classList.add('success');
+            }
+
+            return isValid;
+        }
+
+        // Add validation listeners
+        const fieldsToValidate = [
+            'plan_type',
+            'academic_year',
+            'total_amount',
+            'advance_amount',
+            'number_of_installments',
+            'installment_frequency',
+            'start_date',
+            'fee_category'
+        ];
+
+        fieldsToValidate.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('blur', () => {
+                    validateField(fieldId, field.value);
+                });
+                field.addEventListener('change', () => {
+                    validateField(fieldId, field.value);
+                });
+            }
         });
-    });
-    
-    // Show alert message
-    function showAlert(message, type = 'error') {
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type}`;
-        alert.innerHTML = `
+
+        // Show alert message
+        function showAlert(message, type = 'error') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
             <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
             ${message}
         `;
-        
-        alertContainer.innerHTML = '';
-        alertContainer.appendChild(alert);
-        
-        if (type === 'success') {
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-            }, 5000);
-        }
-        
-        alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-    
-    // Form submission
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        submitBtn.disabled = true;
-        loadingSpinner.style.display = 'block';
-        submitText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Plan...';
-        
-        alertContainer.innerHTML = '';
-        
-        // Validate all fields
-        let isFormValid = true;
-        fieldsToValidate.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (!validateField(fieldId, field.value)) {
-                isFormValid = false;
-            }
-        });
-        
-        if (!isFormValid) {
-            showAlert('Please fix all errors before submitting.', 'error');
-            resetSubmitButton();
-            return;
-        }
-        
-        // Submit form
-        const formData = new FormData(form);
-        
-        fetch(form.action || window.location.href, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showAlert('Payment plan created successfully! Redirecting...', 'success');
+
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alert);
+
+            if (type === 'success') {
                 setTimeout(() => {
-                    window.location.href = data.redirect_url || '{% url "student_payment_details" student.id %}';
-                }, 2000);
-            } else {
-                showAlert(data.message || 'An error occurred while creating the payment plan.', 'error');
-                resetSubmitButton();
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 5000);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('An unexpected error occurred. Please try again.', 'error');
-            resetSubmitButton();
+
+            alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Form submission
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            submitBtn.disabled = true;
+            loadingSpinner.style.display = 'block';
+            submitText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Plan...';
+
+            alertContainer.innerHTML = '';
+
+            // Validate all fields
+            let isFormValid = true;
+            fieldsToValidate.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field && !validateField(fieldId, field.value)) {
+                    isFormValid = false;
+                }
+            });
+
+            if (!isFormValid) {
+                showAlert('Please fix all errors before submitting.', 'error');
+                resetSubmitButton();
+                return;
+            }
+
+            // Additional validation: Check if balance amount allows for installments
+            const totalAmount = parseFloat(totalAmountInput.value) || 0;
+            const advanceAmount = parseFloat(advanceAmountInput.value) || 0;
+            const balanceAmount = totalAmount - advanceAmount;
+            const installments = parseInt(installmentsInput.value) || 1;
+
+            if (balanceAmount <= 0 && installments > 0) {
+                showAlert('Balance amount must be greater than 0 to create installments. Either reduce advance amount or set installments to 0.', 'error');
+                resetSubmitButton();
+                return;
+            }
+
+            if (balanceAmount > 0 && installments === 0) {
+                showAlert('Number of installments must be greater than 0 when balance amount exists.', 'error');
+                resetSubmitButton();
+                return;
+            }
+
+            // Submit form
+            const formData = new FormData(form);
+
+            fetch(form.action || window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('Payment plan created successfully! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = data.redirect_url;
+                        }, 2000);
+                    } else {
+                        showAlert(data.message || 'An error occurred while creating the payment plan.', 'error');
+                        resetSubmitButton();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('An unexpected error occurred. Please try again.', 'error');
+                    resetSubmitButton();
+                });
         });
+
+        function resetSubmitButton() {
+            submitBtn.disabled = false;
+            loadingSpinner.style.display = 'none';
+            submitText.innerHTML = '<i class="fas fa-check-circle"></i> Create Payment Plan';
+        }
+
+        // Initial preview update
+        updatePreview();
     });
-    
-    function resetSubmitButton() {
-        submitBtn.disabled = false;
-        loadingSpinner.style.display = 'none';
-        submitText.innerHTML = '<i class="fas fa-check-circle"></i> Create Payment Plan';
-    }
-    
-    // Initial preview update
-    updatePreview();
-});
 </script>
 
 {% endblock %}

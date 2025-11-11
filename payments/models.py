@@ -91,20 +91,39 @@ class PaymentPlan(models.Model):
         ('quarterly', 'Quarterly'),
         ('custom', 'Custom'),
     ]
+    
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='payment_plans')
     plan_type = models.CharField(max_length=20, choices=PLAN_TYPE_CHOICES)
     academic_year = models.IntegerField()
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    advance_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    balance_amount = models.DecimalField(max_digits=10, decimal_places=2)
     number_of_installments = models.PositiveIntegerField(default=1)
     installment_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    installment_frequency = models.PositiveIntegerField(default=30, help_text="Days between installments")
     start_date = models.DateField()
+    fee_category = models.ForeignKey(FeeCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ['student', 'academic_year']
+        unique_together = ['student', 'academic_year', 'fee_category']
+
+    def save(self, *args, **kwargs):
+        # Calculate balance amount
+        self.balance_amount = self.total_amount - self.advance_amount
+        # Calculate installment amount based on balance
+        if self.number_of_installments > 0:
+            self.installment_amount = self.balance_amount / self.number_of_installments
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.student.get_full_name()} - {self.plan_type} - {self.academic_year}"
@@ -150,7 +169,6 @@ class PaymentInstallment(models.Model):
 
     def __str__(self):
         return f"{self.payment_plan.student.get_full_name()} - Installment {self.installment_number}"
-
 
 class Payment(models.Model):
     """Main payment transaction model"""

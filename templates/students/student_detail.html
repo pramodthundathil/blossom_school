@@ -1296,7 +1296,7 @@
                                                 <div
                                                     class="installment-item {% if installment.status == 'overdue' %}overdue{% elif installment.status == 'paid' %}paid{% else %}pending{% endif %}">
                                                     <div class="installment-details">
-                                                        <div class="installment-name">{{ installment.fee_category.name }}</div>
+                                                        <div class="installment-name">{{ installment.payment_plan.fee_category.name }}</div>
                                                             
                                                         <div class="installment-meta">
                                                             Due: {{ installment.due_date|date:"M d, Y" }}
@@ -1347,7 +1347,7 @@
                                                 <th>Amount</th>
                                                 <th>Method</th>
                                                 <th>Status</th>
-                                                <th>Reference</th>
+                                                <th>Category</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1369,7 +1369,7 @@
                                                         {{ payment.get_payment_status_display }}
                                                     </span>
                                                 </td>
-                                                <td>{{ payment.transaction_reference|default:"-" }}</td>
+                                                <td>{{ payment.remarks|default:"-" }}</td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
@@ -1399,7 +1399,7 @@
                                         <div
                                             class="installment-item {% if installment.status == 'overdue' %}overdue{% else %}pending{% endif %}">
                                             <div class="installment-details">
-                                                <div class="installment-name">{{ installment.fee_category.name }}</div>
+                                                <div class="installment-name">{{ installment.payment_plan.fee_category.name }}</div>
                                                 <div class="installment-meta">
                                                     {{ installment.payment_plan.fee_structure.name }} •
                                                     Due: {{ installment.due_date|date:"M d, Y" }}

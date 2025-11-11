@@ -151,7 +151,7 @@
     box-shadow: 0 4px 12px rgba(33, 72, 136, 0.1);
 }
 
-.payment-item::before {
+/* .payment-item::before {
     content: '';
     position: absolute;
     top: 0;
@@ -169,6 +169,72 @@
     font-weight: 700;
     font-size: 1.1rem;
     text-align: center;
+} */
+ /* Add this to your <style> section - place it after the existing .payment-item styles */
+
+.payment-item .row {
+    gap: 0.5rem;
+}
+
+.payment-item .col-md-3,
+.payment-item .col-md-2,
+.payment-item .col-md-1 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.payment-item .enhanced-form-control {
+    font-size: 0.875rem;
+    padding: 0.625rem 0.75rem;
+    min-height: 38px;
+}
+
+.payment-item .enhanced-form-label {
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.payment-item select.enhanced-form-control {
+    font-size: 0.85rem;
+}
+
+.payment-item .net-amount-display {
+    font-size: 0.9rem;
+    padding: 0.625rem 0.5rem;
+    text-align: center;
+}
+
+.payment-item .btn-remove-item {
+    width: 38px;
+    height: 38px;
+    padding: 0.5rem;
+    margin-top: 0;
+}
+
+/* Responsive adjustments for better visibility */
+@media (max-width: 992px) {
+    .payment-item .col-md-3,
+    .payment-item .col-md-2,
+    .payment-item .col-md-1 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 0.75rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .payment-item .col-md-3 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    
+    .payment-item .col-md-2 {
+        flex: 0 0 33.333%;
+        max-width: 33.333%;
+    }
 }
 
 .btn-enhanced {

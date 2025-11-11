@@ -1205,8 +1205,12 @@
                         progressFill.style.width = '100%';
 
                         // Redirect after success
-                        setTimeout(() => {
-                            window.location.href = data.redirect_url || '/students/';
+                       setTimeout(() => {
+                                if (data.redirect_url) {
+                                    window.location.href = data.redirect_url;
+                                } else {
+                                    window.location.href = '/students/'; // fallback
+                                }
                         }, 2000);
                     } else {
                         // Handle form errors
