@@ -18,7 +18,7 @@ from django.contrib.auth import login, logout, authenticate
 
 from .models import *
 from .forms import *
-from .decorators import unauthenticated_user
+from .decorators import unauthenticated_user, user_controls
 
 # authentications and dashboards 
 
@@ -38,6 +38,7 @@ from payments.models import (
 )
 from home.models import ClassRooms, FeeCategory
 from Finance.models import Income, Expense
+
 
 
 def dashboard_view(request):
@@ -353,8 +354,29 @@ def get_payment_status_chart(request):
 from django.db.models import Sum
 from django.utils import timezone
 
+@user_controls
 @unauthenticated_user
 def index(request):
+    today = timezone.now()
+    students_count = Student.objects.filter(status = "enrolled").count()
+    staff_count = Teacher.objects.filter(status = 'active').count()
+    total_revenue =  (
+        Income.objects
+        .filter(date__year=today.year, date__month=today.month)
+        .aggregate(total=Sum('amount'))['total'] or 0
+    )
+    pending_installments = PaymentInstallment.objects.filter(
+    due_date__year=today.year,
+    due_date__month=today.month
+    ).exclude(
+        status='paid'
+    ).count()
+
+    context = {"students_count":students_count,"staff_count":staff_count,"pending_installments":pending_installments,"total_revenue":total_revenue }
+    return render(request,"auth_templates/index.html")
+
+@unauthenticated_user
+def index_employee(request):
     today = timezone.now()
     students_count = Student.objects.filter(status = "enrolled").count()
     staff_count = Teacher.objects.filter(status = 'active').count()

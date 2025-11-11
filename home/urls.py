@@ -5,6 +5,8 @@ from . import views
 urlpatterns = [
     #auth and index functions profile handling and password settings 
     path("index/",views.index,name="index"),
+    path("index_employee/",views.index_employee,name="index_employee"),
+    
     path("", views.signin,name="signin"),
     path('signout',views.signout,name="signout"),
     path('profile/',views.profile,name="profile"),

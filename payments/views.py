@@ -11,8 +11,8 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 import json
 from django.db import models
-from home.decorators import unauthenticated_user
-
+from home.decorators import unauthenticated_user, user_controls
+from django.utils.decorators import method_decorator
 from Finance.models import Income, Expense
 from .models import (
     Student, Payment, PaymentItem, FeeCategory, FeeStructure,
@@ -20,7 +20,7 @@ from .models import (
 )
 from .forms import PaymentForm, PaymentPlanForm  # You'll need to create these
 
-
+# @method_decorator(user_controls, name='dispatch')
 class PaymentDashboardView(LoginRequiredMixin, ListView):
     """Dashboard showing payment overview"""
     template_name = 'payments/dashboard.html'

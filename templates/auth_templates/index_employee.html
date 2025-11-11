@@ -293,13 +293,9 @@
                         Payments
                     </a>
                     <ul class="dropdown-menu">
-                
-
-                        <li>
+                        <!-- <li>
                             <a class="dropdown-item" href="{% url 'payment_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Payment Dashboard</a>
-                        </li>
-                      
-
+                        </li> -->
                         <li><a class="dropdown-item" href="{% url 'create_payment' %}">
                             <i class="fas fa-dollar-sign"></i> Fee Collection
                         </a></li>
@@ -313,33 +309,26 @@
                 </li>
 
                 <!-- Reports -->
-                <li class="nav-item dropdown">
+                <!-- <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-briefcase"></i> Finance 
 
                     </a>
                     <ul class="dropdown-menu">
-                 {% if request.user.role == 'admin'%}
-
                         <li><a class="dropdown-item" href="{%url 'income'%}">
                             <i class="fas fa-hand-holding-usd"></i> Income
 
                         </a></li>
-                        {% endif %}
                         <li><a class="dropdown-item" href="{%url 'expense' %}">
                            <i class="fas fa-money-bill-wave"></i> Expense
 
                         </a></li>
-                 {% if request.user.role == 'admin'%}
-
                         <li><a class="dropdown-item" href="{%url 'balance_sheet' %}">
                            <i class="fas fa-chart-line"></i> Balance Sheet
 
                         </a></li>
-                {% endif %}
-
                     </ul>
-                </li>
+                </li> -->
 
                 <!-- Settings -->
                 <li class="nav-item dropdown">
@@ -359,24 +348,15 @@
                         </a></li>
                         <li><a class="dropdown-item" href="{% url 'site_setting' %}">
                             <i class="fas fa-school"></i> School Settings
-                        </a></li>
-                        
-
-                        
-                       
+                        </a></li>  
                     </ul>
                 </li>
 
-                 {% if request.user.role == 'admin'%}
-
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="{% url 'reports_dashboard' %}">
-                        <i class="fas fa-chart-bar"></i> Reports
-
-                        
+                        <i class="fas fa-chart-bar"></i> Reports    
                     </a>
-                </li>
-                {% endif %}
+                </li> -->
             </ul>
 
             <!-- Right Side Menu -->
@@ -449,9 +429,7 @@
                     <span class="stat-change positive" id="teacherChange">Loading...</span>
                 </div>
             </div>
-                 {% if request.user.role == 'admin'%}
-            
-            <div class="stat-card accent">
+            <!-- <div class="stat-card accent">
                 <div class="stat-icon">
                     <i class="fas fa-dollar-sign"></i>
                 </div>
@@ -460,8 +438,7 @@
                     <p>Total Revenue (This Month)</p>
                     <span class="stat-change positive" id="revenueChange">Loading...</span>
                 </div>
-            </div>
-            {% endif %}
+            </div> -->
             <div class="stat-card warning">
                 <div class="stat-icon">
                     <i class="fas fa-exclamation-triangle"></i>
@@ -473,12 +450,11 @@
                 </div>
             </div>
         </div>
-                 {% if request.user.role == 'admin'%}
 
         <!-- Charts Row 1 -->
         <div class="dashboard-grid">
             <!-- Revenue & Expense Overview -->
-            <div class="dashboard-card large">
+            <!-- <div class="dashboard-card large">
                 <div class="card-header">
                     <h3><i class="fas fa-chart-line"></i> Revenue & Expense Trend</h3>
                     <div class="card-actions">
@@ -493,7 +469,7 @@
                         <canvas id="revenueExpenseChart"></canvas>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Student Status Distribution -->
             <div class="dashboard-card">
@@ -507,14 +483,11 @@
                 </div>
             </div>
         </div>
-        {% endif %}
-
-                 {% if request.user.role == 'admin'%}
 
         <!-- Charts Row 2 -->
         <div class="dashboard-grid">
             <!-- Income Forecasting (MANDATORY) -->
-            <div class="dashboard-card large">
+            <!-- <div class="dashboard-card large">
                 <div class="card-header">
                     <h3><i class="fas fa-chart-area"></i> Next Month Income Forecast</h3>
                     <span class="period-badge" id="forecastMonth">Based on Payment Installments</span>
@@ -536,7 +509,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Recent Payments -->
             <div class="dashboard-card">
@@ -551,7 +524,6 @@
                 </div>
             </div>
         </div>
-        {% endif %}
 
         <!-- Additional Analytics Row -->
         <div class="dashboard-grid-bottom">

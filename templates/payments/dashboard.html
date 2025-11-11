@@ -603,6 +603,8 @@
 
     <!-- Statistics Cards -->
     <div class="stats-grid">
+                 {% if request.user.role == 'admin'%}
+
         <div class="stat-card primary">
             <div class="stat-icon">
                 <i class="fas fa-dollar-sign"></i>
@@ -630,7 +632,7 @@
                 </div>
             </div>
         </div>
-
+{% endif %}
         <div class="stat-card warning">
             <div class="stat-icon">
                 <i class="fas fa-clock"></i>
