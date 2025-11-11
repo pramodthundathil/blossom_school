@@ -691,7 +691,7 @@ def notification_list(request):
     filter_type = request.GET.get('filter', 'all')
     
     # Base queryset
-    notifications = Notification.objects.filter(user=request.user).select_related(
+    notifications = Notification.objects.all().select_related(
         'student', 'installment', 'installment__payment_plan'
     )
     
@@ -705,7 +705,7 @@ def notification_list(request):
     # 'all' shows everything
     
     # Get unread count
-    unread_count = Notification.objects.filter(user=request.user, is_read=False).count()
+    unread_count = Notification.objects.filter(is_read=False).count()
     
     # Pagination
     paginator = Paginator(notifications, 20)  # 20 notifications per page

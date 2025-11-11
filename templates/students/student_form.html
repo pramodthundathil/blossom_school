@@ -1301,52 +1301,70 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const dealsSelect = document.getElementById('deals');
-        const startDateInput = document.getElementById('id_date_start');
-        const endDateInput = document.getElementById('id_date_end');
-        const errorStartDate = document.getElementById('error_date_start');
+document.addEventListener('DOMContentLoaded', function () {
+    const dealsSelect = document.getElementById('deals');
+    const startDateInput = document.getElementById('id_date_start');
+    const endDateInput = document.getElementById('id_date_end');
+    const errorStartDate = document.getElementById('error_date_start');
 
-        // Make start date required
-        startDateInput.setAttribute('required', 'required');
+    // Make start date required
+    startDateInput.setAttribute('required', 'required');
 
-        function calculateEndDate() {
-            const startDate = startDateInput.value;
-            const months = parseInt(dealsSelect.value);
+    function calculateEndDate() {
+        const startDate = startDateInput.value;
+        const months = parseInt(dealsSelect.value);
 
-            // Validate start date is entered
-            if (!startDate) {
-                errorStartDate.textContent = 'Start date is required to calculate end date';
-                errorStartDate.style.display = 'block';
-                endDateInput.value = '';
-                return;
-            } else {
-                errorStartDate.textContent = '';
-                errorStartDate.style.display = 'none';
-            }
-
-            if (startDate && months) {
-                const start = new Date(startDate);
-                const end = new Date(start);
-                end.setMonth(end.getMonth() + months);
-
-                // Format date to YYYY-MM-DD for input field
-                const formattedDate = end.toISOString().split('T')[0];
-                endDateInput.value = formattedDate;
-            }
+        // Validate start date
+        if (!startDate) {
+            errorStartDate.textContent = 'Start date is required to calculate end date';
+            errorStartDate.style.display = 'block';
+            endDateInput.value = '';
+            return;
+        } else {
+            errorStartDate.textContent = '';
+            errorStartDate.style.display = 'none';
         }
 
-        // Trigger calculation on both start date and deals change
-        dealsSelect.addEventListener('change', calculateEndDate);
-        startDateInput.addEventListener('change', calculateEndDate);
+        if (startDate && months) {
+            // Parse using UTC to avoid timezone issues
+            const [year, month, day] = startDate.split('-').map(Number);
+            
+            // Calculate target date (N months later, same day)
+            let targetYear = year;
+            let targetMonth = month - 1 + months; // month is 0-indexed in Date
+            let targetDay = day;
 
-        // Clear error on start date input
-        startDateInput.addEventListener('input', function () {
-            if (this.value) {
-                errorStartDate.textContent = '';
-                errorStartDate.style.display = 'none';
-            }
-        });
+            // Adjust year and month overflow
+            targetYear += Math.floor(targetMonth / 12);
+            targetMonth = targetMonth % 12;
+
+            // Create date in UTC
+            const targetDate = new Date(Date.UTC(targetYear, targetMonth, targetDay));
+            
+            // Subtract 1 day
+            targetDate.setUTCDate(targetDate.getUTCDate() - 1);
+
+            // Format to YYYY-MM-DD using UTC
+            const formattedYear = targetDate.getUTCFullYear();
+            const formattedMonth = String(targetDate.getUTCMonth() + 1).padStart(2, '0');
+            const formattedDay = String(targetDate.getUTCDate()).padStart(2, '0');
+            const formattedDate = `${formattedYear}-${formattedMonth}-${formattedDay}`;
+            
+            endDateInput.value = formattedDate;
+        }
+    }
+
+    // Event bindings
+    dealsSelect.addEventListener('change', calculateEndDate);
+    startDateInput.addEventListener('change', calculateEndDate);
+
+    startDateInput.addEventListener('input', function () {
+        if (this.value) {
+            errorStartDate.textContent = '';
+            errorStartDate.style.display = 'none';
+        }
     });
+});
 </script>
+
 {% endblock %}
