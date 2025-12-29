@@ -136,6 +136,7 @@ class PaymentInstallment(models.Model):
         ('paid', 'Paid'),
         ('overdue', 'Overdue'),
         ('partially_paid', 'Partially Paid'),
+        ('held', 'On Hold'),
     ]
 
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name='installments')

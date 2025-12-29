@@ -3,7 +3,7 @@ from django.forms import inlineformset_factory
 from decimal import Decimal
 from .models import (
     Payment, PaymentItem, PaymentPlan, FeeStructure, 
-    StudentFeeAssignment, FeeCategory, Student
+    StudentFeeAssignment, FeeCategory, Student, PaymentInstallment
 )
 
 
@@ -480,3 +480,29 @@ class QuickPaymentForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['student'].queryset = Student.objects.filter(is_active=True).order_by('first_name', 'last_name')
+
+
+class PaymentPlanEditForm(forms.ModelForm):
+    """Form for editing existing payment plans"""
+    class Meta:
+        model = PaymentPlan
+        fields = ['total_amount', 'installment_amount', 'status', 'is_active']
+        widgets = {
+            'total_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'installment_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'})
+        }
+
+
+class PaymentInstallmentEditForm(forms.ModelForm):
+    """Form for editing payment installments"""
+    class Meta:
+        model = PaymentInstallment
+        fields = ['due_date', 'amount', 'late_fee', 'status']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'late_fee': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'status': forms.Select(attrs={'class': 'form-control'})
+        }

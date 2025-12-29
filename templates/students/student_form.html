@@ -1194,10 +1194,11 @@
                 }
             })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    // Check for success or specific error codes that return JSON
+                    if (response.ok || response.status === 400 || response.status === 500) {
+                        return response.json();
                     }
-                    return response.json();
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 })
                 .then(data => {
                     if (data.success) {

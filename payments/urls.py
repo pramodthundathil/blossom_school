@@ -19,6 +19,11 @@ urlpatterns = [
     path('student/installment/marked/<int:pk>/',views.mark_as_paid,name="mark_as_paid"),
     # Payment plans
     path('plan/create/<uuid:student_id>/', views.create_payment_plan, name='create_payment_plan'),
+    path('plan/edit/<int:pk>/', views.edit_payment_plan, name='edit_payment_plan'),
+    path('plan/delete/<int:pk>/', views.delete_payment_plan, name='delete_payment_plan'),
+    path('installment/edit/<int:pk>/', views.edit_payment_installment, name='edit_payment_installment'),
+    path('installment/delete/<int:pk>/', views.delete_payment_installment, name='delete_payment_installment'),
+    path('installment/hold/<int:pk>/', views.hold_payment_installment, name='hold_payment_installment'),
     
     # Reports
     path('reports/overdue/', views.overdue_payments_report, name='overdue_report'),

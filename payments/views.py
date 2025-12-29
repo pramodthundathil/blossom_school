@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.http import JsonResponse, HttpResponse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
@@ -18,7 +19,7 @@ from .models import (
     Student, Payment, PaymentItem, FeeCategory, FeeStructure,
     StudentFeeAssignment, PaymentPlan, PaymentInstallment, StudentLedger, PaymentReminder
 )
-from .forms import PaymentForm, PaymentPlanForm  # You'll need to create these
+from .forms import PaymentForm, PaymentPlanForm, PaymentPlanEditForm, PaymentInstallmentEditForm
 
 # @method_decorator(user_controls, name='dispatch')
 class PaymentDashboardView(LoginRequiredMixin, ListView):
@@ -360,7 +361,7 @@ def create_payment(request):
                 )
                 
                 #income saving to db
-                income = Income.objects.create(perticulers = f"Fee payment of  {str(student.get_full_name())} against {remarks} by {payment_method}", amount = net_amount,bill_number = payment.payment_id  )
+                income = Income.objects.create(perticulers = f"Fee payment of  {str(student.get_full_name())} against {remarks} by {payment_method}", amount = net_amount,bill_number = payment.payment_id ,date = payment_date )
                 income.save()
 
                 
@@ -1147,7 +1148,7 @@ def generate_invoice_quick(request, payment_id):
         'name': 'Blossom British School',
         'address': 'Villa No 2 University Street,',
         'city': 'Ajman UAE',
-        'phone': '+971-50 977 4927',
+        'phone': '+971-504212662',
         'email': 'info@blossombritish.ae',
     }
     
@@ -1163,3 +1164,166 @@ def generate_invoice_quick(request, payment_id):
     }
     
     return generate_pdf_invoice(request, context)
+
+
+@csrf_protect
+@unauthenticated_user
+def edit_payment_plan(request, pk):
+    """Edit an existing payment plan"""
+    plan = get_object_or_404(PaymentPlan, pk=pk)
+    student_id = plan.student.id
+    
+    if request.method == 'POST':
+        form = PaymentPlanEditForm(request.POST, instance=plan)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Payment plan for {plan.academic_year} updated successfully.")
+            return redirect('student_payment_details', student_id=student_id)
+    else:
+        form = PaymentPlanEditForm(instance=plan)
+    
+    context = {
+        'form': form,
+        'title': f'Edit Payment Plan - {plan.student.get_full_name()}',
+        'plan': plan,
+        'student': plan.student
+    }
+    return render(request, 'payments/payment_plan_form.html', context)
+
+
+@csrf_protect
+@unauthenticated_user
+def edit_payment_installment(request, pk):
+    """Edit a payment installment"""
+    installment = get_object_or_404(PaymentInstallment, pk=pk)
+    student_id = installment.payment_plan.student.id
+    
+    if request.method == 'POST':
+        form = PaymentInstallmentEditForm(request.POST, instance=installment)
+        if form.is_valid():
+            form.save()
+            # Update status logic if amount/paid amount changed
+            installment.update_status()
+            installment.save()
+            
+            messages.success(request, f"Installment {installment.installment_number} updated successfully.")
+            return redirect('student_payment_details', student_id=student_id)
+    else:
+        form = PaymentInstallmentEditForm(instance=installment)
+    
+    context = {
+        'form': form,
+        'title': f'Edit Installment {installment.installment_number}',
+        'installment': installment,
+        'student': installment.payment_plan.student 
+    }
+    return render(request, 'payments/payment_installment_form.html', context)
+
+
+@csrf_protect
+@unauthenticated_user
+def delete_payment_installment(request, pk):
+    """Delete a pending payment installment"""
+    installment = get_object_or_404(PaymentInstallment, pk=pk)
+    student_id = installment.payment_plan.student.id
+    
+    if installment.status != 'pending' and installment.paid_amount > 0:
+        messages.error(request, "Cannot delete an installment that has been paid or partially paid.")
+        return redirect('student_payment_details', student_id=student_id)
+
+    if request.method == 'POST':
+        installment.delete()
+        messages.success(request, f"Installment {installment.installment_number} deleted successfully.")
+        return redirect('student_payment_details', student_id=student_id)
+        
+    # If GET, show confirmation page or just redirect (safest is to use POST for deletion)
+    # But for simplicity with simple links, we might need a confirmation page or JS handling.
+    # Assuming the specific user request implies simple deletion, but POST is safer.
+    # I'll implement a simple confirmation template.
+    
+    context = {
+        'title': 'Delete Installment',
+        'item_name': f'Installment {installment.installment_number}',
+        'cancel_url': 'student_payment_details',
+        'cancel_id': student_id
+    }
+    return render(request, 'payments/confirm_delete.html', context)
+
+
+@csrf_protect
+@unauthenticated_user
+def delete_payment_plan(request, pk):
+    """Delete a pending payment plan"""
+    plan = get_object_or_404(PaymentPlan, pk=pk)
+    student_id = plan.student.id
+    
+    # Check if any installments are paid
+    if plan.installments.filter(paid_amount__gt=0).exists():
+        messages.error(request, "Cannot delete a payment plan that has paid installments.")
+        return redirect('student_payment_details', student_id=student_id)
+
+    if request.method == 'POST':
+        plan.delete()
+        messages.success(request, f"Payment plan for {plan.academic_year} deleted successfully.")
+        return redirect('student_payment_details', student_id=student_id)
+        
+    context = {
+        'title': 'Delete Payment Plan',
+        'item_name': f'Payment Plan {plan.academic_year}',
+        'cancel_url': 'student_payment_details',
+        'cancel_id': student_id
+    }
+    return render(request, 'payments/confirm_delete.html', context)
+
+@csrf_protect
+@unauthenticated_user
+def hold_payment_installment(request, pk):
+    """Hold a payment installment and transfer balance to next installment"""
+    installment = get_object_or_404(PaymentInstallment, pk=pk)
+    student_id = installment.payment_plan.student.id
+    
+    if installment.status == 'held':
+        messages.warning(request, "This installment is already on hold.")
+        return redirect('student_payment_details', student_id=student_id)
+
+    if request.method == 'POST':
+        with transaction.atomic():
+            # Find next pending installment
+            next_installment = PaymentInstallment.objects.filter(
+                payment_plan=installment.payment_plan,
+                installment_number__gt=installment.installment_number,
+                status='pending'
+            ).order_by('installment_number').first()
+
+            if next_installment:
+                amount_to_transfer = installment.amount + installment.late_fee - installment.paid_amount
+                
+                # Update next installment
+                next_installment.amount = F('amount') + amount_to_transfer
+                next_installment.save()
+                next_installment.refresh_from_db() # Reload to get updated amount
+
+                # Update current installment
+                installment.status = 'held'
+                installment.amount = 0 # Optional: Set to 0 to reflect transfer? Or keep original amount for history? 
+                # User request: "AMOUNT IS TRANSFERD TO NEXT MONTH" implies current amount should be gone or 0-ed out effectively.
+                # If we set amount to 0, it won't show as due.
+                installment.amount = 0
+                installment.late_fee = 0 
+                installment.save()
+
+                messages.success(request, f"Installment {installment.installment_number} held and amount transferred to Installment {next_installment.installment_number}.")
+            else:
+                messages.error(request, "No subsequent pending installment found to transfer the amount to.")
+        
+        return redirect('student_payment_details', student_id=student_id)
+        
+    context = {
+        'title': 'Hold Installment',
+        'item_name': f'Installment {installment.installment_number}',
+        'cancel_url': 'student_payment_details',
+        'cancel_id': student_id,
+        'action_verb': 'Hold',
+        'message_body': 'Are you sure you want to put this installment on hold? The outstanding amount will be transferred to the next pending installment.'
+    }
+    return render(request, 'payments/confirm_delete.html', context)
