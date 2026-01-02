@@ -545,7 +545,7 @@
         // Set default start date to today
         const today = new Date().toISOString().split('T')[0];
         startDateInput.value = today;
-        startDateInput.min = today;
+        // startDateInput.min = today;
 
         // Update installment suggestions based on plan type
         planTypeSelect.addEventListener('change', function () {
@@ -693,16 +693,7 @@
                         }
                         break;
 
-                    case 'start_date':
-                        const selectedDate = new Date(value);
-                        const todayDate = new Date(today);
-                        todayDate.setHours(0, 0, 0, 0);
-                        selectedDate.setHours(0, 0, 0, 0);
-                        if (selectedDate < todayDate) {
-                            isValid = false;
-                            errorMessage = 'Start date cannot be in the past';
-                        }
-                        break;
+                    
                 }
             }
 
