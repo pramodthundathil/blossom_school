@@ -483,22 +483,23 @@ function animateProgressBars() {
 setTimeout(animateProgressBars, 1000);
 
 // Quick Action Handlers
-document.addEventListener('click', function(e) {
-    if (e.target.closest('.action-btn')) {
-        e.preventDefault();
-        const action = e.target.closest('.action-btn');
-        const actionText = action.querySelector('span').textContent;
-        
-        // Simulate action feedback
-        action.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-            action.style.transform = 'translateY(-2px)';
-        }, 150);
-        
-        // Show toast notification
-        showToast(`${actionText} clicked - Feature coming soon!`, 'info');
-    }
-});
+// Quick Action Handlers
+// document.addEventListener('click', function(e) {
+//     if (e.target.closest('.action-btn')) {
+//         e.preventDefault();
+//         const action = e.target.closest('.action-btn');
+//         const actionText = action.querySelector('span').textContent;
+//         
+//         // Simulate action feedback
+//         action.style.transform = 'scale(0.95)';
+//         setTimeout(() => {
+//             action.style.transform = 'translateY(-2px)';
+//         }, 150);
+//         
+//         // Show toast notification
+//         // showToast(`${actionText} clicked - Feature coming soon!`, 'info');
+//     }
+// });
 
 // Form Select Styling and Functionality
 document.querySelectorAll('.form-select').forEach(select => {

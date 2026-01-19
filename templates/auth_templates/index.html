@@ -607,7 +607,7 @@
 
 
             <!-- Quick Actions -->
-            <div class="dashboard-card">
+            <div class="dashboard-card" style="position: relative; z-index: 10;">
                 <div class="card-header">
                     <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
                 </div>
@@ -1078,15 +1078,16 @@ setInterval(fetchDashboardData, 300000);
         });
 
         // Auto-show loader for navigation links (optional)
-        document.addEventListener('click', function (e) {
-            const link = e.target.closest('a[href]');
-            if (link && link.href && !link.href.startsWith('#') && !link.href.startsWith('javascript:') && !link.hasAttribute('download') && !link.target) {
-                // Only show for internal navigation
-                if (link.href.includes(window.location.origin)) {
-                    window.loader.show('Navigating...', 'Loading page');
-                }
-            }
-        });
+        // Auto-show loader for navigation links (optional)
+        // document.addEventListener('click', function (e) {
+        //     const link = e.target.closest('a[href]');
+        //     if (link && link.href && !link.href.startsWith('#') && !link.href.startsWith('javascript:') && !link.hasAttribute('download') && !link.target) {
+        //         // Only show for internal navigation
+        //         if (link.href.includes(window.location.origin)) {
+        //             window.loader.show('Navigating...', 'Loading page');
+        //         }
+        //     }
+        // });
 
     </script>
     <script>
