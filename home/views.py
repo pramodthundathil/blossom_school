@@ -138,7 +138,7 @@ def dashboard_data_api(request):
     # Recent payments (last 10)
     recent_payments = Payment.objects.filter(
         payment_status='completed'
-    ).select_related('student').order_by('-payment_date')[:10]
+    ).select_related('student').order_by('-payment_date')[:6]
     
     recent_payments_list = [{
         'student_name': p.student.get_full_name(),
@@ -1541,11 +1541,13 @@ def generate_student_pdf(student_id):
 def reports_dashboard(request):
     """Main reports dashboard"""
     from students.models import Student
+    from utils.models import Teacher
     context = {
         'fee_categories': FeeCategory.objects.all().order_by('name'),
         'current_year': timezone.now().year,
         'current_date': timezone.now().date(),
         'students': Student.objects.filter(is_active=True).order_by('first_name', 'last_name'),
+        'teachers': Teacher.objects.filter(is_active=True).order_by('first_name'),
     }
     return render(request, 'auth_templates/reports-dashboard.html', context)
 
@@ -2497,93 +2499,252 @@ def generate_fee_tracking_report(request):
     
 #     ws.merge_cells('A3:H3')
 #     ws['A3'] = f"Fee Tracking Report: {fee_category.name}"
-#     ws['A3'].font = Font(size=14, bold=True)
-#     ws['A3'].alignment = Alignment(horizontal='center')
-    
-#     ws.merge_cells('A4:H4')
-#     ws['A4'] = f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}"
-#     ws['A4'].alignment = Alignment(horizontal='center')
-    
-#     row = 6
-    
-#     # Headers
-#     headers = ['Student ID', 'Student Name', 'Class', 'Total Due', 'Paid Amount', 'Balance', 'Payment Date', 'Status']
-#     for col, header in enumerate(headers, 1):
-#         cell = ws.cell(row=row, column=col, value=header)
-#         cell.font = Font(bold=True, color="FFFFFF")
-#         cell.fill = PatternFill(start_color="214888", end_color="214888", fill_type="solid")
-#         cell.alignment = Alignment(horizontal='center')
-#     row += 1
-    
-#     # Get all students with this fee category
-#     fee_assignments = StudentFeeAssignment.objects.filter(
-#         fee_structure__fee_category=fee_category,
-#         is_active=True
-#     ).select_related('student', 'fee_structure')
-    
-#     total_due = Decimal('0')
-#     total_paid = Decimal('0')
-    
-#     for assignment in fee_assignments:
-#         student = assignment.student
-#         due_amount = assignment.get_final_amount()
+
+def generate_staff_report(request):
+    """Generate comprehensive staff report"""
+    if request.method == 'POST':
+        # status = request.POST.get('status', 'all')
+        report_format = request.POST.get('format', 'excel')
         
-#         # Calculate paid amount for this fee category
-#         paid = PaymentItem.objects.filter(
-#             payment__student=student,
-#             fee_category=fee_category,
-#             payment__payment_date__gte=start,
-#             payment__payment_date__lte=end,
-#             payment__payment_status='completed'
-#         ).aggregate(total=Sum('net_amount'))['total'] or Decimal('0')
-        
-#         balance = due_amount - paid
-        
-#         # Get last payment date
-#         last_payment = Payment.objects.filter(
-#             student=student,
-#             payment_items__fee_category=fee_category,
-#             payment_date__gte=start,
-#             payment_date__lte=end
-#         ).order_by('-payment_date').first()
-        
-#         payment_date = last_payment.payment_date.strftime('%d %b %Y') if last_payment else 'N/A'
-#         status = 'Paid' if balance <= 0 else 'Pending' if paid == 0 else 'Partial'
-        
-#         ws.cell(row=row, column=1, value=student.student_id)
-#         ws.cell(row=row, column=2, value=student.get_full_name())
-#         ws.cell(row=row, column=3, value=student.class_room.class_name if student.class_room else 'N/A')
-#         ws.cell(row=row, column=4, value=float(due_amount))
-#         ws.cell(row=row, column=5, value=float(paid))
-#         ws.cell(row=row, column=6, value=float(balance))
-#         ws.cell(row=row, column=7, value=payment_date)
-#         ws.cell(row=row, column=8, value=status)
-        
-#         # Color code status
-#         status_cell = ws.cell(row=row, column=8)
-#         if status == 'Paid':
-#             status_cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
-#         elif status == 'Pending':
-#             status_cell.fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
-#         else:
-#             status_cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid")
-        
-#         total_due += due_amount
-#         total_paid += paid
-#         row += 1
+        if report_format == 'excel':
+            return generate_staff_excel()
+        else:
+            return generate_staff_pdf()
     
-#     # Totals
-#     row += 1
-#     ws.cell(row=row, column=3, value="TOTALS:").font = Font(bold=True, size=12)
-#     ws.cell(row=row, column=4, value=float(total_due)).font = Font(bold=True, size=12)
-#     ws.cell(row=row, column=5, value=float(total_paid)).font = Font(bold=True, size=12)
-#     ws.cell(row=row, column=6, value=float(total_due - total_paid)).font = Font(bold=True, size=12)
+    return redirect('reports_dashboard')
+
+def generate_staff_excel():
+    """Generate staff report in Excel"""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Staff Report"
     
-#     # Adjust column widths
-#     for col in range(1, 9):
-#         ws.column_dimensions[get_column_letter(col)].width = 16
+    # Header
+    ws.merge_cells('A1:H1')
+    ws['A1'] = "Blossom British School - Staff Report"
+    ws['A1'].font = Font(size=16, bold=True, color="214888")
+    ws['A1'].alignment = Alignment(horizontal='center')
     
-#     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-#     response['Content-Disposition'] = f'attachment; filename="Fee_Tracking_{fee_category.name}_{start}_to_{end}.xlsx"'
-#     wb.save(response)
-#     return response
+    ws.merge_cells('A2:H2')
+    ws['A2'] = f"Generated on: {timezone.now().strftime('%d %B %Y')}"
+    ws['A2'].alignment = Alignment(horizontal='center')
+    
+    row = 4
+    
+    # Table Headers
+    headers = ['ID', 'Full Name', 'Position', 'Mobile', 'Email', 'Status', 'Join Date', 'Salary']
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=row, column=col, value=header)
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill(start_color="214888", end_color="214888", fill_type="solid")
+        cell.alignment = Alignment(horizontal='center')
+    
+    row += 1
+    
+    staff_members = Teacher.objects.all().order_by('first_name')
+    
+    for staff in staff_members:
+        ws.cell(row=row, column=1, value=staff.teacher_id)
+        ws.cell(row=row, column=2, value=staff.full_name)
+        ws.cell(row=row, column=3, value=staff.get_position_display())
+        ws.cell(row=row, column=4, value=staff.phone_number)
+        ws.cell(row=row, column=5, value=staff.email)
+        ws.cell(row=row, column=6, value=staff.status.title())
+        ws.cell(row=row, column=7, value=staff.start_date.strftime('%d %b %Y') if staff.start_date else '-')
+        ws.cell(row=row, column=8, value=float(staff.total_salary))
+        row += 1
+        
+    # Adjust column widths
+    for col in range(1, 9):
+        ws.column_dimensions[get_column_letter(col)].width = 20
+        
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="Staff_Report.xlsx"'
+    wb.save(response)
+    return response
+
+def generate_staff_pdf():
+    """Generate staff report in PDF"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=30, leftMargin=30, topMargin=50, bottomMargin=30)
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        textColor=colors.HexColor('#214888'),
+        alignment=TA_CENTER,
+        spaceAfter=10
+    )
+    
+    elements.append(Paragraph("Blossom British School - Staff Report", title_style))
+    elements.append(Paragraph(f"Generated on: {timezone.now().strftime('%d %B %Y')}", styles['Normal']))
+    elements.append(Spacer(1, 20))
+    
+    data = [['ID', 'Name', 'Position', 'Mobile', 'Email', 'Status', 'Join Date', 'Salary']]
+    
+    staff_members = Teacher.objects.all().order_by('first_name')
+    
+    for staff in staff_members:
+        data.append([
+            staff.teacher_id,
+            staff.full_name[:20],
+            staff.get_position_display()[:20],
+            staff.phone_number,
+            staff.email[:25],
+            staff.status.title(),
+             staff.start_date.strftime('%d-%b-%y') if staff.start_date else '-',
+            f"{staff.total_salary:.2f}"
+        ])
+        
+    table = Table(data, colWidths=[1.2*inch, 2*inch, 1.5*inch, 1.2*inch, 2*inch, 1*inch, 1.2*inch, 1*inch])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#214888')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTSIZE', (0, 1), (-1, -1), 8),
+    ]))
+    
+    elements.append(table)
+    doc.build(elements)
+    buffer.seek(0)
+    
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Staff_Report.pdf"'
+    return response
+
+def generate_staff_attendance_report(request):
+    """Generate staff attendance report"""
+    if request.method == 'POST':
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        staff_id = request.POST.get('staff_id')
+        report_format = request.POST.get('format', 'excel')
+        
+        if report_format == 'excel':
+            return generate_staff_attendance_excel(start_date, end_date, staff_id)
+        else:
+            return generate_staff_attendance_pdf(start_date, end_date, staff_id)
+            
+    return redirect('reports_dashboard')
+
+def generate_staff_attendance_excel(start_date, end_date, staff_id=None):
+    """Generate staff attendance Excel report"""
+    start = datetime.strptime(start_date, '%Y-%m-%d').date()
+    end = datetime.strptime(end_date, '%Y-%m-%d').date()
+    
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Staff Attendance"
+    
+    ws.merge_cells('A1:F1')
+    ws['A1'] = "Blossom British School - Staff Attendance Report"
+    ws['A1'].font = Font(size=16, bold=True, color="214888")
+    ws['A1'].alignment = Alignment(horizontal='center')
+    
+    ws.merge_cells('A2:F2')
+    ws['A2'] = f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}"
+    ws['A2'].alignment = Alignment(horizontal='center')
+    
+    row = 4
+    headers = ['Date', 'Staff ID', 'Name', 'Status', 'Marked At', 'Remarks']
+    for col, header in enumerate(headers, 1):
+        cell = ws.cell(row=row, column=col, value=header)
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill(start_color="214888", end_color="214888", fill_type="solid")
+    
+    row += 1
+    
+    attendance_records = Attendance.objects.filter(
+        date__gte=start, 
+        date__lte=end
+    )
+    
+    if staff_id:
+        attendance_records = attendance_records.filter(teacher__id=staff_id)
+        
+    attendance_records = attendance_records.select_related('teacher').order_by('date', 'teacher__first_name')
+    
+    for record in attendance_records:
+        ws.cell(row=row, column=1, value=record.date.strftime('%d %b %Y'))
+        ws.cell(row=row, column=2, value=record.teacher.teacher_id)
+        ws.cell(row=row, column=3, value=record.teacher.full_name)
+        ws.cell(row=row, column=4, value=record.get_status_display())
+        ws.cell(row=row, column=5, value=record.marked_at.strftime('%H:%M') if record.marked_at else '-')
+        ws.cell(row=row, column=6, value=record.remarks)
+        
+        status_cell = ws.cell(row=row, column=4)
+        if record.status == 'present':
+             status_cell.fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid") # Green
+        elif record.status == 'absent':
+             status_cell.fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid") # Red
+        elif record.status == 'sick_leave':
+             status_cell.fill = PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid") # Yellow
+        
+        row += 1
+        
+    for col in range(1, 7):
+        ws.column_dimensions[get_column_letter(col)].width = 20
+        
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="Attendance_{start}_{end}.xlsx"'
+    wb.save(response)
+    return response
+
+def generate_staff_attendance_pdf(start_date, end_date, staff_id=None):
+    """Generate staff attendance PDF report"""
+    start = datetime.strptime(start_date, '%Y-%m-%d').date()
+    end = datetime.strptime(end_date, '%Y-%m-%d').date()
+    
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=50, bottomMargin=30)
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    elements.append(Paragraph("Blossom British School - Staff Attendance", styles['Heading1']))
+    elements.append(Paragraph(f"Period: {start.strftime('%d %b %Y')} to {end.strftime('%d %b %Y')}", styles['Normal']))
+    elements.append(Spacer(1, 20))
+    
+    data = [['Date', 'Name', 'Status', 'Remarks']]
+    
+    attendance_records = Attendance.objects.filter(
+        date__gte=start, 
+        date__lte=end
+    )
+    
+    if staff_id:
+        attendance_records = attendance_records.filter(teacher__id=staff_id)
+        
+    attendance_records = attendance_records.select_related('teacher').order_by('date', 'teacher__first_name')
+    
+    for record in attendance_records:
+        data.append([
+            record.date.strftime('%d-%b'),
+            record.teacher.full_name[:25],
+            record.get_status_display(),
+            record.remarks[:30]
+        ])
+        
+    table = Table(data, colWidths=[1.5*inch, 2.5*inch, 1.5*inch, 2*inch])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#214888')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+    ]))
+    
+    elements.append(table)
+    doc.build(elements)
+    buffer.seek(0)
+    
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Attendance_{start}_{end}.pdf"'
+    return response

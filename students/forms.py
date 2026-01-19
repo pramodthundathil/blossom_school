@@ -24,7 +24,7 @@ class StudentForm(forms.ModelForm):
     
     class Meta:
         model = Student
-        exclude = ['created_by', 'student_id', 'is_active']
+        exclude = ['created_by', 'student_id', 'is_active', 'father_place_of_work', 'mother_place_of_work', 'religion', 'po_box_number', 'home_telephone', 'father_work_telephone', 'mother_work_telephone']
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'date_start': forms.DateInput(attrs={'type': 'date'}),

@@ -19,7 +19,7 @@ from .models import (
     Student, Payment, PaymentItem, FeeCategory, FeeStructure,
     StudentFeeAssignment, PaymentPlan, PaymentInstallment, StudentLedger, PaymentReminder
 )
-from .forms import PaymentForm, PaymentPlanForm, PaymentPlanEditForm, PaymentInstallmentEditForm
+from .forms import PaymentForm, PaymentPlanForm, PaymentPlanEditForm, PaymentInstallmentEditForm, PaymentInstallmentAddForm
 
 # @method_decorator(user_controls, name='dispatch')
 class PaymentDashboardView(LoginRequiredMixin, ListView):
@@ -58,6 +58,12 @@ class PaymentDashboardView(LoginRequiredMixin, ListView):
                 status='overdue'
             ).count(),
             
+            'pending_installments_this_month': PaymentInstallment.objects.select_related('payment_plan__student').filter(
+                status__in=['pending', 'overdue', 'partially_paid'],
+                due_date__month=current_month,
+                due_date__year=current_year
+            ).order_by('due_date'),
+
             'recent_payments': Payment.objects.select_related('student').filter(
                 payment_status='completed'
             ).order_by('-created_at')[:5],
@@ -562,6 +568,63 @@ class PaymentListView(LoginRequiredMixin, ListView):
         return context
 
 
+class PendingInstallmentListView(LoginRequiredMixin, ListView):
+    """List pending and overdue installments"""
+    model = PaymentInstallment
+    template_name = 'payments/pending_installments_list.html'
+    context_object_name = 'installments'
+    paginate_by = 50
+
+    def get_queryset(self):
+        queryset = PaymentInstallment.objects.select_related('payment_plan__student').filter(
+            status__in=['pending', 'overdue', 'partially_paid']
+        ).order_by('due_date')
+
+        # Filter mode
+        mode = self.request.GET.get('mode')
+        
+        if mode == 'this_month':
+            today = timezone.now().date()
+            queryset = queryset.filter(
+                due_date__month=today.month,
+                due_date__year=today.year
+            )
+        
+        # Date range filters (override mode if present)
+        date_from = self.request.GET.get('date_from')
+        if date_from:
+            queryset = queryset.filter(due_date__gte=date_from)
+            
+        date_to = self.request.GET.get('date_to')
+        if date_to:
+             queryset = queryset.filter(due_date__lte=date_to)
+
+        # Student search
+        search = self.request.GET.get('search')
+        if search:
+             queryset = queryset.filter(
+                Q(payment_plan__student__first_name__icontains=search) |
+                Q(payment_plan__student__last_name__icontains=search) |
+                Q(payment_plan__student__student_id__icontains=search)
+            )
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mode'] = self.request.GET.get('mode', 'all')
+        
+        # Add overdue calculation
+        for installment in context['installments']:
+             if installment.status == 'overdue' or (installment.status == 'pending' and installment.due_date < timezone.now().date()):
+                installment.days_overdue = (timezone.now().date() - installment.due_date).days
+                installment.is_overdue = True
+             else:
+                installment.is_overdue = False
+                
+        return context
+
+
 from django.http import JsonResponse
 from django.urls import reverse
 
@@ -601,7 +664,33 @@ def create_payment_plan(request, student_id):
                 balance_amount = total_amount - advance_amount
                 installment_amount = balance_amount / number_of_installments if number_of_installments > 0 else balance_amount
                 
+                # Custom Installments Logic
+                if plan_type == 'custom':
+                    custom_installments_json = request.POST.get('custom_installments')
+                    if not custom_installments_json:
+                        raise ValueError("Custom installments are required for custom plan type")
+                    
+                    try:
+                        custom_installments = json.loads(custom_installments_json)
+                    except json.JSONDecodeError:
+                         raise ValueError("Invalid custom installments data")
+                         
+                    if not custom_installments:
+                         raise ValueError("At least one installment is required")
+                         
+                    # Verify total amount matches
+                    installments_total = sum(Decimal(str(inst['amount'])) for inst in custom_installments)
+                    if abs(installments_total - balance_amount) > Decimal('0.01'):
+                         raise ValueError(f"Sum of installments ({installments_total}) must match balance amount ({balance_amount})")
+                         
+                    number_of_installments = len(custom_installments)
+                    installment_amount = 0 # Variable for plan model, though individual installments differ
+                    installment_frequency = 0 # Not applicable for custom
+
                 # Create payment plan
+                session_type = request.POST.get('session_type', 'morning')
+                registration_fee_included = request.POST.get('registration_fee_included') == 'on'
+                
                 payment_plan = PaymentPlan.objects.create(
                     student=student,
                     plan_type=plan_type,
@@ -614,9 +703,49 @@ def create_payment_plan(request, student_id):
                     installment_frequency=installment_frequency,
                     start_date=start_date,
                     fee_category=fee_category,
+                    session_type=session_type,
+                    registration_fee_included=registration_fee_included,
                     status='active',
                     created_by=request.user
                 )
+                
+                # Handle Registration Fee
+                if registration_fee_included:
+                    reg_fee_amount = Decimal(request.POST.get('registration_fee_amount', '0'))
+                    if reg_fee_amount > 0:
+                        reg_fee_category, _ = FeeCategory.objects.get_or_create(name='Registration Fee')
+                        
+                        reg_payment = Payment.objects.create(
+                            student=student,
+                            total_amount=reg_fee_amount,
+                            discount_amount=0,
+                            late_fee_amount=0,
+                            net_amount=reg_fee_amount,
+                            payment_method='cash', # Default
+                            payment_status='completed',
+                            payment_date=timezone.now().date(),
+                            remarks='Registration Fee',
+                            collected_by=request.user
+                        )
+                        
+                        PaymentItem.objects.create(
+                            payment=reg_payment,
+                            fee_category=reg_fee_category,
+                            description=f'Registration Fee - {student.get_full_name()}',
+                            amount=reg_fee_amount,
+                            discount_amount=0,
+                            late_fee=0,
+                            net_amount=reg_fee_amount
+                        )
+                        
+                        # Add income entry
+                        Income.objects.create(
+                            perticulers=f"Registration Fee of {student.get_full_name()}",
+                            amount=reg_fee_amount,
+                            bill_number=reg_payment.payment_id,
+                            date=reg_payment.payment_date
+                        )
+
                 
                 # Create advance payment if advance amount exists
                 if advance_amount > 0:
@@ -635,6 +764,10 @@ def create_payment_plan(request, student_id):
                         collected_by=request.user
                     )
                     
+                    #income saving to db
+                    Income.objects.create(perticulers = f"Advance payment of  {str(student.get_full_name())} against {fee_category.name if fee_category else 'fees'}", amount = advance_amount,bill_number = advance_payment.payment_id ,date = start_date )
+
+
                     # Create payment item for advance
                     PaymentItem.objects.create(
                         payment=advance_payment,
@@ -646,19 +779,45 @@ def create_payment_plan(request, student_id):
                         net_amount=advance_amount
                     )
                 
-                # Create installments based on frequency
-                current_date = start_date
-                for i in range(number_of_installments):
-                    PaymentInstallment.objects.create(
-                        payment_plan=payment_plan,
-                        installment_number=i + 1,
-                        due_date=current_date,
-                        amount=installment_amount,
-                        status='pending'
-                    )
-                    
-                    # Calculate next due date based on frequency
-                    current_date += timedelta(days=installment_frequency)
+                # Create installments
+                if plan_type == 'custom':
+                    for i, inst_data in enumerate(custom_installments):
+                         PaymentInstallment.objects.create(
+                            payment_plan=payment_plan,
+                            installment_number=i + 1,
+                            due_date=inst_data['date'],
+                            amount=Decimal(str(inst_data['amount'])),
+                            status='pending'
+                        )
+                else:
+                    # Logic for auto-generated installments
+                    current_date = start_date
+                    for i in range(number_of_installments):
+                        PaymentInstallment.objects.create(
+                            payment_plan=payment_plan,
+                            installment_number=i + 1,
+                            due_date=current_date,
+                            amount=installment_amount,
+                            status='pending'
+                        )
+                        
+                        # Calculate next due date based on frequency or plan type
+                        if plan_type == 'weekly':
+                            current_date += timedelta(weeks=1)
+                        elif plan_type == 'monthly': # Monthly
+                             # Add a month logic roughly or strict
+                             import calendar
+                             month = current_date.month - 1 + 1
+                             year = current_date.year + month // 12
+                             month = month % 12 + 1
+                             day = min(current_date.day, calendar.monthrange(year,month)[1])
+                             current_date = current_date.replace(year=year, month=month, day=day)
+                        elif plan_type == 'quarterly' or plan_type == '3_months':
+                             current_date += timedelta(days=90) # Approx
+                        elif plan_type == '6_months':
+                             current_date += timedelta(days=180) # Approx
+                        else:
+                             current_date += timedelta(days=installment_frequency)
                 
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                     return JsonResponse({
@@ -710,7 +869,10 @@ def student_payment_details(request, student_id):
     student = get_object_or_404(Student, id=student_id)
     
     # Get payment plans
-    payment_plans = PaymentPlan.objects.filter(student=student).order_by('-academic_year')
+    # Get payment plans with sorted installments
+    payment_plans = PaymentPlan.objects.filter(student=student).order_by('-academic_year').prefetch_related(
+        models.Prefetch('installments', queryset=PaymentInstallment.objects.order_by('due_date'))
+    )
     
     # Get all payments
     payments = Payment.objects.filter(student=student).order_by('-payment_date')
@@ -1327,3 +1489,47 @@ def hold_payment_installment(request, pk):
         'message_body': 'Are you sure you want to put this installment on hold? The outstanding amount will be transferred to the next pending installment.'
     }
     return render(request, 'payments/confirm_delete.html', context)
+
+
+@csrf_protect
+@unauthenticated_user
+def add_payment_installment(request, plan_id):
+    """Add a new installment to an existing payment plan"""
+    plan = get_object_or_404(PaymentPlan, pk=plan_id)
+    student_id = plan.student.id
+    
+    if request.method == 'POST':
+        form = PaymentInstallmentAddForm(request.POST)
+        if form.is_valid():
+            installment = form.save(commit=False)
+            installment.payment_plan = plan
+            
+            # Calculate next installment number
+            last_installment = plan.installments.order_by('-installment_number').first()
+            if last_installment:
+                installment.installment_number = last_installment.installment_number + 1
+            else:
+                installment.installment_number = 1
+                
+            installment.status = 'pending'
+            installment.save()
+            
+            # Identify source: 'overdue' or 'plan'
+            source = request.GET.get('source', '')
+            
+            messages.success(request, f"Installment {installment.installment_number} added successfully.")
+            
+            if source == 'overdue':
+                return redirect('overdue_report') 
+                
+            return redirect('student_payment_details', student_id=student_id)
+    else:
+        form = PaymentInstallmentAddForm()
+    
+    context = {
+        'form': form,
+        'title': f'Add Installment - {plan.student.get_full_name()}',
+        'plan': plan,
+        'student': plan.student
+    }
+    return render(request, 'payments/payment_installment_form.html', context)

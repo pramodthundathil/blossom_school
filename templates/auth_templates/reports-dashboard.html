@@ -464,6 +464,98 @@
             </form>
         </div>
 
+
+        <!-- Staff Report Card -->
+        <div class="report-card">
+            <div class="report-card-header">
+                <div class="report-icon" style="background: linear-gradient(135deg, var(--e-global-color-primary) 0%, var(--e-global-color-bea3118) 100%); color: white;">
+                    👨‍🏫
+                </div>
+                <div class="report-card-title">
+                    <h3>Staff Report</h3>
+                    <p>Comprehensive list of all staff members</p>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <form method="post" action="{% url 'generate_staff_report' %}" id="staffForm">
+                {% csrf_token %}
+                <div class="info-badge">
+                    Profile • Contact Info • Position • Salary Details
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" name="format" value="excel" class="btn btn-excel">
+                        📊 Generate Excel
+                    </button>
+                    <button type="submit" name="format" value="pdf" class="btn btn-pdf">
+                        📄 Generate PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Staff Attendance Report Card -->
+        <div class="report-card">
+            <div class="report-card-header">
+                <div class="report-icon" style="background: linear-gradient(135deg, var(--e-global-color-secondary) 0%, var(--e-global-color-d2fd119) 100%); color: white;">
+                    📋
+                </div>
+                <div class="report-card-title">
+                    <h3>Staff Attendance</h3>
+                    <p>Attendance records for staff members</p>
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <form method="post" action="{% url 'generate_staff_attendance_report' %}" id="staffAttendanceForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="staff_id_att">Select Staff (Optional)</label>
+                    <select class="form-control" id="staff_id_att" name="staff_id">
+                        <option value="">-- All Staff --</option>
+                        {% for teacher in teachers %}
+                        <option value="{{ teacher.id }}">{{ teacher.full_name }} ({{ teacher.get_position_display }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="staff_att_start_date">Start Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           id="staff_att_start_date" 
+                           name="start_date" 
+                           required
+                           max="{{ current_date|date:'Y-m-d' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="staff_att_end_date">End Date</label>
+                    <input type="date" 
+                           class="form-control" 
+                           id="staff_att_end_date" 
+                           name="end_date" 
+                           required
+                           max="{{ current_date|date:'Y-m-d' }}">
+                </div>
+                
+                <div class="info-badge">
+                    Date • Status • Check-in Time • Remarks
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" name="format" value="excel" class="btn btn-excel">
+                        📊 Generate Excel
+                    </button>
+                    <button type="submit" name="format" value="pdf" class="btn btn-pdf">
+                        📄 Generate PDF
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -488,6 +580,14 @@
         if (document.getElementById('fee_end_date').value === '') {
             document.getElementById('fee_end_date').value = today;
         }
+
+        // Set default for staff attendance
+        if (document.getElementById('staff_att_start_date').value === '') {
+            document.getElementById('staff_att_start_date').value = firstDayOfMonth;
+        }
+        if (document.getElementById('staff_att_end_date').value === '') {
+            document.getElementById('staff_att_end_date').value = today;
+        }
     });
 
     // Validate date range
@@ -504,6 +604,16 @@
     document.getElementById('feeForm').addEventListener('submit', function(e) {
         const startDate = new Date(document.getElementById('fee_start_date').value);
         const endDate = new Date(document.getElementById('fee_end_date').value);
+        
+        if (startDate > endDate) {
+            e.preventDefault();
+            alert('Start date must be before end date!');
+        }
+    });
+    
+    document.getElementById('staffAttendanceForm').addEventListener('submit', function(e) {
+        const startDate = new Date(document.getElementById('staff_att_start_date').value);
+        const endDate = new Date(document.getElementById('staff_att_end_date').value);
         
         if (startDate > endDate) {
             e.preventDefault();

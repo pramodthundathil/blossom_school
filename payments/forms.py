@@ -506,3 +506,15 @@ class PaymentInstallmentEditForm(forms.ModelForm):
             'late_fee': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'status': forms.Select(attrs={'class': 'form-control'})
         }
+
+
+class PaymentInstallmentAddForm(forms.ModelForm):
+    """Form for adding a new payment installment"""
+    class Meta:
+        model = PaymentInstallment
+        fields = ['due_date', 'amount', 'late_fee']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'late_fee': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'value': '0'}),
+        }

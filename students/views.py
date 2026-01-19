@@ -691,7 +691,7 @@ def notification_list(request):
     filter_type = request.GET.get('filter', 'all')
     
     # Base queryset
-    notifications = Notification.objects.all().select_related(
+    notifications = Notification.objects.filter(user=request.user).select_related(
         'student', 'installment', 'installment__payment_plan'
     )
     

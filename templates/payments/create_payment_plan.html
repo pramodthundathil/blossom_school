@@ -478,6 +478,41 @@
                                 <input type="date" id="start_date" name="start_date" class="form-input" required>
                                 <div class="error-message" id="error_start_date"></div>
                             </div>
+                            
+                            <div class="form-group">
+                                <label for="session_type" class="form-label required-field">Session Type</label>
+                                <select id="session_type" name="session_type" class="form-input" required>
+                                    <option value="morning">Morning</option>
+                                    <option value="afternoon">Afternoon</option>
+                                    <option value="full_day">Full Day</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <input type="checkbox" id="registration_fee_included" name="registration_fee_included">
+                                    Include Registration Fee
+                                </label>
+                            </div>
+
+                            <div class="form-group" id="registration_fee_amount_group" style="display: none;">
+                                <label for="registration_fee_amount" class="form-label">Registration Fee Amount (AED)</label>
+                                <input type="number" id="registration_fee_amount" name="registration_fee_amount"
+                                    class="form-input" value="0" step="0.01" min="0">
+                            </div>
+                        </div>
+
+                        <!-- Custom Installments Section -->
+                        <div id="custom_installments_section" style="display: none; margin-top: 20px;">
+                            <h5 class="section-title">Custom Installments</h5>
+                            <div id="custom_installments_container">
+                                <!-- Installment rows will be added here -->
+                            </div>
+                            <button type="button" id="add_installment_btn" class="btn btn-sm btn-secondary" style="margin-top: 10px;">
+                                <i class="fas fa-plus"></i> Add Installment
+                            </button>
+                            <input type="hidden" name="custom_installments" id="custom_installments_input">
+                            <div class="error-message" id="error_custom_installments"></div>
                         </div>
                     </div>
 
@@ -630,6 +665,88 @@
         advanceAmountInput.addEventListener('input', updatePreview);
         installmentsInput.addEventListener('input', updatePreview);
         installmentFrequencyInput.addEventListener('input', updatePreview);
+
+        // Registration Fee Toggle
+        const regFeeCheckbox = document.getElementById('registration_fee_included');
+        const regFeeGroup = document.getElementById('registration_fee_amount_group');
+        regFeeCheckbox.addEventListener('change', function() {
+            regFeeGroup.style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Custom Installments Logic
+        const customSection = document.getElementById('custom_installments_section');
+        const customContainer = document.getElementById('custom_installments_container');
+        const addInstBtn = document.getElementById('add_installment_btn');
+        const customInput = document.getElementById('custom_installments_input');
+
+        planTypeSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customSection.style.display = 'block';
+                installmentsInput.disabled = true;
+                installmentFrequencyInput.disabled = true;
+                if (customContainer.children.length === 0) {
+                     addInstallmentRow();
+                }
+            } else {
+                customSection.style.display = 'none';
+                installmentsInput.disabled = false;
+                installmentFrequencyInput.disabled = false;
+            }
+        });
+
+        function addInstallmentRow() {
+            const index = customContainer.children.length + 1;
+            const row = document.createElement('div');
+            row.className = 'installment-row';
+            row.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: end;';
+            row.innerHTML = `
+                <div style="flex: 1;">
+                    <label style="font-size: 12px;">Date</label>
+                    <input type="date" class="form-input custom-date" required>
+                </div>
+                <div style="flex: 1;">
+                     <label style="font-size: 12px;">Amount</label>
+                    <input type="number" class="form-input custom-amount" step="0.01" required>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm remove-row" style="height: 42px;">&times;</button>
+            `;
+            
+            row.querySelector('.remove-row').addEventListener('click', function() {
+                row.remove();
+                updateCustomInstallments();
+            });
+
+            row.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', updateCustomInstallments);
+            });
+
+            customContainer.appendChild(row);
+        }
+
+        addInstBtn.addEventListener('click', addInstallmentRow);
+
+        function updateCustomInstallments() {
+             const rows = customContainer.querySelectorAll('.installment-row');
+             const installments = [];
+             let totalStats = 0;
+             
+             rows.forEach(row => {
+                 const date = row.querySelector('.custom-date').value;
+                 const amount = parseFloat(row.querySelector('.custom-amount').value) || 0;
+                 if (date && amount > 0) {
+                     installments.push({ date, amount });
+                     totalStats += amount;
+                 }
+             });
+             
+             customInput.value = JSON.stringify(installments);
+             
+             // Update installments count display if custom
+             if (planTypeSelect.value === 'custom') {
+                 document.getElementById('preview_installments').textContent = rows.length;
+                 // Ideally validate total matches balance here
+             }
+        }
 
         // Validation function
         function validateField(fieldId, value) {

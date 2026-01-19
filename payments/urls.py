@@ -7,6 +7,7 @@ urlpatterns = [
     # Dashboard and main views
     path('payment_dashboard/', views.PaymentDashboardView.as_view(), name='payment_dashboard'),
     path('list/', views.PaymentListView.as_view(), name='payment_list'),
+    path('pending/', views.PendingInstallmentListView.as_view(), name='pending_installments'),
     
     # Payment CRUD operations
     path('create/', views.create_payment, name='create_payment'),
@@ -22,6 +23,7 @@ urlpatterns = [
     path('plan/edit/<int:pk>/', views.edit_payment_plan, name='edit_payment_plan'),
     path('plan/delete/<int:pk>/', views.delete_payment_plan, name='delete_payment_plan'),
     path('installment/edit/<int:pk>/', views.edit_payment_installment, name='edit_payment_installment'),
+    path('plan/<int:plan_id>/add-installment/', views.add_payment_installment, name='add_payment_installment'),
     path('installment/delete/<int:pk>/', views.delete_payment_installment, name='delete_payment_installment'),
     path('installment/hold/<int:pk>/', views.hold_payment_installment, name='hold_payment_installment'),
     

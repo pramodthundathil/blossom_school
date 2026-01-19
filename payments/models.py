@@ -86,10 +86,19 @@ class StudentFeeAssignment(models.Model):
 class PaymentPlan(models.Model):
     """Define payment plans for students (monthly, quarterly, etc.)"""
     PLAN_TYPE_CHOICES = [
-        ('full', 'Full Payment'),
+        ('weekly', 'Weekly'),
         ('monthly', 'Monthly'),
+        ('3_months', '3 Months'),
+        ('6_months', '6 Months'),
         ('quarterly', 'Quarterly'),
+        ('full', 'Full Payment'),
         ('custom', 'Custom'),
+    ]
+
+    SESSION_TYPE_CHOICES = [
+        ('morning', 'Morning'),
+        ('afternoon', 'Afternoon'),
+        ('full_day', 'Full Day'),
     ]
     
     STATUS_CHOICES = [
@@ -109,6 +118,8 @@ class PaymentPlan(models.Model):
     installment_frequency = models.PositiveIntegerField(default=30, help_text="Days between installments")
     start_date = models.DateField()
     fee_category = models.ForeignKey(FeeCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    session_type = models.CharField(max_length=20, choices=SESSION_TYPE_CHOICES, default='morning')
+    registration_fee_included = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

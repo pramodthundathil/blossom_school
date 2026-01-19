@@ -84,9 +84,15 @@
                             <td style="color: var(--e-global-color-text); font-size: 12px;">
                                {{ student.phone_number|default:"-" }}</td>
                             <td>
-                                <span class="status-badge status-{{ student.status }}">
-                                    {{ student.get_status_display }}
+                                {% if student.is_active %}
+                                <span class="status-badge bg-success">
+                                    Approved 
                                 </span>
+                                {% else %}
+                                <span class="status-badge bg-warning">
+                                    Pending
+                                </span>
+                                {% endif %}
                             </td>
                             <td style="color: var(--e-global-color-text); font-size: 12px;">
                                 {{ student.created_at|date:"M d, Y" }}</td>

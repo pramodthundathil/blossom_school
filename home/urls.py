@@ -36,6 +36,8 @@ urlpatterns = [
     path('date-range/', views.generate_date_range_report, name='generate_date_range_report'),
     path('fee-tracking/', views.generate_fee_tracking_report, name='generate_fee_tracking_report'),
     path('student-report/', views.generate_student_report, name='generate_student_report'),
+    path('staff-report/', views.generate_staff_report, name='generate_staff_report'),
+    path('staff-attendance-report/', views.generate_staff_attendance_report, name='generate_staff_attendance_report'),
 
 # API endpoints for dashboard data
     path('api/dashboard-data/', views.dashboard_data_api, name='dashboard_data_api'),

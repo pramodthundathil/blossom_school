@@ -692,7 +692,10 @@
                 updateUnreadCount();
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to mark notification as read. Please try again.');
+        });
     }
 
     // Mark as read and redirect to student detail

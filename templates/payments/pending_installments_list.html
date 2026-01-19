@@ -1,0 +1,118 @@
+{% extends 'auth_templates/index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="students-container">
+    <div class="dashboard-card-1">
+        <div class="card-header">
+            <h3>
+                <i class="fas fa-clock text-warning"></i>
+                {% if mode == 'this_month' %}
+                    Pending Payments (This Month)
+                {% else %}
+                    All Pending Payments
+                {% endif %}
+            </h3>
+            <div>
+                {% if mode == 'this_month' %}
+                <a href="?mode=all" class="btn btn-outline-secondary btn-sm">View All Pending</a>
+                {% else %}
+                <a href="?mode=this_month" class="btn btn-outline-primary btn-sm">View This Month Only</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card-content">
+            <div class="table-responsive-1">
+                <table id="pendingTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Due Date</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for installment in installments %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; flex-direction: column;">
+                                    <strong style="color: var(--e-global-color-text); font-size: 12px;">{{ installment.payment_plan.student.get_full_name }}</strong>
+                                    <small style="color: var(--e-global-color-text); opacity: 0.7; font-size: 10px;">{{ installment.payment_plan.student.student_id }}</small>
+                                </div>
+                            </td>
+                            <td style="color: var(--e-global-color-text); font-size: 12px;">{{ installment.due_date|date:"M d, Y" }}</td>
+                            <td>
+                                <div style="font-size: 12px;">
+                                    Installment {{ installment.installment_number }}
+                                    {% if installment.is_overdue %}
+                                    <br><small class="text-danger" style="font-size: 10px;">Overdue by {{ installment.days_overdue }} days</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td><strong style="font-size: 12px;"><span style='font-size:small'>AED </span>{{ installment.amount|floatformat:2 }}</strong></td>
+                            <td class="text-success" style="font-size: 12px;"><span style='font-size:small'>AED </span>{{ installment.paid_amount|floatformat:2 }}</td>
+                            <td>
+                                <div style="font-size: 12px;">
+                                    <strong class="text-danger"><span style='font-size:small'>AED </span>{{ installment.get_outstanding_amount|floatformat:2 }}</strong>
+                                    {% if installment.late_fee > 0 %}
+                                    <br><small class="text-warning" style="font-size: 10px;">+ AED {{ installment.late_fee }} Late Fee</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if installment.status == 'overdue' %}
+                                    <span class="status-badge bg-danger" style="font-size: 10px;">
+                                        <i class="fas fa-exclamation-circle"></i> Overdue
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge bg-warning" style="font-size: 10px;">
+                                        <i class="fas fa-clock"></i> Pending
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'create_payment' %}?student_id={{ installment.payment_plan.student.id }}&installment_id={{ installment.id }}" 
+                                   class="btn btn-sm" style="background: rgba(87, 188, 144, 0.1); color: #10b981; font-weight: 600; font-size: 12px;">
+                                    <i class="fas fa-credit-card me-1"></i> Pay
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DataTables CSS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css' %}">
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+
+<script>
+    $(document).ready(function() {
+        if ($.fn.DataTable) {
+            $('#pendingTable').DataTable({
+                responsive: true,
+                order: [[1, 'asc']], // Sort by Due Date ascending
+                pageLength: 25,
+                language: {
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    infoEmpty: "No entries found",
+                    zeroRecords: "No pending payments found",
+                    emptyTable: "No pending payments found"
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

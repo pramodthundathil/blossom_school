@@ -429,7 +429,7 @@
 
         <!-- Statistics Cards -->
         <div class="stats-grid">
-            <div class="stat-card primary">
+            <a href="{% url 'students' %}" class="stat-card primary" style="text-decoration: none; color: inherit; display: flex; cursor: pointer;">
                 <div class="stat-icon">
                     <i class="fas fa-users"></i>
                 </div>
@@ -438,8 +438,8 @@
                     <p>Total Students</p>
                     <span class="stat-change positive" id="studentChange">Loading...</span>
                 </div>
-            </div>
-            <div class="stat-card secondary">
+            </a>
+            <a href="{% url 'teacher_list' %}" class="stat-card secondary" style="text-decoration: none; color: inherit; display: flex; cursor: pointer;">
                 <div class="stat-icon">
                     <i class="fas fa-chalkboard-teacher"></i>
                 </div>
@@ -448,10 +448,10 @@
                     <p>Active Staffs</p>
                     <span class="stat-change positive" id="teacherChange">Loading...</span>
                 </div>
-            </div>
+            </a>
                  {% if request.user.role == 'admin'%}
             
-            <div class="stat-card accent">
+            <a href="{% url 'income' %}" class="stat-card accent" style="text-decoration: none; color: inherit; display: flex; cursor: pointer;">
                 <div class="stat-icon">
                     <i class="fas fa-dollar-sign"></i>
                 </div>
@@ -460,9 +460,9 @@
                     <p>Total Revenue (This Month)</p>
                     <span class="stat-change positive" id="revenueChange">Loading...</span>
                 </div>
-            </div>
+            </a>
             {% endif %}
-            <div class="stat-card warning">
+            <a href="{% url 'pending_installments' %}" class="stat-card warning" style="text-decoration: none; color: inherit; display: flex; cursor: pointer;">
                 <div class="stat-icon">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
@@ -471,7 +471,7 @@
                     <p>Pending Installments</p>
                     <span class="stat-change negative" id="overdueCount">Loading...</span>
                 </div>
-            </div>
+            </a>
         </div>
                  {% if request.user.role == 'admin'%}
 
@@ -604,27 +604,7 @@
 
         <!-- Teacher Attendance Summary -->
         <div class="dashboard-grid-bottom">
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-user-check"></i> Teacher Attendance Today</h3>
-                </div>
-                <div class="card-content">
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                        <div style="text-align: center; padding: 15px; background: rgba(67, 165, 116, 0.1); border-radius: 8px;">
-                            <div style="font-size: 24px; font-weight: 700; color: var(--e-global-color-4e9ef99);" id="teachersPresent">0</div>
-                            <div style="font-size: 12px; opacity: 0.8;">Present</div>
-                        </div>
-                        <div style="text-align: center; padding: 15px; background: rgba(255, 149, 135, 0.1); border-radius: 8px;">
-                            <div style="font-size: 24px; font-weight: 700; color: var(--e-global-color-7d1e931);" id="teachersAbsent">0</div>
-                            <div style="font-size: 12px; opacity: 0.8;">Absent</div>
-                        </div>
-                        <div style="text-align: center; padding: 15px; background: rgba(255, 184, 4, 0.1); border-radius: 8px;">
-                            <div style="font-size: 24px; font-weight: 700; color: var(--e-global-color-3a7e2f2);" id="teachersHalfDay">0</div>
-                            <div style="font-size: 12px; opacity: 0.8;">Half Day</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
 
             <!-- Quick Actions -->
             <div class="dashboard-card">
@@ -633,15 +613,18 @@
                 </div>
                 <div class="card-content">
                     <div class="quick-actions">
-                        <a href="{%url 'student_create'%}" class="action-btn primary">
+                        <a href="{% url 'student_create' %}" class="action-btn primary">
                             <i class="fas fa-user-plus"></i>
                             <span>Add New Student</span>
                         </a>
-                        <a href="{%url 'create_payment'%}" class="action-btn secondary">
+                        <a href="{% url 'create_payment' %}" class="action-btn secondary">
                             <i class="fas fa-credit-card"></i>
                             <span>Record Payment</span>
                         </a>
-                        
+                        <a href="{% url 'pending_installments' %}?mode=this_month" class="action-btn warning" style="background: rgba(255, 184, 4, 0.1); color: #f59e0b;">
+                             <i class="fas fa-clock"></i>
+                             <span>Pending Payments</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -670,28 +653,30 @@ async function fetchDashboardData() {
         document.getElementById('teacherChange').textContent = `${data.teachers.total || 0} total staffs`;
         
         // Update Revenue Stats
-        const revenue = data.payments.total_revenue || 0;
-        document.getElementById('totalRevenue').textContent = `AED ${revenue.toLocaleString()}`;
-        const changeSymbol = data.payments.revenue_change >= 0 ? '+' : '';
-        document.getElementById('revenueChange').textContent = `${changeSymbol}${data.payments.revenue_change.toFixed(1)}% vs last month`;
+        const totalRevenueEl = document.getElementById('totalRevenue');
+        if (totalRevenueEl) {
+            const revenue = data.payments.total_revenue || 0;
+            totalRevenueEl.textContent = `AED ${revenue.toLocaleString()}`;
+            const changeSymbol = data.payments.revenue_change >= 0 ? '+' : '';
+            document.getElementById('revenueChange').textContent = `${changeSymbol}${data.payments.revenue_change.toFixed(1)}% vs last month`;
+        }
         
         // Update Pending Payments
         document.getElementById('pendingPayments').textContent = data.payments.pending_installments || 0;
         document.getElementById('overdueCount').textContent = `${data.payments.overdue_installments || 0} overdue`;
         
-        // Update Teacher Attendance
-        document.getElementById('teachersPresent').textContent = data.teachers.attendance_today.present;
-        document.getElementById('teachersAbsent').textContent = data.teachers.attendance_today.absent;
-        document.getElementById('teachersHalfDay').textContent = data.teachers.attendance_today.half_day;
-        
         // Update Fee Collection Summary
         // updateFeeCollectionSummary(data.fee_collection);
         
         // Update Forecast
-        updateForecast(data.forecast);
+        if (document.getElementById('forecastAmount')) {
+             updateForecast(data.forecast);
+        }
         
         // Update Recent Payments
-        updateRecentPayments(data.payments.recent_payments);
+        if (document.getElementById('recentPaymentsList')) {
+            updateRecentPayments(data.payments.recent_payments);
+        }
         
         // Initialize Charts with real data
         initializeCharts(data);

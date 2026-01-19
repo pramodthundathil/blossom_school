@@ -101,7 +101,7 @@ class Student(models.Model):
 
     # Status and Administrative
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending',null=True, blank=True)
-    approved = models.BooleanField(default=False)
+    approved = models.BooleanField(default=True)
     year_of_admission = models.IntegerField()
     date_start = models.DateField(blank=True, null=True)
     date_end = models.DateField(blank=True, null=True)

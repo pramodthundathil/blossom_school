@@ -726,6 +726,9 @@
             </div>
         </div>
 
+        <!-- Pending Payments (This Month) -->
+
+
         <!-- Sidebar Cards -->
         <div class="sidebar-cards">
             <!-- Quick Actions -->
@@ -743,6 +746,16 @@
                         <div class="quick-action-content">
                             <div class="quick-action-title">Record New Payment</div>
                             <div class="quick-action-desc">Add a payment transaction</div>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'pending_installments' %}?mode=this_month" class="quick-action-btn">
+                        <div class="quick-action-icon" style="background: linear-gradient(135deg, var(--e-global-color-3a7e2f2) 0%, #ffcc33 100%);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="quick-action-content">
+                            <div class="quick-action-title">Pending Payments</div>
+                            <div class="quick-action-desc">View all pending items</div>
                         </div>
                     </a>
 
@@ -765,26 +778,6 @@
                             <div class="quick-action-desc">Generate financial reports</div>
                         </div>
                     </a>
-
-                    <!-- <a href="{% url 'bulk_reminder' %}" class="quick-action-btn">
-                        <div class="quick-action-icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <div class="quick-action-content">
-                            <div class="quick-action-title">Send Reminders</div>
-                            <div class="quick-action-desc">Notify about due payments</div>
-                        </div>
-                    </a> -->
-
-                    <!-- <a href="{% url 'export_payment_data' %}" class="quick-action-btn">
-                        <div class="quick-action-icon">
-                            <i class="fas fa-download"></i>
-                        </div>
-                        <div class="quick-action-content">
-                            <div class="quick-action-title">Export Data</div>
-                            <div class="quick-action-desc">Download payment records</div>
-                        </div>
-                    </a> -->
                 </div>
             </div>
 
