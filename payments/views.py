@@ -856,6 +856,7 @@ def create_payment_plan(request, student_id):
         'fee_assignments': fee_assignments,
         'total_annual_fees': total_annual_fees,
         'plan_types': PaymentPlan.PLAN_TYPE_CHOICES,
+        'session_types': PaymentPlan.SESSION_TYPE_CHOICES,
         'fee_categories': fee_categories,
     }
     

@@ -1,0 +1,10 @@
+SL_No,Student_Name,Amount,Due_Date,Payment_Type,Description
+1,SIDRA FATIMA HASSAN,900.0,2026-02-14,Standard,Tution fee (Monthly )
+2,MOHAMED HUSAM,700.0,2026-01-29,Standard,Tution fee (Monthly ) SIBLING DISCOUNT
+3,AMIN HUSAM,700.0,2026-01-29,Standard,Tution fee (Monthly ) SIBLING DISCOUNT
+5,ALBIAN ADAM LINTESH,900.0,2026-02-17,Consolidated,800+100 ONE WAY DROP
+79,Aaliyah Anas Ibrahim,1800.0,2026-01-23,Installment,2nd installment
+79,Aaliyah Anas Ibrahim,300.0,2026-02-23,Installment,3rd installment
+81,Dvaimik Devdutt,1750.0,2026-01-22,Installment,Last due
+86,Tahnoun mohammad,400.0,2026-01-25,Outstanding,Outstanding amount
+10,Omar Mohmmed,6300.0,2026-03-07,Standard,6 months with bus

@@ -99,6 +99,11 @@ class PaymentPlan(models.Model):
         ('morning', 'Morning'),
         ('afternoon', 'Afternoon'),
         ('full_day', 'Full Day'),
+        ('morning_nursery', 'Morning Nursery'),
+        ('full_day_nursery', 'Full Day Nursery'),
+        ('afternoon_nursery', 'Afternoon Nursery'),
+        ('extended_nursery', 'Extended Nursery'),
+        ('weekly_3_days', 'Weekly 3 Days'),
     ]
     
     STATUS_CHOICES = [
