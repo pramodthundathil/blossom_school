@@ -1227,7 +1227,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
-from weasyprint import HTML
+from utils.pdf_generator import render_to_pdf
 import tempfile
 from .models import Payment, Student
 
@@ -1280,21 +1280,16 @@ def generate_invoice(request, payment_id):
 def generate_pdf_invoice(request, context):
     """Generate PDF version of invoice"""
     
-    # Render HTML template
-    html_string = render_to_string('payments/invoice.html', context)
-    
-    # Create PDF
-    html = HTML(string=html_string, base_url=request.build_absolute_uri())
-    
     # Generate PDF
-    result = html.write_pdf()
+    pdf = render_to_pdf('payments/invoice.html', context)
     
-    # Create response
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="invoice_{context["payment"].payment_id}.pdf"'
-    response.write(result)
-    
-    return response
+    if pdf:
+        # Create response
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="invoice_{context["payment"].payment_id}.pdf"'
+        return response
+        
+    return HttpResponse("Error generating PDF", status=500)
 
 
 @unauthenticated_user
@@ -1364,12 +1359,14 @@ def edit_payment_installment(request, pk):
         form = PaymentInstallmentEditForm(request.POST, instance=installment)
         if form.is_valid():
             form.save()
-            # Update status logic if amount/paid amount changed
-            installment.update_status()
-            installment.save()
+            # Update status logic ONLY if status wasn't manually changed
+            if 'status' not in form.changed_data:
+                installment.update_status()
+                installment.save()
             
             messages.success(request, f"Installment {installment.installment_number} updated successfully.")
             return redirect('student_payment_details', student_id=student_id)
+
     else:
         form = PaymentInstallmentEditForm(instance=installment)
     
@@ -1380,6 +1377,7 @@ def edit_payment_installment(request, pk):
         'student': installment.payment_plan.student 
     }
     return render(request, 'payments/payment_installment_form.html', context)
+
 
 
 @csrf_protect

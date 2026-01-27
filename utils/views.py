@@ -632,7 +632,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
-from weasyprint import HTML
+from .pdf_generator import render_to_pdf
 from .models import MonthlySalary, Teacher, Attendance
 from datetime import date
 from calendar import monthrange
@@ -725,23 +725,20 @@ def generate_salary_slip(request, salary_id):
 def generate_pdf_salary_slip(request, context):
     """Generate PDF version of salary slip"""
     
-    # Render HTML template
-    html_string = render_to_string('salary/salary_slip.html', context)
+    # Generate PDF
+    pdf = render_to_pdf('salary/salary_slip.html', context)
     
-    # Create PDF
-    html = HTML(string=html_string, base_url=request.build_absolute_uri())
-    result = html.write_pdf()
+    if pdf:
+        # Create response
+        teacher_name = context['teacher'].full_name.replace(' ', '_')
+        month_year = context['month_year'].replace(' ', '_')
+        filename = f'salary_slip_{teacher_name}_{month_year}.pdf'
+        
+        response = HttpResponse(pdf, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
     
-    # Create response
-    teacher_name = context['teacher'].full_name.replace(' ', '_')
-    month_year = context['month_year'].replace(' ', '_')
-    filename = f'salary_slip_{teacher_name}_{month_year}.pdf'
-    
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    response.write(result)
-    
-    return response
+    return HttpResponse("Error generating PDF", status=500)
 
 
 @unauthenticated_user

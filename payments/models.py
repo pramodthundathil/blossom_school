@@ -144,10 +144,10 @@ class PaymentInstallment(models.Model):
     """Individual installments for payment plans"""
     STATUS_CHOICES = [
         ('pending', 'Pending'),
-        ('paid', 'Paid'),
-        ('overdue', 'Overdue'),
-        ('partially_paid', 'Partially Paid'),
-        ('held', 'On Hold'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('refunded', 'Refunded'),
+        ('cancelled', 'Cancelled'),
     ]
 
     payment_plan = models.ForeignKey(PaymentPlan, on_delete=models.CASCADE, related_name='installments')
@@ -169,15 +169,24 @@ class PaymentInstallment(models.Model):
 
     def update_status(self):
         """Update status based on payment amount and due date"""
+        # Do not auto-update if status is in a terminal/manual state
+        if self.status in ['cancelled', 'refunded', 'failed']:
+            return
+
         if self.paid_amount >= self.amount + self.late_fee:
-            self.status = 'paid'
-        elif self.paid_amount > 0:
-            self.status = 'partially_paid'
-        elif timezone.now().date() > self.due_date:
-            self.status = 'overdue'
+            self.status = 'completed'
+        # elif self.paid_amount > 0:
+        #     self.status = 'partially_paid' # Not in choices
+        elif timezone.now().date() > self.due_date and self.status != 'completed':
+             # Keep distinct overdue flag but status remains pending or can be failed?
+             # User list has 'failed'. Overdue is not 'failed' usually but let's stick to valid choices.
+             # We'll just keep it pending but mark is_overdue.
             self.is_overdue = True
+            self.status = 'pending'
         else:
             self.status = 'pending'
+
+
 
     def __str__(self):
         return f"{self.payment_plan.student.get_full_name()} - Installment {self.installment_number}"

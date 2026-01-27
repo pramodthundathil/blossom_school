@@ -2,60 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salary Slip - {{ teacher.full_name }} - {{ month_year }}</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @page {
+            size: a4 portrait;
+            margin: 1cm;
         }
         
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
             font-size: 11px;
             line-height: 1.5;
             color: #333;
-            padding: 20px;
         }
         
         .salary-slip-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
+            width: 100%;
             border: 2px solid #2c3e50;
         }
         
         .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            background-color: #2c3e50;
             color: white;
-            padding: 25px 30px;
+            padding: 20px;
             text-align: center;
         }
         
         .header h1 {
             font-size: 24px;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin: 0 0 5px 0;
+            color: white;
         }
         
         .header .address {
             font-size: 11px;
-            margin: 3px 0;
-            opacity: 0.95;
+            margin: 2px 0;
+            color: #ecf0f1;
         }
         
         .payslip-title {
-            background: #ecf0f1;
-            padding: 12px 30px;
+            background-color: #ecf0f1;
+            padding: 10px;
             text-align: center;
             border-bottom: 2px solid #bdc3c7;
         }
         
         .payslip-title h2 {
-            font-size: 20px;
+            font-size: 18px;
             color: #2c3e50;
-            margin-bottom: 3px;
+            margin: 0;
+            padding: 0;
         }
         
         .payslip-title .period {
@@ -65,35 +61,31 @@
         }
         
         .employee-info {
-            padding: 20px 30px;
-            background: #f8f9fa;
+            padding: 15px;
+            background-color: #f8f9fa;
             border-bottom: 2px solid #dee2e6;
         }
         
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        table.info-table {
+            width: 100%;
         }
         
-        .info-row {
-            display: flex;
-            padding: 5px 0;
+        table.info-table td {
+            width: 50%;
+            padding: 3px 0;
+            vertical-align: top;
         }
         
         .info-label {
             font-weight: bold;
-            min-width: 140px;
             color: #495057;
-        }
-        
-        .info-value {
-            color: #212529;
+            display: inline-block;
+            width: 120px;
         }
         
         .attendance-summary {
-            padding: 20px 30px;
-            background: #fff;
+            padding: 15px;
+            background-color: #fff;
             border-bottom: 1px solid #dee2e6;
         }
         
@@ -101,246 +93,181 @@
             font-weight: bold;
             font-size: 14px;
             color: #2c3e50;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             padding-bottom: 5px;
             border-bottom: 2px solid #3498db;
         }
         
-        .attendance-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-top: 10px;
+        table.attendance-table {
+            width: 100%;
+            border-spacing: 10px;
         }
         
-        .attendance-box {
+        table.attendance-table td {
+            width: 25%;
             text-align: center;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 4px;
+            padding: 10px;
+            background-color: #f8f9fa;
             border: 1px solid #dee2e6;
         }
         
-        .attendance-box .label {
-            font-size: 10px;
+        table.attendance-table .label {
+            font-size: 9px;
             color: #6c757d;
             text-transform: uppercase;
-            margin-bottom: 5px;
         }
         
-        .attendance-box .value {
-            font-size: 18px;
+        table.attendance-table .value {
+            font-size: 16px;
             font-weight: bold;
             color: #2c3e50;
-        }
-        
-        .attendance-box.percentage .value {
-            color: #27ae60;
+            margin-top: 5px;
         }
         
         .salary-details {
-            padding: 20px 30px;
+            padding: 15px;
         }
         
-        .salary-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+        table.salary-structure-table {
+            width: 100%;
         }
         
-        .earnings-section, .deductions-section {
-            background: #fff;
+        table.salary-structure-table td.col-earnings {
+            width: 48%;
+            vertical-align: top;
+            padding-right: 2%;
+        }
+        
+        table.salary-structure-table td.col-deductions {
+            width: 48%;
+            vertical-align: top;
+            padding-left: 2%;
         }
         
         .section-header {
-            background: #2c3e50;
+            background-color: #2c3e50;
             color: white;
-            padding: 10px 15px;
+            padding: 8px 10px;
             font-weight: bold;
-            font-size: 13px;
-            margin-bottom: 0;
+            font-size: 12px;
         }
         
         .deductions-section .section-header {
-            background: #e74c3c;
+            background-color: #e74c3c;
         }
         
-        .salary-table {
+        table.items-table {
             width: 100%;
             border-collapse: collapse;
         }
         
-        .salary-table tr {
+        table.items-table td {
+            padding: 8px 5px;
             border-bottom: 1px solid #ecf0f1;
         }
         
-        .salary-table td {
-            padding: 10px 15px;
-        }
-        
-        .salary-table .description {
-            color: #495057;
-        }
-        
-        .salary-table .amount {
+        table.items-table .amount {
             text-align: right;
             font-weight: bold;
             color: #2c3e50;
-            white-space: nowrap;
         }
         
-        .salary-table .total-row {
-            background: #f8f9fa;
+        table.items-table .total-row td {
+            background-color: #f8f9fa;
             font-weight: bold;
-            font-size: 12px;
             border-top: 2px solid #dee2e6;
-        }
-        
-        .salary-table .total-row td {
-            padding: 12px 15px;
-            color: #2c3e50;
+            padding: 10px 5px;
         }
         
         .net-salary-section {
-            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            background-color: #27ae60;
             color: white;
-            padding: 20px 30px;
-            margin: 0;
+            padding: 15px 30px;
         }
         
-        .net-salary-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        table.net-salary-table {
+            width: 100%;
         }
         
         .net-salary-label {
             font-size: 16px;
             font-weight: bold;
+            text-align: left;
+            color: white;
         }
         
         .net-salary-amount {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
+            text-align: right;
+            color: white;
         }
         
         .payment-info {
-            padding: 20px 30px;
-            background: #f8f9fa;
+            padding: 15px;
+            background-color: #f8f9fa;
             border-top: 1px solid #dee2e6;
         }
         
-        .payment-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+        table.payment-table {
+            width: 100%;
         }
         
-        .payment-item {
-            padding: 8px 0;
+        table.payment-table td {
+            vertical-align: top;
+            padding: 5px;
         }
         
-        .payment-item .label {
-            font-size: 10px;
+        .payment-item-label {
+            font-size: 9px;
             color: #6c757d;
             text-transform: uppercase;
-            margin-bottom: 3px;
         }
         
-        .payment-item .value {
+        .payment-item-value {
             font-weight: bold;
             color: #2c3e50;
         }
         
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-paid {
-            background: #27ae60;
-            color: white;
-        }
-        
-        .status-pending {
-            background: #f39c12;
-            color: white;
-        }
-        
-        .status-processed {
-            background: #3498db;
-            color: white;
-        }
-        
-        .status-hold {
-            background: #e74c3c;
-            color: white;
-        }
-        
         .remarks-section {
-            padding: 15px 30px;
-            background: #fff3cd;
+            padding: 15px;
+            background-color: #fff3cd;
             border-top: 1px solid #ffc107;
-        }
-        
-        .remarks-section .title {
-            font-weight: bold;
             color: #856404;
-            margin-bottom: 5px;
-        }
-        
-        .remarks-section .content {
-            color: #856404;
-        }
-        
-        .footer {
-            padding: 20px 30px;
-            text-align: center;
-            background: #f8f9fa;
-            border-top: 2px solid #dee2e6;
-        }
-        
-        .footer p {
-            margin: 5px 0;
-            font-size: 10px;
-            color: #6c757d;
         }
         
         .signature-section {
-            display: flex;
-            justify-content: space-between;
             padding: 40px 30px 20px;
-            margin-top: 30px;
+            margin-top: 10px;
         }
         
-        .signature-box {
+        table.signature-table {
+            width: 100%;
+        }
+        
+        table.signature-table td {
+            width: 40%;
             text-align: center;
-            min-width: 200px;
+            vertical-align: top;
         }
         
         .signature-line {
-            border-top: 2px solid #2c3e50;
-            margin-bottom: 8px;
+            border-top: 1px solid #2c3e50;
+            margin-bottom: 5px;
+            width: 80%;
+            margin-left: 10%;
         }
         
-        .signature-label {
-            font-size: 11px;
-            color: #495057;
-            font-weight: bold;
+        .footer {
+            padding: 15px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 9px;
         }
         
-        @media print {
-            body {
-                padding: 0;
-            }
-            .salary-slip-container {
-                border: none;
-            }
-        }
+        .footer p { margin: 2px 0; }
     </style>
 </head>
 <body>
@@ -363,169 +290,183 @@
 
         <!-- Employee Information -->
         <div class="employee-info">
-            <div class="info-grid">
-                <div class="info-row">
-                    <span class="info-label">Employee Name:</span>
-                    <span class="info-value">{{ teacher.full_name }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Employee ID:</span>
-                    <span class="info-value">{{ teacher.teacher_id }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Designation:</span>
-                    <span class="info-value">{{ teacher.get_position_display }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Department:</span>
-                    <span class="info-value">Teaching Staff</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Date of Joining:</span>
-                    <span class="info-value">{{ teacher.start_date|date:"d M, Y" }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Emirates ID:</span>
-                    <span class="info-value">{{ teacher.emirates_id|default:"N/A" }}</span>
-                </div>
-            </div>
+            <table class="info-table">
+                <tr>
+                    <td>
+                        <span class="info-label">Employee Name:</span>
+                        {{ teacher.full_name }}
+                    </td>
+                    <td>
+                        <span class="info-label">Employee ID:</span>
+                        {{ teacher.teacher_id }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="info-label">Designation:</span>
+                        {{ teacher.get_position_display }}
+                    </td>
+                    <td>
+                        <span class="info-label">Department:</span>
+                        Teaching Staff
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span class="info-label">Date of Joining:</span>
+                        {{ teacher.start_date|date:"d M, Y" }}
+                    </td>
+                    <td>
+                        <span class="info-label">Emirates ID:</span>
+                        {{ teacher.emirates_id|default:"N/A" }}
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <!-- Attendance Summary -->
         <div class="attendance-summary">
             <div class="summary-title">ATTENDANCE SUMMARY</div>
-            <div class="attendance-grid">
-                <div class="attendance-box">
-                    <div class="label">Total Working Days</div>
-                    <div class="value">{{ salary.total_working_days }}</div>
-                </div>
-                <div class="attendance-box">
-                    <div class="label">Days Present</div>
-                    <div class="value">{{ salary.days_present }}</div>
-                </div>
-                <div class="attendance-box">
-                    <div class="label">Days Absent</div>
-                    <div class="value">{{ salary.days_absent }}</div>
-                </div>
-                <div class="attendance-box percentage">
-                    <div class="label">Attendance %</div>
-                    <div class="value">{{ attendance_percentage }}%</div>
-                </div>
-            </div>
+            <table class="attendance-table">
+                <tr>
+                    <td>
+                        <div class="label">Working Days</div>
+                        <div class="value">{{ salary.total_working_days }}</div>
+                    </td>
+                    <td>
+                        <div class="label">Days Present</div>
+                        <div class="value">{{ salary.days_present }}</div>
+                    </td>
+                    <td>
+                        <div class="label">Days Absent</div>
+                        <div class="value">{{ salary.days_absent }}</div>
+                    </td>
+                    <td>
+                        <div class="label">Attendance %</div>
+                        <div class="value" style="color: #27ae60;">{{ attendance_percentage }}%</div>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <!-- Salary Details -->
         <div class="salary-details">
-            <div class="salary-grid">
-                <!-- Earnings -->
-                <div class="earnings-section">
-                    <div class="section-header">EARNINGS</div>
-                    <table class="salary-table">
-                        <tbody>
+            <table class="salary-structure-table">
+                <tr>
+                    <!-- Earnings -->
+                    <td class="col-earnings">
+                        <div class="section-header">EARNINGS</div>
+                        <table class="items-table">
                             {% for earning in earnings %}
                             <tr>
-                                <td class="description">{{ earning.description }}</td>
+                                <td>{{ earning.description }}</td>
                                 <td class="amount">AED {{ earning.amount|floatformat:2 }}</td>
                             </tr>
                             {% endfor %}
-                        </tbody>
-                        <tfoot>
                             <tr class="total-row">
                                 <td>TOTAL EARNINGS</td>
                                 <td class="amount">AED {{ total_earnings|floatformat:2 }}</td>
                             </tr>
-                        </tfoot>
-                    </table>
-                </div>
-
-                <!-- Deductions -->
-                <div class="deductions-section">
-                    <div class="section-header">DEDUCTIONS</div>
-                    <table class="salary-table">
-                        <tbody>
-                            {% if deductions %}
-                                {% for deduction in deductions %}
-                                <tr>
-                                    <td class="description">{{ deduction.description }}</td>
-                                    <td class="amount">AED {{ deduction.amount|floatformat:2 }}</td>
+                        </table>
+                    </td>
+                    
+                    <!-- Deductions -->
+                    <td class="col-deductions">
+                        <div class="deductions-section">
+                            <div class="section-header">DEDUCTIONS</div>
+                            <table class="items-table">
+                                {% if deductions %}
+                                    {% for deduction in deductions %}
+                                    <tr>
+                                        <td>{{ deduction.description }}</td>
+                                        <td class="amount">AED {{ deduction.amount|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td>No Deductions</td>
+                                        <td class="amount">AED 0.00</td>
+                                    </tr>
+                                {% endif %}
+                                <tr class="total-row">
+                                    <td>TOTAL DEDUCTIONS</td>
+                                    <td class="amount">AED {{ total_deductions|floatformat:2 }}</td>
                                 </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td class="description">No Deductions</td>
-                                    <td class="amount">AED 0.00</td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                        <tfoot>
-                            <tr class="total-row">
-                                <td>TOTAL DEDUCTIONS</td>
-                                <td class="amount">AED {{ total_deductions|floatformat:2 }}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <!-- Net Salary -->
         <div class="net-salary-section">
-            <div class="net-salary-content">
-                <div class="net-salary-label">NET SALARY PAYABLE</div>
-                <div class="net-salary-amount">AED {{ salary.net_salary|floatformat:2 }}</div>
-            </div>
+            <table class="net-salary-table">
+                <tr>
+                    <td>
+                        <div class="net-salary-label">NET SALARY PAYABLE</div>
+                    </td>
+                    <td>
+                        <div class="net-salary-amount">AED {{ salary.net_salary|floatformat:2 }}</div>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <!-- Payment Information -->
         <div class="payment-info">
-            <div class="payment-grid">
-                <div class="payment-item">
-                    <div class="label">Payment Status</div>
-                    <div class="value">
-                        <span class="status-badge status-{{ salary.payment_status }}">
+            <table class="payment-table">
+                <tr>
+                    <td>
+                        <div class="payment-item-label">Payment Status</div>
+                        <div class="payment-item-value">
                             {{ salary.get_payment_status_display }}
-                        </span>
-                    </div>
-                </div>
-                {% if salary.payment_date %}
-                <div class="payment-item">
-                    <div class="label">Payment Date</div>
-                    <div class="value">{{ salary.payment_date|date:"d M, Y" }}</div>
-                </div>
-                {% endif %}
-                {% if salary.payment_method %}
-                <div class="payment-item">
-                    <div class="label">Payment Method</div>
-                    <div class="value">{{ salary.payment_method }}</div>
-                </div>
-                {% endif %}
-                {% if salary.payment_reference %}
-                <div class="payment-item">
-                    <div class="label">Reference Number</div>
-                    <div class="value">{{ salary.payment_reference }}</div>
-                </div>
-                {% endif %}
-            </div>
+                        </div>
+                    </td>
+                    {% if salary.payment_date %}
+                    <td>
+                        <div class="payment-item-label">Payment Date</div>
+                        <div class="payment-item-value">{{ salary.payment_date|date:"d M, Y" }}</div>
+                    </td>
+                    {% endif %}
+                    {% if salary.payment_method %}
+                    <td>
+                        <div class="payment-item-label">Payment Method</div>
+                        <div class="payment-item-value">{{ salary.payment_method }}</div>
+                    </td>
+                    {% endif %}
+                    {% if salary.payment_reference %}
+                    <td>
+                        <div class="payment-item-label">Reference Number</div>
+                        <div class="payment-item-value">{{ salary.payment_reference }}</div>
+                    </td>
+                    {% endif %}
+                </tr>
+            </table>
         </div>
 
         <!-- Remarks -->
         {% if salary.remarks %}
         <div class="remarks-section">
-            <div class="title">REMARKS:</div>
-            <div class="content">{{ salary.remarks }}</div>
+            <strong>REMARKS:</strong> {{ salary.remarks }}
         </div>
         {% endif %}
 
         <!-- Signature Section -->
         <div class="signature-section">
-            <div class="signature-box">
-                <div class="signature-line"></div>
-                <div class="signature-label">Employee Signature</div>
-            </div>
-            <div class="signature-box">
-                <div class="signature-line"></div>
-                <div class="signature-label">Authorized Signatory</div>
-            </div>
+            <table class="signature-table">
+                <tr>
+                    <td>
+                        <div class="signature-line"></div>
+                        <div class="signature-label">Employee Signature</div>
+                    </td>
+                    <td width="20%">&nbsp;</td>
+                    <td>
+                        <div class="signature-line"></div>
+                        <div class="signature-label">Authorized Signatory</div>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <!-- Footer -->
