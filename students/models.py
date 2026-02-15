@@ -49,7 +49,7 @@ class Student(models.Model):
     date_of_birth = models.DateField()
     age_at_enrollment = models.IntegerField(blank=True, null=True)
     religion = models.CharField(max_length=100, blank=True)
-    child_emirates_id = models.CharField(max_length=20, blank=True)
+    child_emirates_id = models.CharField(max_length=50, blank=True)
     languages_spoken = models.TextField(blank=True)
     
     # Photos
@@ -62,8 +62,8 @@ class Student(models.Model):
     father_nationality = models.CharField(max_length=100)
     father_place_of_work = models.CharField(max_length=200, blank=True)
     father_position_held = models.CharField(max_length=200, blank=True)
-    father_mobile = models.CharField(max_length=20, blank=True)
-    father_work_telephone = models.CharField(max_length=20, blank=True)
+    father_mobile = models.CharField(max_length=50, blank=True)
+    father_work_telephone = models.CharField(max_length=50, blank=True)
     father_email = models.EmailField(blank=True)
     
     # Mother Information
@@ -71,15 +71,15 @@ class Student(models.Model):
     mother_nationality = models.CharField(max_length=100)
     mother_place_of_work = models.CharField(max_length=200, blank=True)
     mother_position_held = models.CharField(max_length=200, blank=True)
-    mother_mobile = models.CharField(max_length=20, blank=True)
-    mother_work_telephone = models.CharField(max_length=20, blank=True)
+    mother_mobile = models.CharField(max_length=50, blank=True)
+    mother_work_telephone = models.CharField(max_length=50, blank=True)
     mother_email = models.EmailField(blank=True)
     
     # Siblings Information
     siblings_info = models.TextField(blank=True, help_text="Sibling names and ages")
     
     # Home Information
-    home_telephone = models.CharField(max_length=20, blank=True)
+    home_telephone = models.CharField(max_length=50, blank=True)
     full_home_address = models.TextField()
     po_box_number = models.CharField(max_length=50, blank=True)
     city = models.CharField(max_length=100, default='Dubai')
@@ -87,11 +87,11 @@ class Student(models.Model):
     # Emergency Contacts
     first_contact_person = models.CharField(max_length=100)
     first_contact_relationship = models.CharField(max_length=50)
-    first_contact_telephone = models.CharField(max_length=20)
+    first_contact_telephone = models.CharField(max_length=50)
     
     second_contact_person = models.CharField(max_length=100, blank=True)
     second_contact_relationship = models.CharField(max_length=50, blank=True)
-    second_contact_telephone = models.CharField(max_length=20, blank=True)
+    second_contact_telephone = models.CharField(max_length=50, blank=True)
     
     # School Information
     term_to_begin = models.TextField(null=True, blank=True)
@@ -111,7 +111,7 @@ class Student(models.Model):
     
     # Contact Information (for main contact)
     email = models.EmailField(blank=True)
-    phone_number = models.CharField(max_length=20, blank=True)
+    phone_number = models.CharField(max_length=50, blank=True)
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
