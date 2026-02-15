@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -252,10 +253,11 @@
         <!-- Header with Logo and Title -->
         <table class="header-table">
             <tr>
-                <td class="logo-area">
-                    <img src="/Users/pramodgopinath/Desktop/Blossom_School/blossom_school/static/img/BB_LOGO_V1.png"
-                        style="height: 80px; width: auto; margin-bottom: 5px;" alt="Logo" />
-                    <div class="school-name">{{ school.name }}</div>
+                <td class="logo-area" style="background-color: #ffffff;">
+                    <div style="background-color: #ffffff !important; padding: 5px;">
+                        <img src="{%static 'img/BB_LOGO_V1.png' %}"
+                            style="height: 50px; width: auto; margin-bottom: 5px; background-color: #ffffff !important ;" alt="Logo" />
+                    </div>
                     <div class="school-details">
                         {{ school.address }}<br>
                         {{ school.city }}<br>

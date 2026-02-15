@@ -99,6 +99,7 @@ class PaymentPlan(models.Model):
         ('morning', 'Morning'),
         ('afternoon', 'Afternoon'),
         ('full_day', 'Full Day'),
+        ('half_day', 'Half Day'),
         ('morning_nursery', 'Morning Nursery'),
         ('full_day_nursery', 'Full Day Nursery'),
         ('afternoon_nursery', 'Afternoon Nursery'),
