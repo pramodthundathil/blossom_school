@@ -516,7 +516,7 @@ def payment_receipt(request, payment_id):
     
     context = {
         'payment': payment,
-        'school_name': 'Blossom British School',  # Configure this
+        'school_name': 'Name School',  # Configure this
         'school_address': 'Ajman UAE',  # Configure this
     }
     
@@ -1246,11 +1246,11 @@ def generate_invoice(request, payment_id):
     
     # School information
     school_info = {
-        'name': 'Blossom British School',
+        'name': 'British School',
         'address': 'Villa No 2 University Street,',
         'city': 'Ajman UAE',
         'phone': '+971-XXX-XXXXX',  # Add your phone
-        'email': 'info@blossombritish.ae',  # Add your email
+        'email': 'info@british.ae',  # Add your email
     }
     
     # Calculate totals
@@ -1303,10 +1303,10 @@ def generate_invoice_quick(request, payment_id):
     )
     
     school_info = {
-        'name': 'Blossom British School',
+        'name': 'British School',
         'address': 'Villa No 2 University Street,',
         'city': 'Ajman UAE',
-        'phone': '+971-504212662',
+        'phone': '+971-xxxxxxxx',
         'email': 'info@blossombritish.ae',
     }
     
